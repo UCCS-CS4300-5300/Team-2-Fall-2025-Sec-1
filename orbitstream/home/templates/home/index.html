@@ -1,18 +1,23 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="{% static 'styles.css' %}">
+    <link rel="stylesheet" href="{% static 'home/styles.css' %}">
     <title>Orbit Stream</title>
     
 </head>
-<body class="body">
+<body>
     <header class="title"><h1>Orbit Stream</h1></header>
-    <main> <p>Welcome to OrbitStream 
+    <img src="{% static 'home/space.jpg' %}" class="initial-img" alt="space" />
+    <main class="content"> 
+       <p>
+        Welcome to OrbitStream 
         Your gateway to accessible and reliable information in the space domain. 
         OrbitStream highlights recent global launches, provides insights into methodologies and practices, 
-        and offers tools for basic satellite tracking.</p>
+        and offers tools for basic satellite tracking.
+       </p>
     </main>
 </body>
 </html>
