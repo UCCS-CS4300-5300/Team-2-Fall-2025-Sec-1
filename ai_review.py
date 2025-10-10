@@ -12,13 +12,13 @@ MAX_DIFF_BYTES = 60_000  # keep payload modest for the model
 DEFAULT_MODEL = os.getenv("OPENAI_MODEL", "gpt-4o-mini")
 
 
-def run(cmd: list[str]) -> str:
+def run(cmd: list[str]):
     """Run a shell command and return stdout as str (raise on failure)."""
     out = subprocess.check_output(cmd)
     return out.decode("utf-8", errors="ignore").strip()
 
 
-def build_pr_diff(base_ref_env: str | None) -> str:
+def build_pr_diff(base_ref_env: str | None):
     """
     Compute a unified diff between PR HEAD and the merge-base with the PR's base branch.
     Requires actions/checkout with fetch-depth: 0.
@@ -52,7 +52,7 @@ DIFF END
 """.strip()
 
 
-def call_openai(prompt: str, api_key: str, model: str = DEFAULT_MODEL) -> str:
+def call_openai(prompt: str, api_key: str, model: str = DEFAULT_MODEL):
     client = OpenAI(api_key=api_key)
     resp = client.responses.create(model=model, input=prompt)
     # Prefer the SDK's text helper when available
@@ -70,14 +70,14 @@ def call_openai(prompt: str, api_key: str, model: str = DEFAULT_MODEL) -> str:
     return text.strip() or "No findings."
 
 
-def post_pr_comment(gh_token: str, repo_full: str, pr_number: int, body: str) -> None:
+def post_pr_comment(gh_token: str, repo_full: str, pr_number: int, body: str):
     gh = Github(gh_token)
     repo = gh.get_repo(repo_full)
     pr = repo.get_pull(pr_number)
-    pr.create_issue_comment("### 🤖 AI Code Review\n" + body)
+    pr.create_issue_comment("### AI Code Review\n" + body)
 
 
-def maybe_fail_on_severity(text: str) -> None:
+def maybe_fail_on_severity(text: str):
     """
     Optional: fail the job if high-severity keywords are present.
     Set AI_FAIL_ON_SEVERITY=1 in env to enable.
@@ -90,7 +90,7 @@ def maybe_fail_on_severity(text: str) -> None:
         sys.exit(1)
 
 
-def main() -> None:
+def main():
     # --- Required env (provided by your workflow) ---
     gh_token        = os.environ["GITHUB_TOKEN"]
     openai_key      = os.environ["OPENAI_API_KEY"]
@@ -112,3 +112,6 @@ def main() -> None:
     maybe_fail_on_severity(review_text)
 
     print(f"Posted AI review to PR #{pr_number}.")
+
+if __name__ == "__main__":
+    main()
