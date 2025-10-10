@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-sua7#*5#@b7m1mw!)m^!qhjik+dao!zmg7%ee8=d@(zya&=zr-
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['app-cs4300-19.devedu.io']
+ALLOWED_HOSTS = ['app-cs4300-19.devedu.io', "app-cs4300advancedswe-19.devedu.io"]
 
 # Application definition
 
