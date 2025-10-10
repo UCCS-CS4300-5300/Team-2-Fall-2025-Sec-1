@@ -13,6 +13,11 @@ jobs:
   test:
     runs-on: ubuntu-latest  # Use the latest Ubuntu runner provided by GitHub
 
+    # sets default working dir to orbitstream
+    defaults:
+      run:
+        working-directory: orbitstream
+
     # Environment variables available to all steps in this job
     env:
       DJANGO_SETTINGS_MODULE: orbitstream.settings  # Django needs this to locate settings.py
