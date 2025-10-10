@@ -1,3 +1,4 @@
+# Core Django dependencies for production
 asgiref==3.9.2
 Django==5.2.7
 djangorestframework==3.16.1
