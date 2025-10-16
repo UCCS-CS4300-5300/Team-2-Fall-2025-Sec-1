@@ -4,6 +4,7 @@ from django.test import TestCase
 
 from django.test import TestCase
 from home.utils import dummy_function, add_numbers, subtract_numbers
+from home.models import DummyModel
 
 """dummy tests"""
 
@@ -22,3 +23,8 @@ class DummyFunctionTest(TestCase):
     def test_subtract_numbers(self):
         assert subtract_numbers(5, 3) == 2  # add this line
 
+
+class DummyModelTest(TestCase):
+    def test_create_model(self):
+        obj = DummyModel(name="Test")
+        self.assertEqual(str(obj), "Test")
