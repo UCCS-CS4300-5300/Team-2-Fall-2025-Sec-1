@@ -12,4 +12,4 @@ __pycache__
 .coverage
 
 #Database
-db.sqlite
+db.sqlite3
