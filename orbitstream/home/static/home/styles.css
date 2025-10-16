@@ -113,3 +113,75 @@
   .panel:nth-of-type(4) .panel-inner {
     margin-top: clamp(32px, 6vh, 80px); 
   }
+
+  .container{
+    width: min(1200px, calc(100% - 2rem));
+    margin-inline: auto;
+  }
+  .section{ padding-block: 1.25rem; }
+  .section__title{ margin: 0 0 0.75rem; font-size: 1.4rem; }
+  .center{ display: grid; place-items: center; }
+
+  .site-header{
+    background: var(--bg);
+    color: #fff;
+    border-bottom: 1px solid rgba(255,255,255,.08);
+  }
+  .nav{
+    height: 80px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+  .nav__left{
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+  .brand__logo{
+    width: 100px;
+    height: 100px;
+    object-fit: contain;
+    display: block;
+  }
+  .nav__links{
+    list-style: none;
+    display: flex;
+    gap: 1.25rem;
+    padding: 0;
+    margin: 0;
+  }
+  .nav__links a{
+    color: #e9eefc;
+    text-decoration: none;
+    font-weight: 600;
+  }
+  .nav__links a:hover,
+  .nav__links a:focus{ text-decoration: underline; }
+  
+  .nav__search{
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+  }
+  .nav__search input{
+    height: 36px;
+    padding: 0 .75rem;
+    border-radius: 999px;
+    border: 1px solid rgba(255,255,255,.35);
+    background: rgba(255,255,255,.08);
+    color: #fff;
+    outline: none;
+    width: 210px;
+  }
+  .nav__search input::placeholder{ color: #d7def7; }
+  .nav__search button{
+    height: 36px;
+    min-width: 36px;
+    border: 1px solid rgba(255,255,255,.35);
+    background: rgba(255,255,255,.1);
+    color: #fff;
+    border-radius: 999px;
+    cursor: pointer;
+  }
