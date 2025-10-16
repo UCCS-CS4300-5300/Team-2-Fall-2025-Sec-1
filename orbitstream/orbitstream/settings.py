@@ -27,7 +27,8 @@ DEBUG = True
 
 ALLOWED_HOSTS = [
     'app-cs4300-19.devedu.io', 
-    "app-cs4300advancedswe-19.devedu.io"
+    "app-cs4300advancedswe-19.devedu.io",
+    "127.0.0.1",
     ]
 
 # Application definition
@@ -41,6 +42,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'home',
     'rest_framework',
+    'space_news',
 ]
 
 MIDDLEWARE = [
@@ -124,3 +126,7 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+
+# API KEYS
+NEWS_API_KEY = "f1a8a5253c5348169b0f99c31c4857f2"

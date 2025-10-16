@@ -3,6 +3,13 @@
 
 #virtual environments
 venv/
+.venv
 
 #cache
 __pycache__
+
+#Test/Coverage Pipeline
+.coverage
+
+#Database
+db.sqlite
