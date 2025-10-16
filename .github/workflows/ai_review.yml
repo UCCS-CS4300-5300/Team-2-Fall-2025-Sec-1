@@ -1,0 +1,48 @@
+name: AI Code Review
+
+on:
+  pull_request:
+    types: [opened, reopened, synchronize]
+
+permissions:
+  contents: read
+  pull-requests: write   # needed to post a PR comment
+
+jobs:
+  review:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # helpful if your script computes a merge-base diff
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install openai PyGithub
+
+      - name: Run AI Code Review
+        env:
+          # Auto-provided by GitHub; no need to create it yourself
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+          # <-- Add this in your repo: Settings → Secrets and variables → Actions → New repository secret
+          # Name must match exactly here:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+
+          # Metadata about the PR/repo provided by GitHub
+          GITHUB_PR_ID: ${{ github.event.pull_request.number }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          GITHUB_BASE_REF: ${{ github.base_ref }}
+
+          # Optional model override via Actions “Variables”
+          OPENAI_MODEL: ${{ vars.OPENAI_MODEL || 'gpt-4o-mini' }}
+        run: |
+          python ai_review.py
