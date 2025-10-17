@@ -1,134 +1,25 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>NASA Space News</title>
+{% extends "base.html" %}
+{% load static %}
 
-  <style>
-    /* --- Reset --- */
-    *, *::before, *::after { box-sizing: border-box; }
-    body { margin: 0; font-family: system-ui, -apple-system, "Segoe UI", Roboto, Inter, Arial, sans-serif; color: #0f172a; background: #f6f7fb; }
+{% block title %}NASA Space News{% endblock %}
 
-    /* --- Layout --- */
-    .container { max-width: 980px; margin: 32px auto 80px; padding: 0 20px; }
+{% block body_class %}nasa-page{% endblock %}
 
-    /* --- Hero (NASA pic of the day) --- */
-    .hero {
-      background: #fff;
-      border: 1px solid #d9dde8;
-      border-radius: 12px;
-      padding: 18px;
-      margin-bottom: 48px;
-      text-align: center;
-      box-shadow: 0 1px 0 rgba(17,24,39,0.03);
-    }
-    .hero-title { font-size: 22px; font-weight: 600; letter-spacing: 0.2px; }
+{% block content %}
+  <div class="nasa-container">
+    
+    <!-- HEADER -->
+    <header class="nasa-page-header">
+      <h1>Astronomy Picture of the Day!</h1>
+      <p class="nasa-subtitle"></p>
+    </header>
 
-    .hero-media {
-      margin-top: 16px;
-      border-radius: 10px;
-      overflow: hidden;
-      border: 1px solid #e5e7ef;
-      background: #eef1f7;
-      height: 220px;
-      display: flex; align-items: center; justify-content: center;
-    }
-    .hero-media img, .hero-media video {
-      width: 100%; height: 100%; object-fit: cover; display: block;
-    }
-    .hero-fallback { color: #64748b; font-weight: 500; }
-
-    /* --- Section title --- */
-    .section-title { font-size: 20px; font-weight: 700; margin: 6px 0 16px; }
-
-    /* --- Featured Cards --- */
-    .featured {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 22px;
-      margin-bottom: 36px;
-    }
-    .f-card {
-      background: #fff;
-      border: 1px solid #e5e7ef;
-      border-radius: 10px;
-      overflow: hidden;
-    }
-    .f-media {
-      height: 120px; background: #e9edf6; border-bottom: 1px solid #e5e7ef;
-      display:flex; align-items:center; justify-content:center;
-    }
-    .f-media img { width: 100%; height: 100%; object-fit: cover; display:block; }
-    .f-body { padding: 10px 12px 12px; }
-    .f-snippet {
-      font-size: 12px; line-height: 1.35; color: #475569;
-      display: -webkit-box; -webkit-box-orient: vertical; overflow: hidden;
-    }
-
-    /* --- Feed list --- */
-    .feed { display: grid; gap: 20px; }
-    .feed-item {
-      display: grid; grid-template-columns: 160px 1fr; gap: 20px;
-      background: #fff; border: 1px solid #e5e7ef; border-radius: 10px; padding: 14px; align-items: center;
-    }
-    .feed-thumb {
-      width: 160px; height: 110px; border-radius: 8px; overflow: hidden; background: #e9edf6; border: 1px solid #e5e7ef;
-      display:flex; align-items:center; justify-content:center;
-    }
-    .feed-thumb img { width: 100%; height: 100%; object-fit: cover; display:block; }
-    .feed-content { color:#334155; }
-    .feed-title {
-      margin: 0 0 6px; font-size: 15px; font-weight: 700; color: #0f172a;
-    }
-    .feed-text {
-      margin: 0; font-size: 13px; line-height: 1.5; color:#475569;
-      display: -webkit-box; -webkit-box-orient: vertical; overflow: hidden;
-    }
-    .feed-meta {
-      margin-top: 8px; display:flex; gap: 10px; align-items:center; font-size: 12px; color:#64748b;
-    }
-    .feed-link {
-      margin-left: auto;
-      text-decoration: none; font-weight: 600; font-size: 12px; color: #1d4ed8;
-      border: 1px solid #cbd5e1; padding: 6px 10px; border-radius: 999px;
-      transition: background 120ms ease;
-    }
-    .feed-link:hover { background: #eef2ff; }
-
-    /* --- Load more --- */
-    .load-more-wrap { display:flex; justify-content:center; margin-top: 28px; }
-    .load-more {
-      background:#fff; border:1px solid #d9dde8; border-radius: 8px;
-      padding: 10px 22px; font-weight: 600; font-size: 13px; color:#0f172a; cursor: pointer;
-    }
-    .load-more:hover { background:#f3f4f8; }
-
-    /* --- Error --- */
-    .error {
-      background: #fee2e2; color: #7f1d1d; border: 1px solid #fecaca;
-      padding: 14px; border-radius: 10px; text-align: center; margin-bottom: 18px;
-    }
-
-    /* --- Responsive --- */
-    @media (max-width: 900px) {
-      .featured { grid-template-columns: 1fr 1fr; }
-    }
-    @media (max-width: 640px) {
-      .featured { grid-template-columns: 1fr; }
-      .feed-item { grid-template-columns: 1fr; }
-      .feed-thumb { width: 100%; height: 180px; }
-    }
-  </style>
-</head>
-<body>
-  <div class="container">
     <!-- HERO: NASA picture of the day -->
-    <section class="hero">
-      <div class="hero-title">Nasa pic of the day</div>
+    <section class="nasa-hero">
+      <div class="nasa-hero-title"></div>
 
       {% if apod and apod.url %}
-        <div class="hero-media">
+        <div class="nasa-hero-media">
           {% if apod.media_type == "video" %}
             <iframe src="{{ apod.url }}" title="{{ apod.title|default:'APOD' }}" style="width:100%;height:100%;border:0;"></iframe>
           {% else %}
@@ -136,32 +27,31 @@
           {% endif %}
         </div>
       {% else %}
-        <div class="hero-media">
-          <div class="hero-fallback">APOD preview will appear here</div>
+        <div class="nasa-hero-media">
+          <div class="nasa-hero-fallback">APOD preview will appear here</div>
         </div>
       {% endif %}
     </section>
 
-    <h2 class="section-title">Featured News</h2>
+    <h2 class="nasa-section-title">Featured News</h2>
 
     {% if error %}
-      <div class="error">{{ error }}</div>
+      <div class="nasa-error">{{ error }}</div>
     {% endif %}
 
     <!-- FEATURED: first 3 articles -->
-    <section class="featured">
+    <section class="nasa-featured">
       {% for article in articles|slice:":3" %}
-        <article class="f-card">
-          <div class="f-media">
+        <article class="nasa-f-card">
+          <div class="nasa-f-media">
             {% if article.urlToImage %}
               <img src="{{ article.urlToImage }}" alt="{{ article.title }}">
             {% else %}
-              <!-- simple placeholder -->
               <span style="color:#94a3b8; font-weight:600;">No image</span>
             {% endif %}
           </div>
-          <div class="f-body">
-            <div class="f-snippet">
+          <div class="nasa-f-body">
+            <div class="nasa-f-snippet">
               {{ article.description|default:article.title|default:"" }}
             </div>
           </div>
@@ -172,10 +62,10 @@
     </section>
 
     <!-- FEED: remaining articles -->
-    <section class="feed">
+    <section class="nasa-feed">
       {% for article in articles|slice:"3:" %}
-        <article class="feed-item">
-          <div class="feed-thumb">
+        <article class="nasa-feed-item">
+          <div class="nasa-feed-thumb">
             {% if article.urlToImage %}
               <img src="{{ article.urlToImage }}" alt="{{ article.title }}">
             {% else %}
@@ -183,28 +73,27 @@
             {% endif %}
           </div>
 
-          <div class="feed-content">
-            <h3 class="feed-title">{{ article.title }}</h3>
-            <p class="feed-text">{{ article.description|default:""|truncatewords:42 }}</p>
-            <div class="feed-meta">
+          <div class="nasa-feed-content">
+            <h3 class="nasa-feed-title">{{ article.title }}</h3>
+            <p class="nasa-feed-text">{{ article.description|default:""|truncatewords:42 }}</p>
+            <div class="nasa-feed-meta">
               <span>{{ article.source.name }}</span>
               <span>&middot;</span>
               <span>{{ article.publishedAt|date:"M d, Y" }}</span>
-              <a class="feed-link" href="{{ article.url }}" target="_blank" rel="noopener">Read More</a>
+              <a class="nasa-feed-link" href="{{ article.url }}" target="_blank" rel="noopener">Read More</a>
             </div>
           </div>
         </article>
       {% endfor %}
     </section>
 
-    <!-- Pager (wireframe shows a centered button) -->
-    <div class="load-more-wrap">
+    <!-- Pager -->
+    <div class="nasa-load-more-wrap">
       {% if next_page_url %}
-        <a class="load-more" href="{{ next_page_url }}">Load More</a>
+        <a class="nasa-load-more" href="{{ next_page_url }}">Load More</a>
       {% else %}
-        <button class="load-more" disabled>Load More</button>
+        <button class="nasa-load-more" disabled>Load More</button>
       {% endif %}
     </div>
   </div>
-</body>
-</html>
+{% endblock %}
