@@ -1,0 +1,22 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" type="image/png" href="{% static 'home/assets/Orbitstream logo.png' %}">
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>{% block title %}OrbitStream{% endblock %}</title>
+
+  <link rel="stylesheet" href="{% static 'home/styles.css' %}">
+
+  {# page-specific CSS goes here #}
+  {% block extra_css %}{% endblock %}
+</head>
+<body class="{% block body_class %}{% endblock %}">
+
+  {% include 'partials/header.html' %}
+
+  {% block content %}{% endblock %}
+
+</body>
+</html>

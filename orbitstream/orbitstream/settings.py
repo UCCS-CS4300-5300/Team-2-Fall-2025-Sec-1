@@ -135,3 +135,6 @@ if not DEBUG:
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+
+# API KEYS
+NEWS_API_KEY = "f1a8a5253c5348169b0f99c31c4857f2"

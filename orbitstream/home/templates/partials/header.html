@@ -1,0 +1,21 @@
+{% load static %}
+<header class="site-header">
+  <nav class="nav container">
+    <div class="nav__left">
+      <a class="brand" href="{% url 'index' %}">
+        <img src="{% static 'home/assets/Orbitstream logo.png' %}" alt="OrbitStream" class="brand__logo">
+      </a>
+    </div>
+
+    <ul class="nav__links">
+      <li><a href="{% url 'space_news:nasa_news' %}">News</a></li>
+      <li><a href="#">GPS Tracking</a></li>
+      <li><a href="#">Launches</a></li>
+      <li><a href="#">Preferences</a></li>
+    </ul>
+
+    <form class="nav__search" role="search" aria-label="Site search">
+      <input type="search" placeholder="Search" aria-label="Search" />
+    </form>
+  </nav>
+</header>
