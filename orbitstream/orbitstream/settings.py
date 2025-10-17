@@ -26,16 +26,24 @@ SECRET_KEY = 'django-insecure-sua7#*5#@b7m1mw!)m^!qhjik+dao!zmg7%ee8=d@(zya&=zr-
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
+#testing to see if this works
+# ALLOWED_HOSTS = [
+#     'https://team-2-fall-2025-sec-1.onrender.com/',
+#     'app-cs4300-19.devedu.io',
+#     "app-cs4300advancedswe-19.devedu.io",
+#     "127.0.0.1",
+#     "localhost",
+#     ]
+
 ALLOWED_HOSTS = [
-    'https://team-2-fall-2025-sec-1.onrender.com/',
-    'app-cs4300-19.devedu.io',
-    "app-cs4300advancedswe-19.devedu.io",
-    "127.0.0.1",
+    "*",
+    ".onrender.com",
     "localhost",
-    ]
+    "127.0.0.1",
+]
 
 CSRF_TRUSTED_ORIGINS = [
-    "https://team-2-fall-2025-sec-1.onrender.com/",
+    "https://team-2-fall-2025-sec-1.onrender.com",
 ]
 
 # Behind Render’s proxy, tell Django requests are HTTPS
