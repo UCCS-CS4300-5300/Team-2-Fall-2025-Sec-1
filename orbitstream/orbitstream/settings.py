@@ -31,11 +31,12 @@ ALLOWED_HOSTS = [
     'app-cs4300-19.devedu.io',
     "app-cs4300advancedswe-19.devedu.io",
     "127.0.0.1",
-    ] + ([RENDER_HOST] if RENDER_HOST else [])
+    "localhost",
+    ]
 
 CSRF_TRUSTED_ORIGINS = [
-    "https://team-2-fall-2025-sec-1.onrender.com",
-] + ([f"https://{RENDER_HOST}"] if RENDER_HOST else [])
+    "https://team-2-fall-2025-sec-1.onrender.com/",
+]
 
 # Behind Render’s proxy, tell Django requests are HTTPS
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
