@@ -27,11 +27,18 @@ SECRET_KEY = 'django-insecure-sua7#*5#@b7m1mw!)m^!qhjik+dao!zmg7%ee8=d@(zya&=zr-
 DEBUG = False
 
 ALLOWED_HOSTS = [
+    'https://team-2-fall-2025-sec-1.onrender.com/',
     'app-cs4300-19.devedu.io',
     "app-cs4300advancedswe-19.devedu.io",
     "127.0.0.1",
-    '*.onrender.com',
-    ]
+    ] + ([RENDER_HOST] if RENDER_HOST else [])
+
+CSRF_TRUSTED_ORIGINS = [
+    "https://team-2-fall-2025-sec-1.onrender.com",
+] + ([f"https://{RENDER_HOST}"] if RENDER_HOST else [])
+
+# Behind Render’s proxy, tell Django requests are HTTPS
+SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 
 # Application definition
 
@@ -82,11 +89,11 @@ WSGI_APPLICATION = 'orbitstream.wsgi.application'
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
 DATABASES = {
-    # 'default': {
-    #     'ENGINE': 'django.db.backends.sqlite3',
-    #     'NAME': BASE_DIR / 'db.sqlite3',
-    # }
-    'default': dj_database_url.config(default=os.environ.get("DATABASE_URL"))
+    "default": dj_database_url.config(
+        default=os.environ.get("DATABASE_URL"),
+        conn_max_age=600,     # keep connections open
+        ssl_require=True,     # required on Render Postgres
+    )
 }
 
 
