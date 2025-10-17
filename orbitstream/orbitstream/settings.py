@@ -27,9 +27,10 @@ SECRET_KEY = 'django-insecure-sua7#*5#@b7m1mw!)m^!qhjik+dao!zmg7%ee8=d@(zya&=zr-
 DEBUG = False
 
 ALLOWED_HOSTS = [
-    'app-cs4300-19.devedu.io', 
+    'app-cs4300-19.devedu.io',
     "app-cs4300advancedswe-19.devedu.io",
     "127.0.0.1",
+    '*.onrender.com',
     ]
 
 # Application definition
