@@ -7,6 +7,26 @@
   <title>OrbitStream</title>
   <link rel="stylesheet" href="{% static 'home/styles.css' %}">
 </head>
+<header class="site-header">
+  <nav class="nav container">
+    <div class="nav__left">
+      <a class="brand" href="#">
+        <img src="{% static 'home/assets/Orbitstream logo.png' %}" alt="OrbitStream" class="brand__logo" href="index.html" />
+      </a>
+      <ul class="nav__links">
+        <li><a href="{% url 'space_news:nasa_news' %}">News</a></li>
+        <li><a href="#">Ops</a></li>
+        <li><a href="#">Launches</a></li>
+        <li><a href="#">Preferences</a></li>
+      </ul>
+    </div>
+
+    <form class="nav__search" role="search" aria-label="Site search">
+      <input type="search" placeholder="Search" aria-label="Search" />
+      <button type="submit" aria-label="Search">🔎</button>
+    </form>
+  </nav>
+</header>
 <body>
   <div class="snap-container">
     
