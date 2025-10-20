@@ -42,7 +42,7 @@ jobs:
       - name: Run coverage and check the threshold
         run: |
           python -m coverage run manage.py test
-          python -m coverage report -m   # <-- prints the coverage table in the console
+          python -m coverage report -m --fail-under=80 # <-- prints the coverage table in the console
 
 
 # enforce a minimum coverage gate (e.g., 70%) if we want in the future

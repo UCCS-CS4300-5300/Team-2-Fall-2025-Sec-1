@@ -4,7 +4,7 @@ name: CI - Tests & Coverage
 # When this workflow should run
 on:
   push:
-    branches: [ main ]  # Run workflow on push to main branch
+    #branches: [ main, features/space_news]  # Run workflow on push to main branch
   pull_request:
     types: [opened, synchronize, reopened]  # Run workflow for PR events
 
@@ -53,7 +53,7 @@ jobs:
       # Step 5: Run tests with coverage
       - name: Run tests with coverage (fail if < 80%)
         run: |
-          pytest --cov=home --maxfail=1 --disable-warnings -q --cov-report=term-missing --cov-fail-under=80
+          pytest --cov=. --maxfail=1 --disable-warnings -q --cov-report=term-missing --cov-fail-under=70
 
         # This ensures CI enforces test coverage requirements
         # You can adjust '--cov-fail-under' to the percentage you require

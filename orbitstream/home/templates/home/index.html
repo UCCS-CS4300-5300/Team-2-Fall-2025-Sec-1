@@ -1,62 +1,75 @@
+{% extends 'base.html' %}
 {% load static %}
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>OrbitStream</title>
-  <link rel="stylesheet" href="{% static 'home/styles.css' %}">
-</head>
-<body>
-  <div class="snap-container">
-    
-    <section class="panel right">
+
+{% block title %}Home | OrbitStream{% endblock %}
+
+{% block content %}
+<div class="snap-container">
+  
+  <!-- Panel 1 -->
+  <section class="panel right">
+    <video class="bg-video" autoplay muted loop playsinline preload="metadata" poster="{% static 'home/assets/1st-image-poster.jpg' %}">
+      <source src="https://res.cloudinary.com/dhnlbvpxn/video/upload/v1760739117/home_ziik28.mp4" type="video/mp4">
+      <!-- Fallback image for very old browsers -->
       <img class="bg-image" src="{% static 'home/assets/1st image.jpg' %}" alt="Space background">
-      <div class="panel-inner">
-        <h2>Welcome to OrbitStream</h2>
-        <p>
-          Your gateway to accessible and reliable information in the space domain. 
-          OrbitStream highlights recent global launches, provides insights into 
-          methodologies and practices, and offers tools for basic satellite tracking.
-        </p>
-      </div>
-    </section>
+    </video>
+    <div class="panel-inner">
+      <h2>Welcome to OrbitStream</h2>
+      <p>
+        Your gateway to accessible and reliable information in the space domain. 
+        OrbitStream highlights recent global launches, provides insights into 
+        methodologies and practices, and offers tools for basic satellite tracking.
+      </p>
+    </div>
+  </section>
 
-    <section class="panel left">
+  <!-- Panel 2 -->
+  <section class="panel left">
+    <video class="bg-video" autoplay muted loop playsinline preload="metadata" poster="{% static 'home/assets/2nd-image-poster.jpg' %}">
+      <source src="https://res.cloudinary.com/dhnlbvpxn/video/upload/v1760737212/228-135860602_jxxmjk.mp4" type="video/mp4">
       <img class="bg-image" src="{% static 'home/assets/2nd image.jpg' %}" alt="Launch background">
-      <div class="panel-inner">
-        <h2>Launch Information</h2>
-        <p>
-          OrbitStream delivers real-time global launch updates. From commercial satellites 
-          to international missions, each entry highlights launch time, vehicle type, payload, 
-          and objectives—keeping you informed in today's fast-moving space industry.
-        </p>
-      </div>
-    </section>
+    </video>
+    <div class="panel-inner">
+      <h2>Launch Information</h2>
+      <p>
+        OrbitStream delivers real-time global launch updates. From commercial satellites 
+        to international missions, each entry highlights launch time, vehicle type, payload, 
+        and objectives—keeping you informed in today's fast-moving space industry.
+      </p>
+    </div>
+  </section>
 
-    <section class="panel right">
+  <!-- Panel 3 -->
+  <section class="panel right">
+    <video class="bg-video" autoplay muted loop playsinline preload="metadata" poster="{% static 'home/assets/3rd-image-poster.jpg' %}">
+      <source src="https://res.cloudinary.com/dhnlbvpxn/video/upload/v1760942602/satellite_jxgaft.mp4" type="video/mp4">
       <img class="bg-image" src="{% static 'home/assets/3rd image.jpg' %}" alt="Space domain awareness background">
-      <div class="panel-inner">
-        <h2>The Latest in Space Domain Awareness</h2>
-        <p>
-          Stay current with SDA's rapid developments. OrbitStream aggregates trusted sources to 
-          summarize key developments, regulations, and breakthroughs, ensuring you never miss 
-          critical updates in this rapidly evolving field.
-        </p>
-      </div>
-    </section>
+    </video>
+    <div class="panel-inner">
+      <h2>The Latest in Space Domain Awareness</h2>
+      <p>
+        Stay current with SDA's rapid developments. OrbitStream aggregates trusted sources to 
+        summarize key developments, regulations, and breakthroughs, ensuring you never miss 
+        critical updates in this rapidly evolving field.
+      </p>
+    </div>
+  </section>
 
-    <section class="panel left">
+  <!-- Panel 4 -->
+  <section class="panel left">
+    <video class="bg-video" autoplay muted loop playsinline preload="metadata" poster="{% static 'home/assets/4th-image-poster.jpg' %}">
+      <source src="https://res.cloudinary.com/dhnlbvpxn/video/upload/v1760739329/4_ykfe9b.mp4" type="video/mp4">
       <img class="bg-image" src="{% static 'home/assets/4th image.jpg' %}" alt="Satellite tracking background">
-      <div class="panel-inner">
-        <h2>Satellite Tracking</h2>
-        <p>
-          OrbitStream makes satellite tracking simple. Enter your location to see nearby satellites, 
-          visualize orbital paths, and explore mission details—all through clear, user-friendly tools.
-        </p>
-      </div>
-    </section>
+    </video>
+    <div class="panel-inner">
+      <h2>Satellite Tracking</h2>
+      <p>
+        OrbitStream makes satellite tracking simple. Enter your location to see nearby satellites, 
+        visualize orbital paths, and explore mission details—all through clear, user-friendly tools.
+      </p>
+    </div>
+  </section>
 
-  </div>
-</body>
-</html>
+</div>
+
+{% endblock %}
