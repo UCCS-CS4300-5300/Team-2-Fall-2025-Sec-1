@@ -6,8 +6,13 @@
 {% block content %}
 <div class="snap-container">
   
+  <!-- Panel 1 -->
   <section class="panel right">
-    <img class="bg-image" src="{% static 'home/assets/1st image.jpg' %}" alt="Space background">
+    <video class="bg-video" autoplay muted loop playsinline preload="metadata" poster="{% static 'home/assets/1st-image-poster.jpg' %}">
+      <source src="https://res.cloudinary.com/dhnlbvpxn/video/upload/v1760739117/home_ziik28.mp4" type="video/mp4">
+      <!-- Fallback image for very old browsers -->
+      <img class="bg-image" src="{% static 'home/assets/1st image.jpg' %}" alt="Space background">
+    </video>
     <div class="panel-inner">
       <h2>Welcome to OrbitStream</h2>
       <p>
@@ -18,8 +23,12 @@
     </div>
   </section>
 
+  <!-- Panel 2 -->
   <section class="panel left">
-    <img class="bg-image" src="{% static 'home/assets/2nd image.jpg' %}" alt="Launch background">
+    <video class="bg-video" autoplay muted loop playsinline preload="metadata" poster="{% static 'home/assets/2nd-image-poster.jpg' %}">
+      <source src="https://res.cloudinary.com/dhnlbvpxn/video/upload/v1760737212/228-135860602_jxxmjk.mp4" type="video/mp4">
+      <img class="bg-image" src="{% static 'home/assets/2nd image.jpg' %}" alt="Launch background">
+    </video>
     <div class="panel-inner">
       <h2>Launch Information</h2>
       <p>
@@ -30,8 +39,12 @@
     </div>
   </section>
 
+  <!-- Panel 3 -->
   <section class="panel right">
-    <img class="bg-image" src="{% static 'home/assets/3rd image.jpg' %}" alt="Space domain awareness background">
+    <video class="bg-video" autoplay muted loop playsinline preload="metadata" poster="{% static 'home/assets/3rd-image-poster.jpg' %}">
+      <source src="https://res.cloudinary.com/dhnlbvpxn/video/upload/v1760942602/satellite_jxgaft.mp4" type="video/mp4">
+      <img class="bg-image" src="{% static 'home/assets/3rd image.jpg' %}" alt="Space domain awareness background">
+    </video>
     <div class="panel-inner">
       <h2>The Latest in Space Domain Awareness</h2>
       <p>
@@ -42,8 +55,12 @@
     </div>
   </section>
 
+  <!-- Panel 4 -->
   <section class="panel left">
-    <img class="bg-image" src="{% static 'home/assets/4th image.jpg' %}" alt="Satellite tracking background">
+    <video class="bg-video" autoplay muted loop playsinline preload="metadata" poster="{% static 'home/assets/4th-image-poster.jpg' %}">
+      <source src="https://res.cloudinary.com/dhnlbvpxn/video/upload/v1760739329/4_ykfe9b.mp4" type="video/mp4">
+      <img class="bg-image" src="{% static 'home/assets/4th image.jpg' %}" alt="Satellite tracking background">
+    </video>
     <div class="panel-inner">
       <h2>Satellite Tracking</h2>
       <p>
@@ -54,4 +71,5 @@
   </section>
 
 </div>
+
 {% endblock %}
