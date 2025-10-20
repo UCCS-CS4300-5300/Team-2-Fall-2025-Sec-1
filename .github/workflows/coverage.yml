@@ -3,9 +3,9 @@ name: Coverage (per-commit)
 
 # This controls when the workflow is going to run
 on:
-  push:
-    branches: ["**"]
-  pull_request:
+  push: # Triggers the workflow everytime there's a push or pull request for all the branches of the repo
+    branches: ["**"]         # Run on every branch for each commit
+  pull_request:              # Also run on PRs 
     types: [opened, synchronize, reopened, ready_for_review]
 
 # A workflow is made up of one or more jobs
@@ -21,9 +21,6 @@ jobs:
     defaults:
       run:
         working-directory: orbitstream
-    
-    env:
-      DJANGO_SETTINGS_MODULE: orbitstream.settings
      
     steps:
       - name: Checkout
@@ -40,24 +37,14 @@ jobs:
           pip install -r ../requirements.txt
           pip install coverage
 
-      # Download coverage data from ci-test workflow
-      - name: Download coverage data
-        uses: actions/download-artifact@v4
-        with:
-          name: coverage-data
-          path: orbitstream/
-        continue-on-error: true
+      # If your tests need env vars (DB creds, SECRET_KEY, etc.), add them here via repo/environment secrets.
 
-      # If coverage data exists, show the report
-      - name: Show test and coverage and check the threshold
+      - name: Run coverage and check the threshold
         run: |
-          if [ -f .coverage ]; then
-            python -m coverage report -m --fail-under=80
-          else
-            echo "No coverage data found. Make sure CI - Tests & Coverage workflow ran first."
-            exit 1
-          fi
-          
+          python -m coverage run manage.py test
+          python -m coverage report -m --fail-under=80 # <-- prints the coverage table in the console
+
+
 # enforce a minimum coverage gate (e.g., 70%) if we want in the future
       # - name: Enforce minimum coverage
       #   run: |
