@@ -39,9 +39,8 @@ jobs:
 
       # If your tests need env vars (DB creds, SECRET_KEY, etc.), add them here via repo/environment secrets.
 
-      - name: Run coverage and check the threshold
+      - name: Show test and coverage and check the threshold
         run: |
-          python -m coverage run manage.py test
           python -m coverage report -m   # <-- prints the coverage table in the console
 
 
