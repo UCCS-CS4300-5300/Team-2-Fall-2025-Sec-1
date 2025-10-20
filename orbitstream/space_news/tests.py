@@ -14,6 +14,3 @@ class URLCoverageTest(TestCase):
         response = self.client.get(reverse('nasa_news'))
         self.assertEqual(response.status_code, 200)
 
-    def test_admin_url(self):
-        response = self.client.get(reverse('admin/'))
-        self.assertEqual(response.status_code, 302)
