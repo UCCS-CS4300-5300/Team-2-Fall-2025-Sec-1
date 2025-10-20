@@ -1,3 +1,4 @@
+
 from django.test import Client, TestCase
 from django.urls import reverse
 
@@ -15,4 +16,4 @@ class URLCoverageTest(TestCase):
 
     def test_admin_url(self):
         response = self.client.get(reverse('admin/'))
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, 302)
