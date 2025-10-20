@@ -51,8 +51,15 @@
             {% endif %}
           </div>
           <div class="nasa-f-body">
+            <h3 class="nasa-feed-title">{{ article.title }}</h3>
             <div class="nasa-f-snippet">
               {{ article.description|default:article.title|default:"" }}
+            </div>
+            <div class="nasa-feed-meta" style="margin-top: 12px;">
+              <span>{{ article.source.name }}</span>
+              <span>&middot;</span>
+              <span>{{ article.publishedAt|date:"M d, Y" }}</span>
+              <a class="nasa-feed-link" href="{{ article.url }}" target="_blank" rel="noopener">Read More</a>
             </div>
           </div>
         </article>

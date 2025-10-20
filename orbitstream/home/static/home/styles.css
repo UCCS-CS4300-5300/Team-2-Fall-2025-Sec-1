@@ -2,6 +2,14 @@
   --text: #e9e7e4;
   --muted: #cfcac3;
   --bg: #000;
+  --nasa-blue: #0b3d91;
+  --bg-footer: #0b0d18;
+  --panel: #ffffff;
+  --stroke: #d6d7db;
+  --ink: #0e1320;
+  --accent: #274b9f;
+  --radius: 12px;
+  --shadow: 0 1px 2px rgba(0,0,0,.06), 0 6px 18px rgba(0,0,0,.06);
 }
 
 html, body {
@@ -21,7 +29,7 @@ html, body {
   height: 100svh;
   width: 100%;
   background: #000;
-  padding-top: 0; /* Remove any padding */
+  padding-top: 0;
 }
 
 .panel {
@@ -137,6 +145,7 @@ html, body {
 .section__title{ margin: 0 0 0.75rem; font-size: 2rem; }
 .center{ display: grid; place-items: center; }
 
+/* ================= HEADER / NAV ================= */
 .site-header{
   background: var(--bg);
   color: #fff;
@@ -206,6 +215,97 @@ html, body {
   cursor: pointer;
 }
 
+/* ================= FOOTER ================= */
+.site-footer{
+  position: relative;
+  background: var(--bg); /* Changed to match header - pure black */
+  color: #d7def7;
+  padding: 2rem 0;
+  scroll-snap-align: end;
+}
+
+.footer__grid{
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1fr;
+  gap: 2rem;
+  padding: 2rem 0;
+}
+
+.footer__col{
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.footer__brand{
+  max-width: 350px;
+}
+
+.footer__about{
+  margin: 0.5rem 0 0;
+  line-height: 1.6;
+  opacity: 0.9;
+  font-size: 0.95rem;
+}
+
+.footer__title{
+  margin: 0 0 0.5rem;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #fff;
+}
+
+.footer__links{
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.footer__links a{
+  color: #d7def7;
+  text-decoration: none;
+  font-size: 0.95rem;
+  transition: color 0.2s ease;
+}
+
+.footer__links a:hover,
+.footer__links a:focus{
+  color: #fff;
+  text-decoration: underline;
+}
+
+.footer__bottom{
+  border-top: 1px solid rgba(255,255,255,.12);
+  padding-top: 1.5rem;
+  margin-top: 1.5rem;
+}
+
+.footer__bottom__inner{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.footer__bottom small{
+  opacity: 0.8;
+}
+
+.back-to-top{
+  color: #d7def7;
+  text-decoration: none;
+  font-size: 0.95rem;
+  transition: color 0.2s ease;
+}
+
+.back-to-top:hover,
+.back-to-top:focus{
+  color: #fff;
+  text-decoration: underline;
+}
+
 /* Mobile responsive - simplified */
 @media (max-width: 768px) {
   .nav {
@@ -230,6 +330,27 @@ html, body {
   .nav__search input {
     width: 120px;
     font-size: 14px;
+  }
+
+  .footer__grid{
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+  
+  .footer__brand{
+    max-width: 100%;
+  }
+  
+  .footer__bottom__inner{
+    flex-direction: column;
+    gap: 1rem;
+    text-align: center;
+  }
+}
+
+@media (max-width: 1000px){
+  .footer__grid{ 
+    grid-template-columns: 1fr 1fr; 
   }
 }
 
@@ -258,7 +379,8 @@ html:has(body.nasa-page) {
 .nasa-container { 
   max-width: 1250px; 
   margin: 32px auto 80px; 
-  padding: 0 20px; 
+  padding: 0 20px;
+  padding-top: 120px; /* Account for fixed header */
 }
 
 /* --- NASA Page Header --- */
@@ -382,7 +504,7 @@ html:has(body.nasa-page) {
 
 .nasa-feed-item {
   display: grid; 
-  grid-template-columns: 200px 1fr;  /* was 160px 1fr */ 
+  grid-template-columns: 200px 1fr;
   gap: 20px;
   background: #fff; 
   border: 1px solid #e5e7ef; 
@@ -392,8 +514,8 @@ html:has(body.nasa-page) {
 }
 
 .nasa-feed-thumb {
-  width: 200px;   /* was 160px */
-  height: 140px;  /* was 110px */
+  width: 200px;
+  height: 140px;
   border-radius: 8px; 
   overflow: hidden; 
   background: #e9edf6; 

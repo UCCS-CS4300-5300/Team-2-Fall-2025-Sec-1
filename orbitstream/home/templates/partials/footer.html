@@ -1,0 +1,57 @@
+<!-- Footer Partial for Django -->
+{% load static %}
+<footer class="site-footer" role="contentinfo">
+  <nav class="container footer__grid" aria-label="Footer">
+    <!-- Brand / About -->
+    <section class="footer__col footer__brand">
+      <a class="brand" href="{% url 'index' %}" aria-label="Home">
+        <img src="{% static 'home/assets/Orbitstream logo.png' %}" alt="OrbitStream" class="brand__logo">
+      </a>
+      <p class="footer__about">
+        OrbitStream is a student-built platform that makes space data accessible—covering
+        launches, satellite tracking, and curated news in a clean, modern interface.
+      </p>
+    </section>
+
+    <!-- Site Navigation -->
+    <section class="footer__col">
+      <h3 class="footer__title">Navigation</h3>
+      <ul class="footer__links">
+        <li><a href="{% url 'space_news:nasa_news' %}">News</a></li>
+        <li><a href="#">GPS Tracking</a></li>
+        <li><a href="#">Launches</a></li>
+        <li><a href="#">Preferences</a></li>
+      </ul>
+    </section>
+
+    <!-- External Resources -->
+    <section class="footer__col">
+      <h3 class="footer__title">Resources</h3>
+      <ul class="footer__links">
+        <li><a href="https://www.nasa.gov/" target="_blank" rel="noopener noreferrer">NASA</a></li>
+        <li><a href="https://spacenews.com/" target="_blank" rel="noopener noreferrer">SpaceNews</a></li>
+        <li><a href="https://www.esa.int/ESA_Multimedia/Videos" target="_blank" rel="noopener noreferrer">ESA Videos</a></li>
+        <li><a href="https://www.astronomy.com/" target="_blank" rel="noopener noreferrer">Astronomy.com</a></li>
+        <li><a href="https://www.space.com/" target="_blank" rel="noopener noreferrer">Space.com</a></li>
+      </ul>
+    </section>
+
+    <!-- Contact / Repo / Policies -->
+    <section class="footer__col">
+      <h3 class="footer__title">Project</h3>
+      <ul class="footer__links">
+        <li><a href="mailto:orbitstream.team@mail.com" aria-label="Email the OrbitStream team">orbitstream.team@mail.com</a></li>
+        <li><a href="#" aria-label="GitHub repository">GitHub Repository</a></li>
+        <li><a href="#" aria-label="Terms of Use">Terms of Use</a></li>
+        <li><a href="#" aria-label="Privacy Policy">Privacy Policy</a></li>
+      </ul>
+    </section>
+  </nav>
+
+  <div class="footer__bottom">
+    <div class="container footer__bottom__inner">
+      <small>© {% now "Y" %} OrbitStream. All rights reserved.</small>
+      <a class="back-to-top" href="#top" aria-label="Back to top">↑ Back to top</a>
+    </div>
+  </div>
+</footer>
