@@ -4,7 +4,7 @@ name: CI - Tests & Coverage
 # When this workflow should run
 on:
   push:
-    branches: [ main ]  # Run workflow on push to main branch
+    #branches: [ main, features/space_news]  # Run workflow on push to main branch
   pull_request:
     types: [opened, synchronize, reopened]  # Run workflow for PR events
 
