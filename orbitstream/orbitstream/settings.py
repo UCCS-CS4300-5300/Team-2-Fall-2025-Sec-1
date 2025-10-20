@@ -88,13 +88,33 @@ WSGI_APPLICATION = 'orbitstream.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
-DATABASES = {
-    "default": dj_database_url.config(
-        default=os.environ.get("DATABASE_URL"),
-        conn_max_age=600,     # keep connections open
-        ssl_require=True,     # required on Render Postgres
-    )
-}
+
+# Check if we're in GitHub Actions or CI environment
+if 'GITHUB_ACTIONS' in os.environ or 'CI' in os.environ:
+    # Use SQLite for CI/testing
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': ':memory:',  # In-memory database for fast tests
+        }
+    }
+elif os.environ.get("DATABASE_URL"):
+    # Production (Render) - use PostgreSQL
+    DATABASES = {
+        "default": dj_database_url.config(
+            default=os.environ.get("DATABASE_URL"),
+            conn_max_age=600,     # keep connections open
+            ssl_require=True,     # required on Render Postgres
+        )
+    }
+else:
+    # Local development fallback - use SQLite
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
+    }
 
 
 # Password validation
