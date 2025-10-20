@@ -26,34 +26,42 @@ jobs:
       # Step 1: Checkout the repository
       - name: Checkout
         uses: actions/checkout@v4
-        # This pulls your code from GitHub so subsequent steps can run on it
 
       # Step 2: Set up Python
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: '3.12'  # Specify the Python version for this workflow
-        # GitHub provides a virtual environment for this version
+          python-version: '3.12'
 
       # Step 3: Install dependencies
       - name: Install dependencies
         run: |
-          python -m pip install --upgrade pip  # Upgrade pip to latest version
-          pip install -r ../requirements.txt      # Install production dependencies
-          pip install -r ../requirements-dev.txt  # Install development/test dependencies
-        # Installing dev dependencies is important for pytest, coverage, and other test tools
+          python -m pip install --upgrade pip
+          pip install -r ../requirements.txt
+          pip install -r ../requirements-dev.txt
 
       # Step 4: Run Django migrations
       - name: Run migrations
         run: |
           python manage.py migrate --noinput || true
-        # Applies any database migrations so tests can run.
-        # `|| true` ensures workflow doesn’t fail if migrations aren't needed or DB already exists
 
       # Step 5: Run tests with coverage
       - name: Running tests
         run: |
           python -m coverage run manage.py test
 
-        # This ensures CI enforces test coverage requirements
-        # You can adjust '--cov-fail-under' to the percentage you require
+      # Step 6: Generate coverage data files
+      - name: Generate coverage data
+        run: |
+          python -m coverage xml
+          python -m coverage json
+
+      # Step 7: Upload coverage artifacts
+      - name: Upload coverage data
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-data
+          path: |
+            orbitstream/.coverage
+            orbitstream/coverage.xml
+            orbitstream/coverage.json
