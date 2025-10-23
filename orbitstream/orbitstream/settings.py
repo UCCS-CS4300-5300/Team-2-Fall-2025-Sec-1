@@ -24,7 +24,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-sua7#*5#@b7m1mw!)m^!qhjik+dao!zmg7%ee8=d@(zya&=zr-'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
 ALLOWED_HOSTS = [
     "*",
@@ -35,6 +35,8 @@ ALLOWED_HOSTS = [
 
 CSRF_TRUSTED_ORIGINS = [
     "https://team-2-fall-2025-sec-1.onrender.com",
+    "https://app-cs4300advancedswe-19.devedu.io", #temp DELETE BEFORE MERGE BACK TO MAIN
+    "http://app-cs4300advancedswe-19.devedu.io", #temp 
 ]
 
 # Behind Render’s proxy, tell Django requests are HTTPS
