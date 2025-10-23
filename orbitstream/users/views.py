@@ -11,3 +11,7 @@ def register_view(request):
     else:
         form = UserCreationForm()
     return render(request, "users/register.html", { "form": form})
+
+def login_view(request):
+    print("heeloo")
+    return request
