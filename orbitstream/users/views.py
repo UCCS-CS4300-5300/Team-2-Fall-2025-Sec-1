@@ -8,6 +8,6 @@ def register_view(request):
         if form.is_valid():
             form.save()
             return redirect("/") #change this to redirect to /users/login after login page is built
-
-    form = UserCreationForm()
+    else:
+        form = UserCreationForm()
     return render(request, "users/register.html", { "form": form})

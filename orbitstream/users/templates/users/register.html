@@ -13,7 +13,6 @@
         border-radius: 8px;
         background-color: #fafafa;
         box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-        font-family: Arial, sans-serif;
     }
 
     .register-container h1 {
@@ -75,7 +74,7 @@
 <br><br><br><br><br><br>
 <div class="register-container">
     <h1>Create Account</h1>
-    <form form action="/users/register/" method="post" novalidate>
+    <form form action="/register/" method="post" novalidate>
         {% csrf_token %}
         
         {# Render form fields manually to add labels and errors nicely #}
