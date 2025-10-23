@@ -22,4 +22,5 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('', index, name='index'),  # Your index view
     path('news/', include('space_news.urls')), # space news page path
+    path('users/register', include('users.urls')),
 ]
