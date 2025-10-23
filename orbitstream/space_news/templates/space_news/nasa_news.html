@@ -1,23 +1,21 @@
+<!-- space_news/templates/space_news/nasa_news.html -->
 {% extends "base.html" %}
 {% load static %}
-
 {% block title %}NASA Space News{% endblock %}
-
 {% block body_class %}nasa-page{% endblock %}
-
 {% block content %}
   <div class="nasa-container">
-    
+   
     <!-- HEADER -->
     <header class="nasa-page-header">
       <h1>Astronomy Picture of the Day!</h1>
       <p class="nasa-subtitle"></p>
     </header>
-
+    
     <!-- HERO: NASA picture of the day -->
     <section class="nasa-hero">
+      <!-- Your existing APOD code -->
       <div class="nasa-hero-title"></div>
-
       {% if apod and apod.url %}
         <div class="nasa-hero-media">
           {% if apod.media_type == "video" %}
@@ -32,13 +30,21 @@
         </div>
       {% endif %}
     </section>
-
-    <h2 class="nasa-section-title">Featured News</h2>
-
+    
+    <!-- ADD FILTER BAR HERE -->
+    {% include "news_filter/filter_bar.html" %}
+    
+    <h2 class="nasa-section-title">
+      Featured News
+      {% if has_active_filters %}
+        <span style="color: #60a5fa; font-size: 0.85em; font-weight: 400;"> (Filtered)</span>
+      {% endif %}
+    </h2>
+    
     {% if error %}
       <div class="nasa-error">{{ error }}</div>
     {% endif %}
-
+    
     <!-- FEATURED: first 3 articles -->
     <section class="nasa-featured">
       {% for article in articles|slice:":3" %}
@@ -64,10 +70,16 @@
           </div>
         </article>
       {% empty %}
-        <p style="color:#64748b;">No articles found.</p>
+        <p style="color:#64748b;">
+          {% if has_active_filters %}
+            No articles found matching your filters. Try adjusting your search criteria.
+          {% else %}
+            No articles found.
+          {% endif %}
+        </p>
       {% endfor %}
     </section>
-
+    
     <!-- FEED: remaining articles -->
     <section class="nasa-feed">
       {% for article in articles|slice:"3:" %}
@@ -79,7 +91,6 @@
               <span style="color:#94a3b8; font-weight:600;">No image</span>
             {% endif %}
           </div>
-
           <div class="nasa-feed-content">
             <h3 class="nasa-feed-title">{{ article.title }}</h3>
             <p class="nasa-feed-text">{{ article.description|default:""|truncatewords:42 }}</p>
@@ -93,14 +104,12 @@
         </article>
       {% endfor %}
     </section>
-
-    <!-- Pager -->
-    <div class="nasa-load-more-wrap">
-      {% if next_page_url %}
-        <a class="nasa-load-more" href="{{ next_page_url }}">Load More</a>
-      {% else %}
-        <button class="nasa-load-more" disabled>Load More</button>
-      {% endif %}
-    </div>
+    
+    <!-- Results count -->
+    {% if total_results %}
+      <div style="text-align: center; color: #94a3b8; margin: 24px 0;">
+        Showing {{ total_results }} article{{ total_results|pluralize }}
+      </div>
+    {% endif %}
   </div>
 {% endblock %}
