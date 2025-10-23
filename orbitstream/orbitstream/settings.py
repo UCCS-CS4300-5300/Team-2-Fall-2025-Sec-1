@@ -52,6 +52,7 @@ INSTALLED_APPS = [
     'home',
     'rest_framework',
     'space_news',
+    'users',
 ]
 
 MIDDLEWARE = [
