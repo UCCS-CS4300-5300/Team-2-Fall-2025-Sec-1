@@ -517,8 +517,8 @@ html:has(body.nasa-page) {
   display: grid; 
   grid-template-columns: 200px 1fr;
   gap: 20px;
-  background: #fff; 
-  border: 1px solid #e5e7ef; 
+  background: transparent; 
+  border: 1px solid transparent; 
   border-radius: 10px; 
   padding: 14px; 
   align-items: center;
@@ -529,8 +529,8 @@ html:has(body.nasa-page) {
   height: 140px;
   border-radius: 8px; 
   overflow: hidden; 
-  background: #e9edf6; 
-  border: 1px solid #e5e7ef;
+  background: transparent; 
+  border: 1px solid transparent;
   display: flex; 
   align-items: center; 
   justify-content: center;
