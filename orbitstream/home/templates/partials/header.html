@@ -19,8 +19,12 @@
     </form>
 
     <ul class="nav__links">
-      <li><a href="{% url 'users:register_view' %}">Register</a></li>
-      <li><a href="{% url 'users:login_view' %}">Login</a></li>
+      {% if user.is_authenticated %}
+        <li><a href="#">Logout</a></li>
+      {% else %}
+        <li><a href="{% url 'users:register_view' %}">Register</a></li>
+        <li><a href="{% url 'users:login_view' %}">Login</a></li>
+      {% endif %}
     </ul>
   </nav>
 </header>
