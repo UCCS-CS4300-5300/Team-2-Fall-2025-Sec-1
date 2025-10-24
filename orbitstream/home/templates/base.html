@@ -12,13 +12,14 @@
   {# page-specific CSS goes here #}
   {% block extra_css %}{% endblock %}
 </head>
-<body class="{% block body_class %}{% endblock %}">
+<body id="top" class="{% block body_class %}{% endblock %}">
 
   {% include 'partials/header.html' %}
 
   {% block content %}{% endblock %}
 
   {% include 'partials/footer.html' %}
+  
 
 </body>
 </html>

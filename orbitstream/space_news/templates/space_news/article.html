@@ -1,0 +1,55 @@
+{# space_news/templates/space_news/article.html #}
+{% extends "base.html" %}
+{% load static %}
+{% block title %}{{ article.title|default:"Article" }} | OrbitStream{% endblock %}
+{% block body_class %}article-page{% endblock %}
+
+{% block content %}
+<div class="article-container">
+  <nav class="article-breadcrumb">
+    <a href="{% url 'space_news:nasa_news' %}" class="article-back">← Back to News</a>
+  </nav>
+
+  <header class="article-header">
+    <h1 class="article-title">{{ article.title }}</h1>
+    <div class="article-meta">
+      <span class="article-source">{{ article.source.name }}</span>
+      {% if article.author %}<span>·</span><span class="article-author">{{ article.author }}</span>{% endif %}
+      {% if article.publishedAt %}<span>·</span><span class="article-date">{{ article.publishedAt|date:"M d, Y h:i A" }}</span>{% endif %}
+    </div>
+  </header>
+
+  {% if article.urlToImage %}
+    <figure class="article-hero">
+      <img src="{{ article.urlToImage }}" alt="{{ article.title }}">
+    </figure>
+  {% endif %}
+
+  <section class="article-body">
+    {% if full_html %}
+      <div class="article-content">{{ full_html|safe }}</div>
+    {% else %}
+      {% if article.description %}
+        <p class="article-lede">{{ article.description }}</p>
+      {% endif %}
+      {% if article.content %}
+        <p>{{ article.content }}</p>
+      {% endif %}
+      {% if article.url %}
+        <p><a class="article-fallback-link" href="{{ article.url }}" target="_blank" rel="noopener">Read the full story ↗</a></p>
+      {% endif %}
+    {% endif %}
+  </section>
+  
+  <footer class="article-footer">
+    <div class="share-row">
+      <span>Share:</span>
+      {% with share_url=article.url|urlencode share_title=article.title|urlencode %}
+        <a href="https://twitter.com/intent/tweet?url={{ share_url }}&text={{ share_title }}" target="_blank" rel="noopener">X/Twitter</a>
+        <a href="https://www.facebook.com/sharer/sharer.php?u={{ share_url }}" target="_blank" rel="noopener">Facebook</a>
+        <a href="https://www.linkedin.com/shareArticle?mini=true&url={{ share_url }}&title={{ share_title }}" target="_blank" rel="noopener">LinkedIn</a>
+      {% endwith %}
+    </div>
+  </footer>
+</div>
+{% endblock %}

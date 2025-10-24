@@ -22,6 +22,12 @@ html, body {
   overflow: hidden;
 }
 
+/* FIX: Anchor links (like #top) being obscured by a fixed header */
+/* Use a value slightly larger than your fixed header's height (e.g., 120px + margin) */
+#top {
+  scroll-margin-top: 130px; 
+}
+
 .snap-container {
   scroll-snap-type: y mandatory;
   overflow-y: scroll;
@@ -361,6 +367,11 @@ html, body {
 /* --- Reset --- */
 *, *::before, *::after { box-sizing: border-box; }
 
+.nasa-page .nasa-feed-title a {
+  text-decoration: none;
+  color: inherit;
+}
+
 body.nasa-page {
   overflow-y: scroll !important;
   overflow-x: hidden !important;
@@ -618,6 +629,276 @@ html:has(body.nasa-page) {
   margin-bottom: 18px;
 }
 
+/* ===== Featured overrides: LARGER images with tint + overlay ===== */
+body.nasa-page .nasa-featured {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 22px;
+  margin-bottom: 100px;
+}
+
+body.nasa-page .nasa-f-card {
+  position: relative;
+  border-radius: 14px;
+  overflow: hidden;
+  background: #e9edf6;
+  border: 1px solid #e5e7ef;
+}
+
+/* Keep link in normal flow so card has height */
+body.nasa-page .nasa-f-link {
+  display: block;
+  height: 100%;
+  text-decoration: none;
+  color: inherit;
+}
+
+/* ✅ INCREASED HEIGHT for modern, prominent featured cards */
+body.nasa-page .nasa-f-media {
+  position: relative;
+  width: 100%;
+  height: 350px !important;         /* <-- Increased from 200px to 280px */
+  aspect-ratio: auto !important;     /* cancel any earlier aspect-ratio */
+  background: #e9edf6;
+}
+
+/* Image fill + hover effect */
+body.nasa-page .nasa-f-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transform: scale(1.02);
+  transition: transform 240ms ease;
+}
+body.nasa-page .nasa-f-card:hover .nasa-f-img { transform: scale(1.06); }
+
+/* ✅ Tint layer for better text contrast */
+body.nasa-page .nasa-f-media::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,0.30);      /* 30% black tint */
+  pointer-events: none;
+}
+
+/* Bottom gradient overlay + text */
+body.nasa-page .nasa-f-overlay {
+  position: absolute;
+  left: 0; right: 0; bottom: 0;
+  padding: 16px 16px 18px;
+  color: #f1f5f9;
+}
+body.nasa-page .nasa-f-overlay::before {
+  content: "";
+  position: absolute;
+  inset: -60px 0 0 0;
+  background: linear-gradient(to top, rgba(0,0,0,0.85), rgba(0,0,0,0));
+  z-index: -1;
+}
+
+body.nasa-page .nasa-f-title {
+  margin: 0 0 6px;
+  font-size: 18px;
+  line-height: 1.25;
+  font-weight: 700;
+}
+body.nasa-page .nasa-f-meta {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 12px;
+  color: #d1d5db;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  body.nasa-page .nasa-featured { grid-template-columns: 1fr 1fr; }
+}
+@media (max-width: 640px) {
+  body.nasa-page .nasa-featured { grid-template-columns: 1fr; }
+  body.nasa-page .nasa-f-media {
+    height: 240px !important;  /* Slightly smaller on mobile */
+  }
+}
+
+
+/* --- Responsive --- */
+@media (max-width: 900px) {
+  .nasa-featured { 
+    grid-template-columns: 1fr 1fr; 
+  }
+}
+
+@media (max-width: 640px) {
+  .nasa-featured { 
+    grid-template-columns: 1fr; 
+  }
+  .nasa-feed-item { 
+    grid-template-columns: 1fr; 
+  }
+  .nasa-feed-thumb { 
+    width: 100%; 
+    height: 180px; 
+  }
+}
+
+/* ============================================
+   Article page (light UI override)
+   ============================================ */
+   .article-page {
+    /* page tokens */
+    --page-bg: #f5f7fb;      /* light gray like the mock */
+    --ink: #0e1320;          /* body text */
+    --muted: #64748b;        /* secondary text */
+    --link: #274b9f;         /* links/buttons */
+    --card: #ffffff;         /* card surface */
+    --stroke: #d6d7db;
+    --radius: 12px;
+    --shadow: 0 1px 2px rgba(0,0,0,.06), 0 6px 18px rgba(0,0,0,.06);
+  
+    /* flip the dark-site defaults just for this page */
+    background: var(--page-bg);
+    color: var(--ink);
+    min-height: 100svh;
+  }
+  
+
+/* ✅ REPLACE WITH THIS: */
+.article-page .article-container,
+.article-page .article-container * { 
+  color: inherit; 
+}
+
+/* ✅ ADD THESE 3 LINES at the bottom of your article CSS: */
+.article-page .site-footer,
+.article-page .site-footer * {
+  color: #cbd5e1 !important;
+}
+
+.article-page .back-to-top {
+  all: revert;  /* Reset button to normal */
+}
+  
+  /* push content below your fixed header (adjust if your header height differs) */
+  .article-page .article-container{
+    width: min(900px, calc(100% - 2rem));
+    margin-inline: auto;
+    padding-block: calc(120px + 1.5rem) 3rem; /* header(120px) + top padding */
+  }
+  
+  /* breadcrumb */
+  .article-page .article-breadcrumb{ margin-bottom: 1rem; }
+  .article-page .article-back{
+    color: var(--link);
+    text-decoration: none;
+    font-weight: 600;
+  }
+  .article-page .article-back:hover{ text-decoration: underline; }
+  
+  /* header */
+  .article-page .article-header{ margin-bottom: .5rem; }
+  .article-page .article-title{
+    margin: 0 0 .25rem;
+    font-size: clamp(1.6rem, 2.8vw, 2.4rem);
+    line-height: 1.2;
+  }
+  .article-page .article-meta{
+    display: flex;
+    gap: .5rem;
+    flex-wrap: wrap;
+    color: var(--muted);
+    font-size: .95rem;
+  }
+  
+  /* hero image card */
+  .article-page .article-hero{
+    margin: 1rem 0 1.25rem;
+    border-radius: var(--radius);
+    overflow: hidden;
+    border: 1px solid rgba(0,0,0,.06);
+    box-shadow: var(--shadow);
+    background: #e5e7eb; /* light placeholder if image absent */
+  }
+  .article-page .article-hero img{
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+  
+  /* body card */
+  .article-page .article-body{
+    background: transparent;
+    border: none;
+    box-shadow: none;
+    padding: 0;
+    color: #0e1320;
+    font-size: 1.05rem;
+    line-height: 1.7;
+  }
+  .article-page .article-body p {
+    margin: 1rem 0;
+  }  
+  .article-page .article-lede{
+    margin-top: 0;
+    font-weight: 600;
+    color: #111827;
+  }
+  
+  /* CTA button */
+  .article-page .article-cta{ margin-top: 1rem; }
+  .article-page .article-primary-btn{
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 40px;
+    padding: 0 1rem;
+    border-radius: 999px;
+    border: 1px solid #cbd3ea;
+    background: #fff;
+    color: #111827;
+    text-decoration: none;
+    font-weight: 600;
+  }
+  .article-page .article-primary-btn:hover{
+    border-color: #a6b8ff;
+  }
+  
+  /* footer/share row */
+  .article-page .article-footer{
+    margin-top: 1rem;
+    display: flex;
+    align-items: center;
+    gap: .75rem;
+    color: var(--muted);
+  }
+  .article-page .share-row a{
+    margin-left: .5rem;
+    color: var(--link);
+    text-decoration: none;
+    font-weight: 600;
+  }
+.article-page .share-row a:hover{ text-decoration: underline; }
+  
+/* make sure the dark-site global rule `overflow:hidden` on body
+     doesn’t clip this page if you need to scroll a long article */
+.article-page { overflow: auto; }
+
+ /* Let the article page grow as tall as its content and be scrollable */
+body.article-page {
+  height: auto;          /* stop forcing 100% */
+  min-height: 100%;      /* keep at least viewport height */
+  overflow: auto;        /* re-enable scrolling on this page */
+}
+
+/* If your global 'html' also forces overflow/height, unlock it only when the
+   article page is active (Chrome/Edge/Safari support :has) */
+:root:has(body.article-page) {
+  overflow: auto;        /* undo global overflow:hidden */
+  height: auto;          /* let height be content-driven */
+} 
+  
 /* --- Responsive --- */
 @media (max-width: 900px) {
   .nasa-featured { 

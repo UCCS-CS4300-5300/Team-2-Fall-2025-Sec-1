@@ -1,27 +1,38 @@
-<!-- space_news/templates/space_news/nasa_news.html -->
+{# space_news/templates/space_news/nasa_news.html #}
 {% extends "base.html" %}
 {% load static %}
 {% block title %}NASA Space News{% endblock %}
 {% block body_class %}nasa-page{% endblock %}
+
 {% block content %}
   <div class="nasa-container">
-   
+
     <!-- HEADER -->
     <header class="nasa-page-header">
       <h1>Astronomy Picture of the Day!</h1>
       <p class="nasa-subtitle"></p>
     </header>
-    
-    <!-- HERO: NASA picture of the day -->
+
+    <!-- HERO -->
     <section class="nasa-hero">
-      <!-- Your existing APOD code -->
       <div class="nasa-hero-title"></div>
       {% if apod and apod.url %}
         <div class="nasa-hero-media">
           {% if apod.media_type == "video" %}
-            <iframe src="{{ apod.url }}" title="{{ apod.title|default:'APOD' }}" style="width:100%;height:100%;border:0;"></iframe>
+            <iframe
+              src="{{ apod.url }}"
+              title="{{ apod.title|default:'APOD' }}"
+              style="width:100%;height:100%;border:0;"
+              loading="lazy"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+              referrerpolicy="strict-origin-when-cross-origin"
+              allowfullscreen></iframe>
           {% else %}
-            <img src="{{ apod.url }}" alt="{{ apod.title|default:'Astronomy Picture of the Day' }}" />
+            <img
+              src="{{ apod.url }}"
+              alt="{{ apod.title|default:'Astronomy Picture of the Day' }}"
+              loading="lazy"
+              decoding="async" />
           {% endif %}
         </div>
       {% else %}
@@ -30,84 +41,95 @@
         </div>
       {% endif %}
     </section>
-    
-    <!-- ADD FILTER BAR HERE -->
+
     {% include "news_filter/filter_bar.html" %}
-    
+
     <h2 class="nasa-section-title">
       Featured News
-      {% if has_active_filters %}
-        <span style="color: #60a5fa; font-size: 0.85em; font-weight: 400;"> (Filtered)</span>
-      {% endif %}
+      {% if has_active_filters %}<span style="color:#60a5fa;font-size:.85em;font-weight:400;"> (Filtered)</span>{% endif %}
     </h2>
-    
-    {% if error %}
-      <div class="nasa-error">{{ error }}</div>
-    {% endif %}
-    
-    <!-- FEATURED: first 3 articles -->
+
+    {% if error %}<div class="nasa-error">{{ error }}</div>{% endif %}
+
+    <!-- FEATURED: image-only tiles with bottom overlay title -->
     <section class="nasa-featured">
       {% for article in articles|slice:":3" %}
         <article class="nasa-f-card">
-          <div class="nasa-f-media">
-            {% if article.urlToImage %}
-              <img src="{{ article.urlToImage }}" alt="{{ article.title }}">
-            {% else %}
-              <span style="color:#94a3b8; font-weight:600;">No image</span>
-            {% endif %}
-          </div>
-          <div class="nasa-f-body">
-            <h3 class="nasa-feed-title">{{ article.title }}</h3>
-            <div class="nasa-f-snippet">
-              {{ article.description|default:article.title|default:"" }}
+          <a class="nasa-f-link" href="{% url 'space_news:article_detail' article.uid %}" aria-label="{{ article.title }}">
+            <div class="nasa-f-media">
+              {% if article.urlToImage %}
+                <img 
+                  class="nasa-f-img" 
+                  src="{{ article.urlToImage }}" 
+                  alt="{{ article.title }}"
+                  onerror="this.style.display='none'; this.parentElement.classList.add('no-image');"
+                  loading="lazy">
+              {% else %}
+                <div class="nasa-f-fallback">
+                  <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                    <circle cx="8.5" cy="8.5" r="1.5"/>
+                    <polyline points="21 15 16 10 5 21"/>
+                  </svg>
+                </div>
+              {% endif %}
             </div>
-            <div class="nasa-feed-meta" style="margin-top: 12px;">
-              <span>{{ article.source.name }}</span>
-              <span>&middot;</span>
-              <span>{{ article.publishedAt|date:"M d, Y" }}</span>
-              <a class="nasa-feed-link" href="{{ article.url }}" target="_blank" rel="noopener">Read More</a>
+
+            <div class="nasa-f-overlay">
+              <h3 class="nasa-f-title">{{ article.title }}</h3>
+              <div class="nasa-f-meta">
+                <span>{{ article.source.name }}</span>
+                <span>&middot;</span>
+                <span>{{ article.publishedAt|date:"M d, Y" }}</span>
+              </div>
             </div>
-          </div>
+          </a>
         </article>
       {% empty %}
-        <p style="color:#64748b;">
-          {% if has_active_filters %}
-            No articles found matching your filters. Try adjusting your search criteria.
-          {% else %}
-            No articles found.
-          {% endif %}
-        </p>
+        <p style="color:#64748b;">No featured articles found.</p>
       {% endfor %}
     </section>
-    
+
+
     <!-- FEED: remaining articles -->
     <section class="nasa-feed">
       {% for article in articles|slice:"3:" %}
         <article class="nasa-feed-item">
           <div class="nasa-feed-thumb">
             {% if article.urlToImage %}
-              <img src="{{ article.urlToImage }}" alt="{{ article.title }}">
+              <a href="{% url 'space_news:article_detail' article.uid %}">
+                <img 
+                  src="{{ article.urlToImage }}" 
+                  alt="{{ article.title }}"
+                  onerror="this.style.display='none'; this.closest('.nasa-feed-thumb').innerHTML='<span style=\'color:#94a3b8;font-weight:600;\'>No image</span>';"
+                  loading="lazy">
+              </a>
             {% else %}
-              <span style="color:#94a3b8; font-weight:600;">No image</span>
+              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="1.5">
+                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                <circle cx="8.5" cy="8.5" r="1.5"/>
+                <polyline points="21 15 16 10 5 21"/>
+              </svg>
             {% endif %}
           </div>
           <div class="nasa-feed-content">
-            <h3 class="nasa-feed-title">{{ article.title }}</h3>
+            <h3 class="nasa-feed-title">
+              <a href="{% url 'space_news:article_detail' article.uid %}">{{ article.title }}</a>
+            </h3>
             <p class="nasa-feed-text">{{ article.description|default:""|truncatewords:42 }}</p>
             <div class="nasa-feed-meta">
               <span>{{ article.source.name }}</span>
               <span>&middot;</span>
               <span>{{ article.publishedAt|date:"M d, Y" }}</span>
-              <a class="nasa-feed-link" href="{{ article.url }}" target="_blank" rel="noopener">Read More</a>
+              <a class="nasa-feed-link" href="{% url 'space_news:article_detail' article.uid %}">Read More</a>
             </div>
           </div>
         </article>
       {% endfor %}
     </section>
-    
-    <!-- Results count -->
+
     {% if total_results %}
-      <div style="text-align: center; color: #94a3b8; margin: 24px 0;">
+      <div style="text-align:center;color:#94a3b8;margin:24px 0;">
         Showing {{ total_results }} article{{ total_results|pluralize }}
       </div>
     {% endif %}
