@@ -1,11 +1,11 @@
 {% extends "base.html" %}
 {% load static %}
 
-{% block title %}Register a New User{% endblock %}
+{% block title %}User Login{% endblock %}
 
 {% block content %}
 <style>
-    .register-container {
+    .login-container {
         max-width: 400px;
         margin: 40px auto;
         padding: 25px 30px;
@@ -15,7 +15,7 @@
         box-shadow: 0 4px 10px rgba(0,0,0,0.1);
     }
 
-    .register-container h1 {
+    .login-container h1 {
         text-align: center;
         margin-bottom: 20px;
         color: #333;
@@ -72,9 +72,9 @@
     }
 </style>
 <br><br><br><br><br><br>
-<div class="register-container">
-    <h1>Create Account</h1>
-    <form action="/register/" method="post" novalidate>
+<div class="login-container">
+    <h1>User Login</h1>
+    <form action="/login/" method="post">
         {% csrf_token %}
         
         {# Render form fields manually to add labels and errors nicely #}
@@ -90,7 +90,7 @@
             {% endif %}
         {% endfor %}
         
-        <button type="submit" class="submit-button">Register</button>
+        <button type="submit" class="submit-button">Login</button>
     </form>
 </div>
 {% endblock %}
