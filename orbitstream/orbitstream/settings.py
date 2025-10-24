@@ -55,6 +55,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'space_news',
     'users',
+    'news_filter',
 ]
 
 MIDDLEWARE = [
