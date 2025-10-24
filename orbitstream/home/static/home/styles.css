@@ -98,6 +98,66 @@ html, body {
   text-shadow: 0 2px 10px rgba(0,0,0,0.6);
 }
 
+.learn-more {
+  /* Set the button appearance */
+  display: inline-block; /* Allows width/padding and sits in line with text */
+  padding: 4px 20px 10px 20px;
+  margin-top: 30px; /* Spacing below the paragraph text */
+  
+  /* Style the text */
+  color: white;
+  text-decoration: none; /* Removes the underline from the link */
+  font-weight: bold;
+  text-transform: uppercase;
+  
+  /* Style the background/border */
+  background-color: transparent; 
+  border: 2px solid white;
+  border-radius: 5px; /* Rounded corners */
+  
+  /* Make it look clickable */
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.learn-more-signup{
+  /* Set the button appearance */
+  display: inline-block; /* Allows width/padding and sits in line with text */
+  padding: 10px 20px;
+  margin-top: 30px; /* Spacing below the paragraph text */
+  
+  /* Style the text */
+  color: white;
+  text-decoration: none; /* Removes the underline from the link */
+  font-weight: bold;
+  text-transform: uppercase;
+  
+  /* Style the background/border */
+  background-color: transparent; 
+  border: 2px solid white;
+  border-radius: 5px; /* Rounded corners */
+  
+  /* Make it look clickable */
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.learn-more .arrow {
+  font-size: 1.6em;      /* makes the arrow larger */
+  margin-left: 8px;       /* spacing from text */
+  position: relative;
+  top: 1px;
+}
+
+/* Optional: Change color when the user hovers over it */
+.learn-more:hover {
+  background-color: #f7f7f7; /* A darker blue on hover */
+}
+
+.learn-more-signup:hover {
+  background-color: #f7f7f7; /* A darker blue on hover */
+}
+
 /* Alternate POSITION, but keep left-aligned text & push block to the right*/
 .panel.right .panel-inner {
   margin-left: auto;  
