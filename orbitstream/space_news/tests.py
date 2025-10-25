@@ -1,7 +1,8 @@
-from django.test import Client, TestCase
+from django.test import Client, TestCase, override_settings
 from django.urls import reverse
-
+from django.core.cache import cache
 from unittest.mock import patch, MagicMock
+from bs4 import BeautifulSoup  
 from space_news import views as v
 
 
@@ -65,3 +66,58 @@ class URLCoverageTest(TestCase):
         self.assertEqual(response.status_code, 200)
 
     # REMOVING ADMIN SECTION FOR NOW
+
+@override_settings(CACHES={"default": {"BACKEND": "django.core.cache.backends.locmem.LocMemCache"}})
+class ArticleDetailAmpFallbackTests(TestCase):
+    def setUp(self):
+        self.client = Client()
+
+    @patch("space_news.views.Document")
+    @patch("space_news.views.requests.get")
+    def test_article_detail_uses_amp_fallback_when_primary_empty(self, mock_get, MockDoc):
+        """
+        Simulate: primary page yields empty/unsalvageable summary,
+        but page has <link rel="amphtml" href="..."> and AMP returns content.
+        """
+
+        uid = "some-uid-1234abcd"
+        article_url = "https://example.com/post"
+
+        # Seed cache with article (no full_html yet)
+        cache.set(
+            "space_news_articles_by_uid",
+            {uid: {"uid": uid, "title": "T", "url": article_url, "urlToImage": "https://img/ex.jpg"}},
+            timeout=600,
+        )
+
+        # 1st GET: main page (contains amphtml link)
+        main_html = """
+        <html>
+          <head>
+            <link rel="amphtml" href="https://example.com/amp/post">
+          </head>
+          <body>
+            <div>main page but summary will be empty after cleaning</div>
+          </body>
+        </html>
+        """
+        resp_main = MagicMock(status_code=200, text=main_html)
+
+        # 2nd GET: amp page (returns actual content we keep)
+        amp_html = "<article><p>AMP content OK</p></article>"
+        resp_amp = MagicMock(status_code=200, text=amp_html)
+
+        mock_get.side_effect = [resp_main, resp_amp]
+
+        # Make Document(...).summary(...) return something that cleans to empty
+        MockDoc.return_value.summary.return_value = "<div></div>"  # no text after cleaning
+
+        # Hit the view
+        r = self.client.get(f"/news/article/{uid}/")
+        self.assertEqual(r.status_code, 200)
+        self.assertIn(b"AMP content OK", r.content)
+
+        # And it should have cached full_html now
+        cached = cache.get("space_news_articles_by_uid")[uid]
+        self.assertIn("full_html", cached)
+        self.assertIn("AMP content OK", cached["full_html"])
