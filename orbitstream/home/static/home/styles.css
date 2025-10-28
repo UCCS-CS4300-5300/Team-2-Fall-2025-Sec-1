@@ -36,7 +36,7 @@ html, body {
   color: var(--text);
   background: #000;
   font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-  overflow: hidden;
+
 }
 
 /* FIX: Anchor links (like #top) being obscured by a fixed header */
@@ -53,6 +53,21 @@ html, body {
   width: 100%;
   background: #000;
   padding-top: 0;
+}
+
+.snap-container .panel:first-of-type .site-header {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 101; /* Higher than panel content */
+}
+
+.header-wrapper {
+  height: 100px; /* match your header height */
+  flex-shrink: 0;
+  scroll-snap-align: start;
+  scroll-snap-stop: normal; /* allows scrolling past it */
 }
 
 .panel {
@@ -214,10 +229,19 @@ html, body {
   align-items: flex-start;
 }
 
-/* adjustable upward nudge */
-.panel:nth-of-type(1) .panel-inner,
-.panel:nth-of-type(4) .panel-inner {
-  margin-top: clamp(32px, 6vh, 80px); 
+/* Override for snap-container panels - make this more specific */
+.snap-container .panel:nth-of-type(1) .panel-inner,
+.snap-container .panel:nth-of-type(4) .panel-inner {
+  margin-top: 0;
+}
+
+.snap-container .panel {
+  align-items: flex-start; /* Push content to top */
+  padding-top: 100px; /* Add some spacing from top, adjust as needed */
+}
+
+.snap-container .panel-inner {
+  margin-top: 0;
 }
 
 .container{
@@ -233,10 +257,7 @@ html, body {
   background: var(--bg);
   color: #fff;
   border-bottom: 1px solid rgba(255,255,255,.08);
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
+  position: relative;
   z-index: 100;
 }
 .nav{
@@ -381,7 +402,9 @@ html, body {
   text-decoration: none;
   font-size: 0.95rem;
   transition: color 0.2s ease;
+  cursor: pointer;
 }
+
 
 .back-to-top:hover,
 .back-to-top:focus{
@@ -454,7 +477,7 @@ body.nasa-page {
   overflow-x: hidden !important;
   background: #f6f7fb;
   color: #0f172a;
-  height: 100vh !important;
+  height: auto !important;
   min-height: 100vh;
 }
 
@@ -854,9 +877,6 @@ body.nasa-page .nasa-f-meta {
   color: #cbd5e1 !important;
 }
 
-.article-page .back-to-top {
-  all: revert;  /* Reset button to normal */
-}
   
   /* push content below your fixed header (adjust if your header height differs) */
   .article-page .article-container{
