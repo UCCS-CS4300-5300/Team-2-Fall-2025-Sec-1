@@ -56,6 +56,7 @@ INSTALLED_APPS = [
     'space_news',
     'users',
     'news_filter',
+    'space_imagery',
 ]
 
 MIDDLEWARE = [

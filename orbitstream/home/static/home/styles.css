@@ -978,3 +978,23 @@ body.article-page {
     height: 180px; 
   }
 }
+
+/* ============================================
+   Space_imagery section
+   ============================================ */
+
+body.gallery-page {
+  overflow-y: scroll !important;
+  overflow-x: hidden !important;
+  background: #f6f7fb;
+  color: #0f172a;
+  height: 100vh !important;
+  min-height: 100vh;
+}
+
+/*Just a blank container for the time being*/
+.gallery-container {
+  background-color: #ffffff; /* Use black background for a 'canvas' */
+  min-height: 100%; /* Ensure it fills its parent (<main>) */
+  display: grid;
+}
