@@ -1,11 +1,66 @@
-{# space_news/templates/space_news/nasa_news.html #}
 {% extends "base.html" %}
 {% load static %}
-{% block title %}NASA Space News{% endblock %}
+
+{% block title %}NASA Image Gallery{% endblock %}
 {% block body_class %}gallery-page{% endblock %}
 
 {% block content %}
-  <div class="gallery-container">
+<div class="gallery-container">
+  <div class="search-section">
+    <div class="search-wrapper">
+      <form method="get" action="">
+        <input
+          type="text"
+          class="search-input"
+          name="q"
+          value="{{ q }}"
+          placeholder="Search NASA Media"
+        >
+        <input type="hidden" name="type" value="{{ media_type|default:'image' }}">
+      </form>
 
+      <div class="filter-buttons" style="margin-top:.75rem;">
+        <a href="?q={{ q|urlencode }}&type=image"
+           class="filter-btn {% if media_type == 'image' %}active{% endif %}">
+          Images
+        </a>
+        <a href="?q={{ q|urlencode }}&type=video"
+           class="filter-btn {% if media_type == 'video' %}active{% endif %}">
+          Videos
+        </a>
+      </div>
+    </div>
   </div>
+
+  <div class="gallery-grid">
+    {% if items %}
+      {% for item in items %}
+        {% with item.links.0.href as thumb %}
+          {% if thumb %}
+            <div class="gallery-item">
+              {% if media_type == "video" %}
+                <img src="{{ thumb }}" alt="{{ item.data.0.title }}" loading="lazy">
+              {% else %}
+                <img src="{{ thumb }}" alt="{{ item.data.0.title }}" loading="lazy">
+              {% endif %}
+              
+              <div class="caption-overlay">
+                <h3 class="caption-title">{{ item.data.0.title }}</h3>
+                {% if item.data.0.description %}
+                  <p class="caption-description">{{ item.data.0.description|truncatewords:20 }}</p>
+                {% endif %}
+                <a href="#" class="caption-link">View more details</a>
+              </div>
+            </div>
+          {% endif %}
+        {% endwith %}
+      {% endfor %}
+    {% endif %}
+</div>
+{% if q %}
+  <div class="load-more-section">
+    <button class="load-more-btn" disabled>Load More</button>
+  </div>
+{% endif %}
+</div>
 {% endblock %}

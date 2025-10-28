@@ -1,3 +1,20 @@
+/* ========================================================================== 
+   OrbitStream Stylesheet Guide
+   ==========================================================================
+
+   Use Ctrl + F to quickly navigate to a section by searching its title below.
+
+   ──────────────────────────────
+   TABLE OF CONTENTS
+   ──────────────────────────────
+   1. Header / Navigation
+   2. Footer
+   3. NASA Space News Styles
+   4. Article Page
+   5. Space Imagery
+
+   ========================================================================== */
+
 :root {
   --text: #e9e7e4;
   --muted: #cfcac3;
@@ -421,7 +438,7 @@ html, body {
 }
 
 /* ============================================
-   NASA SPACE NEWS STYLES (Namespaced)
+   NASA SPACE NEWS STYLES 
    ============================================ */
 
 /* --- Reset --- */
@@ -805,7 +822,7 @@ body.nasa-page .nasa-f-meta {
 }
 
 /* ============================================
-   Article page (light UI override)
+   Article page 
    ============================================ */
    .article-page {
     /* page tokens */
@@ -980,21 +997,205 @@ body.article-page {
 }
 
 /* ============================================
-   Space_imagery section
+   Space Imagery
    ============================================ */
 
-body.gallery-page {
-  overflow-y: scroll !important;
-  overflow-x: hidden !important;
-  background: #f6f7fb;
-  color: #0f172a;
-  height: 100vh !important;
-  min-height: 100vh;
-}
-
-/*Just a blank container for the time being*/
-.gallery-container {
-  background-color: #ffffff; /* Use black background for a 'canvas' */
-  min-height: 100%; /* Ensure it fills its parent (<main>) */
-  display: grid;
-}
+   body.gallery-page {
+    overflow-y: scroll !important;
+    overflow-x: hidden !important;
+    background: #f6f7fb;
+    color: #0f172a;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .gallery-container {
+    background-color: #161616;
+    flex: 1;
+    padding: 200px 60px 40px 60px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  /* Search Section */
+  .search-section {
+    width: 100%;
+    max-width: 800px;
+    margin-bottom: 30px;
+  }
+  
+  .search-wrapper {
+    position: relative;
+    margin-bottom: 20px;
+  }
+  
+  .search-input {
+    width: 100%;
+    padding: 12px 40px 12px 16px;
+    border: 1px solid #cbd5e1;
+    border-radius: 4px;
+    font-size: 14px;
+    background-color: #ffffff;
+    background-image: none;
+    background-repeat: no-repeat;
+    background-position: 12px center;
+    padding-left: 40px;
+  }
+  
+  .search-input:focus {
+    outline: none;
+    border-color: #3b82f6;
+  }
+  
+  /* Filter Buttons */
+  .filter-buttons {
+    display: flex;
+    gap: 10px;
+  }
+  
+  .filter-btn {
+    padding: 8px 24px;
+    border: 1px solid #cbd5e1;
+    border-radius: 4px;
+    background-color: #ffffff;
+    color: #475569;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-decoration: none;
+  }
+  
+  .filter-btn:hover {
+    background-color: #f1f5f9;
+  }
+  
+  .filter-btn.active {
+    background-color: #3b82f6;
+    color: #ffffff;
+    border-color: #3b82f6;
+  }
+  
+  /* Gallery Grid — Masonry (CSS columns) */
+  .gallery-grid {
+    width: 100%;
+    max-width: 1200px;
+    column-count: 4;          /* number of masonry columns */
+    column-gap: 20px;         /* space between columns */
+    margin-bottom: 40px;
+  }
+  
+  /* Masonry items */
+  .gallery-item {
+    display: inline-block;    /* needed for CSS columns */
+    width: 100%;
+    margin: 0 0 20px;         /* space between tiles vertically */
+    break-inside: avoid;      /* prevent items from splitting */
+    background-color:transparent;
+    border-radius: 8px;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    cursor: pointer;
+    position: relative;
+    background-image: none;
+  }
+  
+  .caption-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(30, 30, 30, 0.9);
+    color: white;
+    padding: 16px;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    border-radius: 6px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+  
+  .gallery-item:hover .caption-overlay {
+    opacity: 1;
+  }
+  
+  .caption-title {
+    font-size: 14px;
+    font-weight: 600;
+    margin: 0 0 8px 0;
+    line-height: 1.4;
+  }
+  
+  .caption-description {
+    font-size: 12px;
+    margin: 0 0 8px 0;
+    line-height: 1.4;
+    color: #d1d5db;
+  }
+  
+  .caption-link {
+    font-size: 12px;
+    color: #60a5fa;
+    text-decoration: none;
+  }
+  
+  .caption-link:hover {
+    text-decoration: underline;
+  }
+  
+  .gallery-item img,
+  .gallery-item video {
+    display: block;
+    width: 100%;
+    height: auto;             /* keep original aspect ratio */
+    object-fit: contain;      /* ensures full image is visible */
+    border-radius: 6px;
+    background: #0d0f12;      /* letterbox */
+  }
+  
+  .gallery-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  }
+  
+  /* Load More Section */
+  .load-more-section {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    margin-bottom: 40px;
+  }
+  
+  .load-more-btn {
+    padding: 10px 32px;
+    border: 1px solid #cbd5e1;
+    border-radius: 4px;
+    background-color: #ffffff;
+    color: #475569;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  
+  .load-more-btn:hover {
+    background-color: #f1f5f9;
+    border-color: #94a3b8;
+  }
+  
+  /* Responsive Design */
+  @media (max-width: 1200px) {
+    .gallery-grid { column-count: 3; }
+    .gallery-container { padding: 100px 40px 30px 40px; }
+  }
+  
+  @media (max-width: 900px) {
+    .gallery-grid { column-count: 2; }
+    .gallery-container { padding: 100px 20px 20px 20px; }
+    .search-section { max-width: 100%; }
+  }
+  
+  @media (max-width: 600px) {
+    .gallery-grid { column-count: 1; }
+  }
+  
