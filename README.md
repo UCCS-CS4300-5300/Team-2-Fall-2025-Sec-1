@@ -61,7 +61,7 @@ OrbitStream requires API keys to function properly. You'll need to obtain an API
 - **Setup:** Register for a free API key and configure it in your application settings
 
 ### NASA APOD API
-- **Documentation:** https://newsapi.org/docs
+- **Documentation:** [https://api.nasa.gov/](https://api.nasa.gov/)
 - **Purpose:** Fetches NASA’s “Astronomy Picture of the Day,” including images, videos, titles, and explanations, featured   at the top of the *Space News* page.
 - **Setup:** Sign up for a free API key at [https://api.nasa.gov/](https://api.nasa.gov/) then add it to your environment or Django settings.
 
