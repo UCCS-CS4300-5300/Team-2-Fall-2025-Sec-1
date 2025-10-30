@@ -5,4 +5,5 @@ app_name = 'space_imagery'
 
 urlpatterns = [
     path('', views.gallery, name='gallery'),
+    path('media/', views.full_media, name='full_media'),
 ]

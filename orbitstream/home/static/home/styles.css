@@ -12,6 +12,7 @@
    3. NASA Space News Styles
    4. Article Page
    5. Space Imagery
+   6. Full Media Page
 
    ========================================================================== */
 
@@ -1219,3 +1220,290 @@ body.article-page {
     .gallery-grid { column-count: 1; }
   }
   
+/* ============================================
+   Full Media Page - SCROLL SNAP FIX
+   ============================================ */
+
+/* CRITICAL: Disable scroll-snap on full-media-page since it doesn't use snap-container */
+body.full-media-page {
+  overflow-y: scroll !important;
+  overflow-x: hidden !important;
+  background: #161616;
+  color: #f6f7fb;
+  min-height: 100vh;
+  scroll-snap-type: none !important; /* Disable scroll snapping */
+  display: flex;
+  flex-direction: column;
+}
+
+body.full-media-page .site-header {
+  position: fixed !important; /* Keep header fixed at top */
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+}
+
+body.full-media-page .site-footer {
+  scroll-snap-align: none !important; /* Disable footer snap */
+  position: relative;
+  margin-top: auto;
+}
+
+.full-media-container {
+  padding: 120px 60px 40px 60px;
+  max-width: 1600px;
+  margin: 0 auto;
+  width: 100%;
+  flex: 1;
+}
+
+.back-button {
+  display: inline-block;
+  padding: 10px 20px;
+  background-color: #2a2a2a;
+  color: #f6f7fb;
+  text-decoration: none;
+  border-radius: 4px;
+  margin-bottom: 30px;
+  transition: background-color 0.2s ease;
+  border: 1px solid #3a3a3a;
+  font-size: 14px;
+}
+
+.back-button:hover {
+  background-color: #3a3a3a;
+}
+
+.error-message {
+  text-align: center;
+  padding: 60px 20px;
+  color: #cbd5e1;
+}
+
+.error-message h2 {
+  color: #f6f7fb;
+  margin-bottom: 12px;
+}
+
+.media-wrapper {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 30px;
+  padding-bottom: 0; /* Remove extra space */
+}
+
+@media (min-width: 1024px) {
+  .media-wrapper {
+    grid-template-columns: 2fr 1fr;
+  }
+}
+
+/* Media Display Section */
+.media-display {
+  background: transparent;
+  border-radius: 8px;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 500px;
+  
+}
+
+.full-image {
+  width: 100%;
+  height: auto;
+  max-height: 80vh;
+  object-fit: contain;
+  display: block;
+}
+
+.video-container {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.full-video {
+  width: 100%;
+  max-height: 70vh;
+  border-radius: 4px;
+  background:transparent;
+}
+
+.video-placeholder {
+  text-align: center;
+  color: #cbd5e1;
+  padding: 40px;
+}
+
+.video-placeholder p {
+  margin: 10px 0;
+}
+
+.video-note {
+  font-size: 14px;
+  color: #94a3b8;
+}
+
+/* Media Details Section */
+.media-details {
+  background: #1e1e1e;
+  padding: 30px;
+  border-radius: 8px;
+  border: 1px solid #2a2a2a;
+}
+
+.media-details h1 {
+  margin: 0 0 24px 0;
+  font-size: 28px;
+  line-height: 1.3;
+  color: #f6f7fb;
+  font-weight: 600;
+}
+
+.metadata {
+  margin-bottom: 25px;
+  border-bottom: 1px solid #2a2a2a;
+  padding-bottom: 20px;
+}
+
+.meta-item {
+  margin-bottom: 12px;
+  display: flex;
+  gap: 12px;
+  font-size: 14px;
+}
+
+.meta-item strong {
+  min-width: 100px;
+  color: #94a3b8;
+  font-weight: 500;
+}
+
+.meta-item span {
+  color: #cbd5e1;
+}
+
+.description {
+  margin-bottom: 25px;
+}
+
+.description h2 {
+  font-size: 18px;
+  margin-bottom: 12px;
+  color: #f6f7fb;
+  font-weight: 600;
+}
+
+.description p {
+  line-height: 1.6;
+  color: #cbd5e1;
+  font-size: 14px;
+}
+
+.keywords {
+  margin-bottom: 25px;
+}
+
+.keywords h3 {
+  font-size: 16px;
+  margin-bottom: 12px;
+  color: #f6f7fb;
+  font-weight: 600;
+}
+
+.keyword-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.keyword-tag {
+  background: #2a2a2a;
+  color: #60a5fa;
+  padding: 6px 12px;
+  border-radius: 4px;
+  font-size: 13px;
+  border: 1px solid #3a3a3a;
+}
+
+.download-section {
+  margin-top: 25px;
+  padding-top: 20px;
+  border-top: 1px solid #2a2a2a;
+}
+
+.download-btn {
+  display: inline-block;
+  padding: 12px 30px;
+  background: #3b82f6;
+  color: #ffffff;
+  text-decoration: none;
+  border-radius: 4px;
+  transition: background-color 0.2s ease;
+  font-weight: 500;
+  font-size: 14px;
+  border: 1px solid #3b82f6;
+}
+
+.download-btn:hover {
+  background: #2563eb;
+  border-color: #2563eb;
+}
+
+/* Responsive Design */
+@media (max-width: 1200px) {
+  .full-media-container {
+    padding: 120px 60px 40px 60px;
+    max-width: 1600px;
+    margin: 0 auto;
+    width: 100%;
+    flex: 1;
+  }
+}
+
+@media (max-width: 900px) {
+  .full-media-container {
+    padding: 100px 20px 40px 20px;
+    flex: 1;
+  }
+  
+  .media-wrapper {
+    grid-template-columns: 1fr;
+    padding-bottom: 0;
+  }
+  
+  .media-details h1 {
+    font-size: 24px;
+  }
+}
+
+@media (max-width: 600px) {
+  .full-media-container {
+    padding: 100px 20px 40px 20px;
+    max-width: 1600px;
+    margin: 0 auto;
+    width: 100%;
+    flex: 1;
+  }
+  
+  .media-display {
+    min-height: 300px;
+  }
+  
+  .media-details {
+    padding: 20px;
+  }
+  
+  .meta-item {
+    flex-direction: column;
+    gap: 4px;
+  }
+  
+  .meta-item strong {
+    min-width: auto;
+  }
+}

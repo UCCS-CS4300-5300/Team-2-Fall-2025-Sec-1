@@ -30,3 +30,4 @@ def fetch_full_html(url: str, timeout: int = 8):
         protocols=["http","https","data"],
         strip=True
     )
+

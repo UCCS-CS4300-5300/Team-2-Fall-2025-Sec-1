@@ -108,7 +108,7 @@ class UtilsTestCase(TestCase):
 
 
 class GalleryViewTestCase(TestCase):
-    """Test cases for views.py"""
+    """Test cases for gallery view"""
     
     @patch('space_imagery.utils.get')
     def test_gallery_with_search_query(self, mock_get):
@@ -241,6 +241,206 @@ class GalleryViewTestCase(TestCase):
         self.assertEqual(len(response.context['items']), 0)
 
 
+class FullMediaViewTestCase(TestCase):
+    """Test cases for full_media view"""
+    
+    def test_full_media_no_nasa_id(self):
+        """Test full_media view without nasa_id parameter"""
+        response = self.client.get(reverse('space_imagery:full_media'))
+        
+        self.assertEqual(response.status_code, 200)
+        self.assertIn('error', response.context)
+        self.assertEqual(response.context['error'], 'No media ID provided')
+    
+    @patch('space_imagery.utils.get')
+    def test_full_media_not_found(self, mock_get):
+        """Test full_media view when media is not found"""
+        mock_get.return_value = {"collection": {"items": []}}
+        
+        response = self.client.get(
+            reverse('space_imagery:full_media'),
+            {'nasa_id': 'nonexistent'}
+        )
+        
+        self.assertEqual(response.status_code, 200)
+        self.assertIn('error', response.context)
+        self.assertEqual(response.context['error'], 'Media not found')
+    
+    @patch('requests.get')
+    @patch('space_imagery.utils.get')
+    def test_full_media_image_success(self, mock_utils_get, mock_requests_get):
+        """Test full_media view with successful image retrieval"""
+        # Mock utils.get for search
+        mock_utils_get.return_value = {
+            "collection": {
+                "items": [
+                    {
+                        "data": [{
+                            "title": "Mars Surface",
+                            "description": "A beautiful view of Mars",
+                            "nasa_id": "PIA12345",
+                            "media_type": "image",
+                            "date_created": "2024-01-15T00:00:00Z",
+                            "center": "JPL",
+                            "keywords": ["mars", "surface", "rover"]
+                        }],
+                        "href": "http://example.com/assets/PIA12345",
+                        "links": [{"href": "http://example.com/thumb.jpg"}]
+                    }
+                ]
+            }
+        }
+        
+        # Mock requests.get for asset manifest
+        mock_asset_response = Mock()
+        mock_asset_response.status_code = 200
+        mock_asset_response.json.return_value = [
+            "http://example.com/PIA12345~small.jpg",
+            "http://example.com/PIA12345~large.jpg",
+            "http://example.com/PIA12345~orig.jpg"
+        ]
+        mock_requests_get.return_value = mock_asset_response
+        
+        response = self.client.get(
+            reverse('space_imagery:full_media'),
+            {'nasa_id': 'PIA12345'}
+        )
+        
+        self.assertEqual(response.status_code, 200)
+        self.assertIn('item', response.context)
+        self.assertIn('media_url', response.context)
+        self.assertEqual(response.context['item']['title'], 'Mars Surface')
+        self.assertEqual(response.context['media_type'], 'image')
+        # Should get the large version
+        self.assertIn('~large', response.context['media_url'])
+    
+    @patch('requests.get')
+    @patch('space_imagery.utils.get')
+    def test_full_media_video_success(self, mock_utils_get, mock_requests_get):
+        """Test full_media view with successful video retrieval"""
+        mock_utils_get.return_value = {
+            "collection": {
+                "items": [
+                    {
+                        "data": [{
+                            "title": "ISS Spacewalk",
+                            "description": "Astronaut spacewalk footage",
+                            "nasa_id": "VID67890",
+                            "media_type": "video"
+                        }],
+                        "href": "http://example.com/assets/VID67890",
+                        "links": [{"href": "http://example.com/thumb.jpg"}]
+                    }
+                ]
+            }
+        }
+        
+        # Mock requests.get for asset manifest with video
+        mock_asset_response = Mock()
+        mock_asset_response.status_code = 200
+        mock_asset_response.json.return_value = [
+            "http://example.com/VID67890.mp4",
+            "http://example.com/VID67890.srt"
+        ]
+        mock_requests_get.return_value = mock_asset_response
+        
+        response = self.client.get(
+            reverse('space_imagery:full_media'),
+            {'nasa_id': 'VID67890'}
+        )
+        
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context['media_type'], 'video')
+        self.assertIn('.mp4', response.context['media_url'])
+    
+    @patch('requests.get')
+    @patch('space_imagery.utils.get')
+    def test_full_media_asset_fetch_failure(self, mock_utils_get, mock_requests_get):
+        """Test full_media view when asset fetch fails"""
+        mock_utils_get.return_value = {
+            "collection": {
+                "items": [
+                    {
+                        "data": [{
+                            "title": "Test Image",
+                            "nasa_id": "TEST123",
+                            "media_type": "image"
+                        }],
+                        "href": "http://example.com/assets/TEST123",
+                        "links": [{"href": "http://example.com/fallback.jpg"}]
+                    }
+                ]
+            }
+        }
+        
+        # Mock failed asset fetch
+        mock_requests_get.side_effect = Exception("Connection error")
+        
+        response = self.client.get(
+            reverse('space_imagery:full_media'),
+            {'nasa_id': 'TEST123'}
+        )
+        
+        self.assertEqual(response.status_code, 200)
+        # Should fallback to links
+        self.assertEqual(response.context['media_url'], 'http://example.com/fallback.jpg')
+    
+    @patch('requests.get')
+    @patch('space_imagery.utils.get')
+    def test_full_media_no_href(self, mock_utils_get, mock_requests_get):
+        """Test full_media view when item has no href"""
+        mock_utils_get.return_value = {
+            "collection": {
+                "items": [
+                    {
+                        "data": [{
+                            "title": "Test Image",
+                            "nasa_id": "TEST456",
+                            "media_type": "image"
+                        }],
+                        "links": [{"href": "http://example.com/direct.jpg"}]
+                    }
+                ]
+            }
+        }
+        
+        response = self.client.get(
+            reverse('space_imagery:full_media'),
+            {'nasa_id': 'TEST456'}
+        )
+        
+        self.assertEqual(response.status_code, 200)
+        # Should use direct link
+        self.assertEqual(response.context['media_url'], 'http://example.com/direct.jpg')
+        # requests.get should not be called since there's no href
+        mock_requests_get.assert_not_called()
+    
+    @patch('space_imagery.utils.get')
+    def test_full_media_no_media_url(self, mock_utils_get):
+        """Test full_media view when no media URL can be found"""
+        mock_utils_get.return_value = {
+            "collection": {
+                "items": [
+                    {
+                        "data": [{
+                            "title": "Test Image",
+                            "nasa_id": "TEST789",
+                            "media_type": "image"
+                        }]
+                    }
+                ]
+            }
+        }
+        
+        response = self.client.get(
+            reverse('space_imagery:full_media'),
+            {'nasa_id': 'TEST789'}
+        )
+        
+        self.assertEqual(response.status_code, 200)
+        self.assertIsNone(response.context['media_url'])
+
+
 class URLTestCase(TestCase):
     """Test cases for urls.py"""
     
@@ -248,6 +448,11 @@ class URLTestCase(TestCase):
         """Test that gallery URL resolves correctly"""
         url = reverse('space_imagery:gallery')
         self.assertEqual(url, '/gallery/')  # Adjust based on your URL config
+    
+    def test_full_media_url_resolves(self):
+        """Test that full_media URL resolves correctly"""
+        url = reverse('space_imagery:full_media')
+        self.assertEqual(url, '/gallery/media/')  # Adjust based on your URL config
     
     @patch('space_imagery.utils.get')
     def test_gallery_url_accessible(self, mock_get):
@@ -265,6 +470,11 @@ class URLTestCase(TestCase):
         response = self.client.get(
             reverse('space_imagery:gallery') + '?q=mars&type=video&page=2'
         )
+        self.assertEqual(response.status_code, 200)
+    
+    def test_full_media_url_accessible(self):
+        """Test that full_media URL is accessible"""
+        response = self.client.get(reverse('space_imagery:full_media'))
         self.assertEqual(response.status_code, 200)
 
 

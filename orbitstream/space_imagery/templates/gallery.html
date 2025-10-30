@@ -37,7 +37,7 @@
       {% for item in items %}
         {% with item.links.0.href as thumb %}
           {% if thumb %}
-            <div class="gallery-item">
+            <a href="{% url 'space_imagery:full_media' %}?nasa_id={{ item.data.0.nasa_id }}" class="gallery-item">
               {% if media_type == "video" %}
                 <img src="{{ thumb }}" alt="{{ item.data.0.title }}" loading="lazy">
               {% else %}
@@ -49,9 +49,9 @@
                 {% if item.data.0.description %}
                   <p class="caption-description">{{ item.data.0.description|truncatewords:20 }}</p>
                 {% endif %}
-                <a href="#" class="caption-link">View more details</a>
+                <span class="caption-link">View more details</span>
               </div>
-            </div>
+            </a>
           {% endif %}
         {% endwith %}
       {% endfor %}
