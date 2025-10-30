@@ -11,7 +11,15 @@
     <header class="nasa-page-header">
       <h1>Astronomy Picture of the Day!</h1>
       <p class="nasa-subtitle"></p>
+
     </header>
+
+    <!-- APOD error handling -->
+    {% if apod_error %}
+        <div class="nasa-error" style="color:#ef4444; font-weight:600; margin:8px 0;">
+            {{  apod_error }}
+        </div>
+    {% endif %}
 
     <!-- HERO -->
     <section class="nasa-hero">
@@ -35,6 +43,17 @@
               decoding="async" />
           {% endif %}
         </div>
+            <div class="nasa-apod-credit" style="text-align:center; font-size:0.9em; color:#9ca3af; margin-top:8px;">
+                {% if apod.copyright %}
+                  Image Credit: {{ apod.copyright }} / NASA
+                {% else %}
+                  Image Credit: NASA Astronomy Picture of the Day (APOD)
+                {% endif %}
+                <br>
+                <a href="https://apod.nasa.gov/apod/astropix.html" target="_blank" rel="noopener noreferrer" style="color:#60a5fa; text-decoration:none;">View on NASA APOD </a>
+            </div>
+
+
       {% else %}
         <div class="nasa-hero-media">
           <div class="nasa-hero-fallback">APOD preview will appear here</div>
