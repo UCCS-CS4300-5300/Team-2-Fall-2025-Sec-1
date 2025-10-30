@@ -4,6 +4,7 @@ from django.core.cache import cache
 from unittest.mock import patch, MagicMock
 from bs4 import BeautifulSoup  
 from space_news import views as v
+import requests
 
 
 class BasicUtilsTests(TestCase):
