@@ -118,7 +118,6 @@ EXCLUDED_TOPICS = {
 # Flatten all excluded topics into a single list
 EXCLUDED_TOPICS_ALL = [topic for category in EXCLUDED_TOPICS.values() for topic in category]
 
-
 # ==============================================================================
 # INAPPROPRIATE CONTENT KEYWORDS
 # ==============================================================================
@@ -146,7 +145,9 @@ EXCLUDED_DOMAINS = [
     "unilad.com",           # Low quality clickbait
     "dailymail.co.uk",      # Tabloid quality
     "techpowerup.com",
-    "siliconangle.com"
+    "siliconangle.com",
+    "Biztoc.com",
+    "newser.com"
 ]
 
 # Reliable sources with consistent high-quality images and content
@@ -172,7 +173,6 @@ RELIABLE_IMAGE_SOURCES = [
     'washingtonpost.com',          # Washington Post
     'bbc.co.uk',                   # BBC News
 ]
-
 
 # ==============================================================================
 # NEWS API CONFIGURATION
