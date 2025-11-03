@@ -12,9 +12,15 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 from pathlib import Path
 import dj_database_url
 import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+NASA_API_KEY = os.getenv("NASA_API_KEY")
+NEWS_API_KEY = os.getenv("NEWS_API_KEY")
 
 
 # Quick-start development settings - unsuitable for production
@@ -56,6 +62,7 @@ INSTALLED_APPS = [
     'space_news',
     'users',
     'news_filter',
+    'space_imagery',
 ]
 
 MIDDLEWARE = [
@@ -166,8 +173,3 @@ if not DEBUG:
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-
-# API KEYS
-NEWS_API_KEY = "f1a8a5253c5348169b0f99c31c4857f2"
-
-NASA_API_KEY = os.getenv("NASA_API_KEY")

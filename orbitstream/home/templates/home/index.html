@@ -1,6 +1,9 @@
 {% extends 'base.html' %}
 {% load static %}
 
+{% block header %}{% endblock %}
+{% block footer %}{% endblock %}
+
 {% block title %}Home | OrbitStream{% endblock %}
 
 {% block content %}
@@ -8,6 +11,7 @@
   
   <!-- Panel 1 -->
   <section class="panel right">
+    {% include 'partials/header.html' %}
     <video class="bg-video" autoplay muted loop playsinline preload="metadata" poster="{% static 'home/assets/1st-image-poster.jpg' %}">
       <source src="https://res.cloudinary.com/dhnlbvpxn/video/upload/v1760739117/home_ziik28.mp4" type="video/mp4">
       <!-- Fallback image for very old browsers -->
@@ -36,7 +40,7 @@
           Space Domain Awareness (SDA) is the ability to detect, track, and understand objects 
           and activities in orbit It ensures the safety, security, and sustainability of space operations
           by monitoring satellites, debris, and potential threats. OrbitStream brings SDA insights to your 
-          fingertips, offering a clear view of what’s happening above our planet.
+          fingertips, offering a clear view of what's happening above our planet.
         </p>
         <a href="#" class="learn-more">LEARN MORE <span class="arrow">&rarr;</span></a>
       </div>

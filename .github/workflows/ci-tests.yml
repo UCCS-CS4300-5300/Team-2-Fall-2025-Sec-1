@@ -52,6 +52,10 @@ jobs:
 
       # Step 5: Run tests with coverage
       - name: Run tests with coverage (fail if < 80%)
+        env:
+          NASA_API_KEY: ${{ secrets.NASA_API_KEY }}
+          NEWS_API_KEY: ${{ secrets.NEWS_API_KEY }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
         run: |
           pytest --cov=. --maxfail=1 --disable-warnings -q --cov-report=term-missing --cov-fail-under=70
 

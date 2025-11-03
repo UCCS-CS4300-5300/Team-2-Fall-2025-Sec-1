@@ -9,13 +9,24 @@ from newsapi import NewsApiClient
 from news_filter.forms import NewsFilterForm
 from news_filter.filters import NewsFilterService
 from .utils import fetch_full_html  # if you use it elsewhere
-from datetime import datetime
+from .config import (
+    SPACE_KEYWORDS_ALL,
+    EXCLUDED_TOPICS_ALL,
+    INAPPROPRIATE_KEYWORDS,
+    EXCLUDED_DOMAINS,
+    RELIABLE_IMAGE_SOURCES,
+    NEWS_API_QUERY,
+    NEWS_API_TITLE_QUERY,
+    MAX_ARTICLES_PER_SOURCE,
+    TOTAL_ARTICLES_LIMIT,
+)
 
 import requests
 from bs4 import BeautifulSoup
 from readability import Document
 import bleach
 import hashlib
+from collections import defaultdict
 
 
 def fetch_apod():
@@ -140,48 +151,48 @@ def _remove_duplicates(articles):
     return unique_articles
 
 
-def _image_is_fetchable(url: str, ua: str = None) -> bool:
+def _prioritize_sources(articles):
     """
-    Quick check that the URL really serves an image (status < 400 and Content-Type: image/*).
-    Result is cached for 1 hour to avoid repeated probes.
+    Move articles from reliable image sources to the front of the list.
+    These sources consistently have high-quality images and authoritative content.
     """
-    if not url:
-        return False
-
-    cache_key = "img_ok:" + hashlib.sha1(url.encode("utf-8", "ignore")).hexdigest()[:12]
-    cached = cache.get(cache_key)
-    if cached is not None:
-        return cached
-
-    UA = ua or (
-        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
-        "(KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36"
-    )
-    headers = {"User-Agent": UA}
-
-    ok = False
-    try:
-        # Try HEAD first
-        r = requests.head(url, timeout=4, allow_redirects=True, headers=headers)
-        ct = (r.headers.get("Content-Type") or "").lower()
-        if r.status_code < 400 and "image" in ct:
-            ok = True
+    priority = []
+    regular = []
+    
+    for article in articles:
+        url = (article.get('url') or '').lower()
+        source_name = (article.get('source', {}).get('name') or '').lower()
+        
+        # Check if article is from a reliable source
+        is_reliable = any(
+            source in url or source.replace('.', ' ') in source_name 
+            for source in RELIABLE_IMAGE_SOURCES
+        )
+        
+        if is_reliable:
+            priority.append(article)
         else:
-            # Fallback to lightweight GET if HEAD fails or lies
-            r = requests.get(url, timeout=6, allow_redirects=True, headers=headers, stream=True)
-            ct = (r.headers.get("Content-Type") or "").lower()
-            ok = (r.status_code < 400 and "image" in ct)
-    except Exception:
-        ok = False
+            regular.append(article)
+    
+    return priority + regular
 
-    cache.set(cache_key, ok, timeout=3600)
-    return ok
+
+def _is_excluded_domain(article_url, excluded_domains):
+    """
+    Check if article URL contains any excluded domain.
+    This catches domains that slip through NewsAPI's exclude_domains.
+    """
+    if not article_url:
+        return False
+    
+    url_lower = article_url.lower()
+    return any(domain.lower() in url_lower for domain in excluded_domains)
 
 
 def nasa_news(request):
     """
     Fetch and display NASA/SpaceX news with filtering.
-    Only include articles that truly have a fetchable image.
+    Optimized with source prioritization and domain blacklisting.
     """
     filter_form = NewsFilterForm(request.GET or None)
 
@@ -204,12 +215,12 @@ def nasa_news(request):
         newsapi = NewsApiClient(api_key=settings.NEWS_API_KEY)
 
         base_params = {
-            "q": '(NASA OR SpaceX OR "space exploration" OR "space mission") AND (rocket OR satellite OR astronaut OR spacecraft OR launch)',
-            "qintitle": "space OR NASA OR SpaceX",
+            "q": NEWS_API_QUERY,
+            "qintitle": NEWS_API_TITLE_QUERY,
             "language": "en",
             "sort_by": "publishedAt",
-            "page_size": 60,  # larger since we'll drop imageless/blocked images
-            "exclude_domains": "adult-sites.com,inappropriate-domain.com",
+            "page_size": 60,
+            "exclude_domains": ",".join(EXCLUDED_DOMAINS),
         }
 
         api_params = NewsFilterService.build_api_params(filter_params, base_params)
@@ -218,67 +229,78 @@ def nasa_news(request):
         if articles_data.get("status") == "ok":
             raw_articles = articles_data.get("articles", [])
             filtered_articles = []
-            inappropriate_keywords = [
-                "adult",
-                "porn",
-                "xxx",
-                "celebrity gossip",
-                "dating",
-                "sexy",
-                "erotic",
-            ]
 
             for article in raw_articles:
                 title_l = (article.get("title") or "").lower()
                 description_l = (article.get("description") or "").lower()
                 content_l = (article.get("content") or "").lower()
+                article_url = article.get("url") or ""
 
-                # Skip if contains inappropriate keywords
-                if any(k in title_l or k in description_l or k in content_l for k in inappropriate_keywords):
+                # Skip excluded domains (manual check in case NewsAPI doesn't filter them)
+                if _is_excluded_domain(article_url, EXCLUDED_DOMAINS):
                     continue
 
-                # Only include if it's genuinely about space/NASA/SpaceX
-                if any(
-                    term in title_l or term in description_l
-                    for term in [
-                        "nasa",
-                        "spacex",
-                        "space",
-                        "rocket",
-                        "satellite",
-                        "astronaut",
-                        "spacecraft",
-                        "launch",
-                        "mars",
-                        "moon",
-                    ]
-                ):
-                    a = dict(article)
-                    a["uid"] = _make_uid(a)
+                # Skip if contains inappropriate keywords
+                if any(k in title_l or k in description_l or k in content_l for k in INAPPROPRIATE_KEYWORDS):
+                    continue
 
-                    # Clean/validate image URL
-                    image_url = a.get("urlToImage")
-                    cleaned_url = _clean_image_url(image_url)
-                    a["urlToImage"] = cleaned_url  # may be None
+                # Stricter space-related filtering - must contain space keywords
+                has_space_keyword = any(
+                    keyword in title_l or keyword in description_l
+                    for keyword in SPACE_KEYWORDS_ALL
+                )
+                
+                if not has_space_keyword:
+                    continue
+                
+                # Skip if article is primarily about excluded topics
+                has_excluded_topic = any(
+                    topic in title_l or topic in description_l
+                    for topic in EXCLUDED_TOPICS_ALL
+                )
+                
+                if has_excluded_topic:
+                    continue
 
-                    # Require a real, fetchable image if images_only is True
-                    if images_only:
-                        if not cleaned_url:
-                            continue
-                        if not _image_is_fetchable(cleaned_url):
-                            continue
+                # Only include if it's genuinely about space/NASA/SpaceX missions
+                a = dict(article)
+                a["uid"] = _make_uid(a)
 
-                    filtered_articles.append(a)
+                # Clean/validate image URL
+                image_url = a.get("urlToImage")
+                cleaned_url = _clean_image_url(image_url)
+                a["urlToImage"] = cleaned_url  # may be None
+
+                # If images_only is True, skip articles without image URLs
+                if images_only and not cleaned_url:
+                    continue
+
+                filtered_articles.append(a)
 
             # Deduplicate
             filtered_articles = _remove_duplicates(filtered_articles)
+
+            # Prioritize articles from reliable sources (those with consistently good images)
+            filtered_articles = _prioritize_sources(filtered_articles)
 
             # Apply user filters (query/date/etc.)
             if filter_params:
                 filtered_articles = NewsFilterService.apply_filters(filtered_articles, filter_params)
 
-            # Limit to top 20
-            filtered_articles = filtered_articles[:20]
+            # Diversity filter: Limit to max articles per source for variety
+            source_counts = defaultdict(int)
+            diverse_articles = []
+            
+            for article in filtered_articles:
+                source_name = article.get('source', {}).get('name', '')
+                if source_counts[source_name] < MAX_ARTICLES_PER_SOURCE:
+                    diverse_articles.append(article)
+                    source_counts[source_name] += 1
+            
+            filtered_articles = diverse_articles
+
+            # Limit to configured maximum
+            filtered_articles = filtered_articles[:TOTAL_ARTICLES_LIMIT]
             total_results = len(filtered_articles)
 
             # Cache for detail pages (10 min)

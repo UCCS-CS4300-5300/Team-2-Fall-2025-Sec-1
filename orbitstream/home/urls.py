@@ -5,5 +5,5 @@ app_name = 'space_news'
 
 urlpatterns = [
     path('', index, name='index'),
-    path('nasa-news/', views.nasa_news, name='nasa_news')  
+    path('nasa-news/', views.nasa_news, name='nasa_news'),
 ]

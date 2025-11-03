@@ -1,0 +1,127 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}
+  {% if item %}{{ item.title }} - NASA Media{% else %}NASA Media{% endif %}
+{% endblock %}
+
+{% block body_class %}full-media-page{% endblock %}
+
+{% block content %}
+<div class="full-media-container">
+  <a href="{% url 'space_imagery:gallery' %}?q={{ request.GET.q }}&type={{ request.GET.type|default:'image' }}" class="back-button">
+    ← Back to Gallery
+  </a>
+  
+  {% if error %}
+    <div class="error-message">
+      <h2>{{ error }}</h2>
+      <p>Please return to the gallery and try again.</p>
+    </div>
+  {% elif item %}
+    <div class="media-wrapper">
+      <div class="media-display">
+        {% if media_type == "image" %}
+          <img src="{{ media_url }}" alt="{{ item.title }}" class="full-image">
+        {% elif media_type == "video" %}
+          <div class="video-container">
+            {% if media_url %}
+              <video controls class="full-video">
+                <source src="{{ media_url }}" type="video/mp4">
+                Your browser does not support the video tag.
+              </video>
+            {% else %}
+              <div class="video-placeholder">
+                <p>Video preview not available</p>
+                <p class="video-note">Some NASA videos may require direct download</p>
+              </div>
+            {% endif %}
+          </div>
+        {% endif %}
+      </div>
+      
+      <div class="media-details">
+        <h1>{{ item.title }}</h1>
+        
+        <div class="metadata">
+          {% if item.date_created %}
+            <div class="meta-item">
+              <strong>Date:</strong>
+              <span>{{ item.date_created|date:"F d, Y" }}</span>
+            </div>
+          {% endif %}
+          
+          {% if item.nasa_id %}
+            <div class="meta-item">
+              <strong>NASA ID:</strong>
+              <span>{{ item.nasa_id }}</span>
+            </div>
+          {% endif %}
+          
+          {% if item.media_type %}
+            <div class="meta-item">
+              <strong>Media Type:</strong>
+              <span>{{ item.media_type|title }}</span>
+            </div>
+          {% endif %}
+          
+          {% if item.center %}
+            <div class="meta-item">
+              <strong>Center:</strong>
+              <span>{{ item.center }}</span>
+            </div>
+          {% endif %}
+        </div>
+        
+        {% if item.description %}
+          <div class="description">
+            <h2>Description</h2>
+            <p>{{ item.description }}</p>
+          </div>
+        {% endif %}
+        
+        {% if item.keywords %}
+          <div class="keywords">
+            <h3>Keywords</h3>
+            <div class="keyword-list">
+              {% for keyword in item.keywords %}
+                <span class="keyword-tag">{{ keyword }}</span>
+              {% endfor %}
+            </div>
+          </div>
+        {% endif %}
+        
+        {% if media_url %}
+          <div class="download-section">
+            <a href="{{ media_url }}" download class="download-btn">
+              Download {{ media_type|title }}
+            </a>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  {% endif %}
+</div>
+
+<script>
+// Video player enhancements
+document.addEventListener('DOMContentLoaded', function() {
+  const video = document.querySelector('.full-video');
+  if (video) {
+    // Log when video loads successfully
+    video.addEventListener('loadedmetadata', function() {
+      console.log('Video loaded successfully');
+    });
+    
+    // Handle video errors
+    video.addEventListener('error', function() {
+      console.error('Error loading video');
+      const container = video.closest('.video-container');
+      if (container) {
+        container.innerHTML = '<div class="video-placeholder"><p>Unable to load video</p><p class="video-note">The video may not be available for streaming</p></div>';
+      }
+    });
+  }
+});
+</script>
+{% endblock %}
