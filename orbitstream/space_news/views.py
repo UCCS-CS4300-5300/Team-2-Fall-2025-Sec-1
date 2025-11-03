@@ -29,6 +29,53 @@ import hashlib
 from collections import defaultdict
 
 
+def fetch_apod():
+    """
+    Get NASA APOD once an hour and normalize to the keys nasa_news.html expects.
+    Returns a dict like:
+      {"title","date","url","media_type","explanation","copyright"}
+    or None on failure.
+    """
+    cache_key = "apod:current"
+    cached = cache.get(cache_key)
+    if cached is not None:
+        return cached
+
+    NASA_APOD_URL = "https://api.nasa.gov/planetary/apod"
+    api_key = getattr(settings, "NASA_API_KEY", None)
+    if not api_key:
+        return None
+
+    try:
+        params = {"api_key": api_key, "thumbs": True}
+        r = requests.get(NASA_APOD_URL, params=params, timeout=10)
+        r.raise_for_status()
+        data = r.json()
+
+        media_type = data.get("media_type", "image")
+        # Template uses a single key: apod.url
+        # - For images: prefer HD if available; else url
+        # - For video: use the video URL (YouTube/Vimeo/etc.)
+        url = data.get("hdurl") or data.get("url")
+        if media_type == "video":
+            url = data.get("url")  # iframe src
+
+        apod = {
+            "title": data.get("title"),
+            "date": data.get("date"),
+            "url": url,
+            "media_type": media_type,
+            "explanation": data.get("explanation"),
+            "copyright": data.get("copyright"),
+        }
+
+        cache.set(cache_key, apod, timeout=60 * 60)  # 1 hour
+        return apod
+    except Exception:
+        return None
+
+
+
 def _make_uid(article: dict) -> str:
     """
     Build a stable, slug-safe UID for routing:
@@ -156,7 +203,12 @@ def nasa_news(request):
     # Toggle via query string (?images_only=0 to disable). Default ON.
     images_only = request.GET.get("images_only", "1") not in ("0", "false", "False")
 
-    apod = None
+    apod = fetch_apod()
+    apod_error = None
+
+    if not apod or not apod.get("url"):
+        apod_error = "Astronomy Picture of the Day is unavailable. Please try again later."
+
     total_results = 0
 
     try:
@@ -262,6 +314,7 @@ def nasa_news(request):
                 "filter_form": filter_form,
                 "has_active_filters": bool(filter_params),
                 "apod": apod,
+                "apod_error": apod_error,
                 "images_only": images_only,
             }
         else:
@@ -272,6 +325,7 @@ def nasa_news(request):
                 "filter_form": filter_form,
                 "has_active_filters": bool(filter_params),
                 "apod": apod,
+                "apod_error": apod_error,
                 "images_only": images_only,
             }
 
@@ -283,6 +337,7 @@ def nasa_news(request):
             "filter_form": filter_form,
             "has_active_filters": bool(filter_params),
             "apod": apod,
+            "apod_error": apod_error,
             "images_only": images_only,
         }
 
