@@ -22,7 +22,7 @@ def _add_key(params: Optional[Dict[str, Any]]):
 def get(path: str, params: Optional[Dict[str, Any]] = None, timeout: int = 15):
     """Helper to make GET requests to NASA API."""
     url = f"{BASE.rstrip('/')}/{path.lstrip('/')}"
-    resp = SESSION.get(url, params=_add_key(params), timeout=timeout)
+    resp = SESSION.get(url, params=params, timeout=timeout)
     if resp.status_code >= 400:
         try:
             detail = resp.json()

@@ -53,7 +53,7 @@ def full_media(request):
                 # For images, get the largest available
                 if media_type == "image":
                     for url in assets:
-                        if "~large" in url or "~orig" in url:
+                        if "~large" in url:
                             media_url = url
                             break
                     if not media_url:
