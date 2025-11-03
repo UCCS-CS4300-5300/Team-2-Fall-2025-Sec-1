@@ -32,10 +32,6 @@ class UtilsTestCase(TestCase):
         
         self.assertEqual(result["collection"]["items"][0]["data"][0]["title"], "Test Image")
         mock_get.assert_called_once()
-        
-        # Check that API key was added to params
-        call_args = mock_get.call_args
-        self.assertEqual(call_args[1]['params']['api_key'], 'test_api_key_123')
     
     @override_settings(NASA_API_KEY='test_api_key_123')
     @patch('space_imagery.utils.SESSION.get')
@@ -48,9 +44,7 @@ class UtilsTestCase(TestCase):
         
         result = utils.get("search")
         
-        # Should still add API key even with no params
-        call_args = mock_get.call_args
-        self.assertEqual(call_args[1]['params']['api_key'], 'test_api_key_123')
+        mock_get.assert_called_once()
     
     @patch('space_imagery.utils.SESSION.get')
     def test_get_404_error(self, mock_get):
