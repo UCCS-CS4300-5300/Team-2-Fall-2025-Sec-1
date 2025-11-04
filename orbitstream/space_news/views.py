@@ -2,7 +2,7 @@
 from django.shortcuts import render
 from django.conf import settings
 from django.core.cache import cache
-from django.http import Http404
+from django.http import Http404, JsonResponse
 from django.utils.text import slugify
 
 from newsapi import NewsApiClient
@@ -74,6 +74,16 @@ def fetch_apod():
     except Exception:
         return None
 
+
+def fetch_apod_async(request):
+    """
+    AJAX endpoint to fetch APOD asynchronously.
+    Called by JavaScript after page loads.
+    """
+    apod = fetch_apod()
+    if apod:
+        return JsonResponse(apod)
+    return JsonResponse({"error": "APOD unavailable"}, status=503)
 
 
 def _make_uid(article: dict) -> str:
@@ -203,11 +213,12 @@ def nasa_news(request):
     # Toggle via query string (?images_only=0 to disable). Default ON.
     images_only = request.GET.get("images_only", "1") not in ("0", "false", "False")
 
-    apod = fetch_apod()
+    # Check cache only - don't fetch during page load
+    apod = cache.get("apod:current")
     apod_error = None
 
     if not apod or not apod.get("url"):
-        apod_error = "Astronomy Picture of the Day is unavailable. Please try again later."
+        apod_error = "Loading Astronomy Picture of the Day..."
 
     total_results = 0
 

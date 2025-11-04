@@ -374,3 +374,127 @@ class ArticleDetailTests(TestCase):
         cached = cache.get("space_news_articles_by_uid")[uid]
         self.assertIn("full_html", cached)
         self.assertIn("Main OK", cached["full_html"])
+
+@override_settings(CACHES={"default": {"BACKEND": "django.core.cache.backends.locmem.LocMemCache"}})
+class FetchApodEssentialTests(TestCase):
+    """Essential tests for fetch_apod() function."""
+    
+    def setUp(self):
+        cache.clear()
+    
+    @patch("space_news.views.requests.get")
+    @override_settings(NASA_API_KEY="test-key-12345")
+    def test_fetch_apod_success(self, mock_get):
+        """Test successful APOD fetch and caching."""
+        mock_response = MagicMock(status_code=200)
+        mock_response.json.return_value = {
+            "title": "Test APOD",
+            "date": "2025-11-03",
+            "url": "https://apod.nasa.gov/image.jpg",
+            "hdurl": "https://apod.nasa.gov/image_hd.jpg",
+            "media_type": "image",
+            "explanation": "Test",
+        }
+        mock_get.return_value = mock_response
+        
+        result = v.fetch_apod()
+        
+        self.assertIsNotNone(result)
+        self.assertEqual(result["url"], "https://apod.nasa.gov/image_hd.jpg")
+        
+        # Verify caching works
+        cached = cache.get("apod:current")
+        self.assertIsNotNone(cached)
+    
+    def test_fetch_apod_returns_cached_without_api_call(self):
+        """Test that cached APOD is returned without making API call."""
+        cached_apod = {"title": "Cached", "url": "https://cached.jpg"}
+        cache.set("apod:current", cached_apod, timeout=3600)
+        
+        with patch("space_news.views.requests.get") as mock_get:
+            result = v.fetch_apod()
+            
+            self.assertEqual(result["title"], "Cached")
+            mock_get.assert_not_called()
+    
+    @patch("space_news.views.requests.get")
+    @override_settings(NASA_API_KEY="test-key-12345")
+    def test_fetch_apod_returns_none_on_failure(self, mock_get):
+        """Test that None is returned when API fails."""
+        mock_get.side_effect = Exception("API down")
+        
+        result = v.fetch_apod()
+        
+        self.assertIsNone(result)
+
+
+@override_settings(CACHES={"default": {"BACKEND": "django.core.cache.backends.locmem.LocMemCache"}})
+class FetchApodAsyncEssentialTests(TestCase):
+    """Essential tests for fetch_apod_async() view."""
+    
+    def setUp(self):
+        self.client = Client()
+        cache.clear()
+    
+    @patch("space_news.views.fetch_apod")
+    def test_fetch_apod_async_returns_json(self, mock_fetch):
+        """Test that endpoint returns JSON on success."""
+        mock_fetch.return_value = {
+            "title": "Test",
+            "url": "https://test.jpg",
+            "media_type": "image"
+        }
+        
+        response = self.client.get(reverse("space_news:fetch_apod_async"))
+        
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+        self.assertEqual(data["title"], "Test")
+    
+    @patch("space_news.views.fetch_apod")
+    def test_fetch_apod_async_returns_503_on_failure(self, mock_fetch):
+        """Test that 503 is returned when APOD unavailable."""
+        mock_fetch.return_value = None
+        
+        response = self.client.get(reverse("space_news:fetch_apod_async"))
+        
+        self.assertEqual(response.status_code, 503)
+
+
+@override_settings(CACHES={"default": {"BACKEND": "django.core.cache.backends.locmem.LocMemCache"}})
+class NasaNewsApodEssentialTests(TestCase):
+    """Essential tests for APOD in nasa_news view."""
+    
+    def setUp(self):
+        self.client = Client()
+        cache.clear()
+    
+    @patch("space_news.views.NewsApiClient")
+    def test_nasa_news_uses_cached_apod(self, MockClient):
+        """Test that view uses cached APOD without fetching."""
+        MockClient.return_value.get_everything.return_value = {
+            "status": "ok",
+            "articles": []
+        }
+        
+        cache.set("apod:current", {"title": "Test", "url": "https://test.jpg"}, timeout=3600)
+        
+        response = self.client.get("/news/")
+        
+        self.assertEqual(response.status_code, 200)
+        self.assertIsNotNone(response.context["apod"])
+        self.assertIsNone(response.context["apod_error"])
+    
+    @patch("space_news.views.NewsApiClient")
+    def test_nasa_news_shows_loading_when_no_cache(self, MockClient):
+        """Test that loading message appears when APOD not cached."""
+        MockClient.return_value.get_everything.return_value = {
+            "status": "ok",
+            "articles": []
+        }
+        
+        response = self.client.get("/news/")
+        
+        self.assertEqual(response.status_code, 200)
+        self.assertIsNone(response.context["apod"])
+        self.assertEqual(response.context["apod_error"], "Loading Astronomy Picture of the Day...")

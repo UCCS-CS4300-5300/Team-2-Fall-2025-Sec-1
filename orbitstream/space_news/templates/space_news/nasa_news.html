@@ -152,4 +152,74 @@
       </div>
     {% endif %}
   </div>
+
+  <script>
+    // Fetch APOD after page loads
+    document.addEventListener('DOMContentLoaded', function() {
+        fetch('{% url "space_news:fetch_apod_async" %}')
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('APOD service unavailable');
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.url) {
+                    // Find the hero section
+                    const heroMedia = document.querySelector('.nasa-hero-media');
+                    const apodCredit = document.querySelector('.nasa-apod-credit');
+                    const errorDiv = document.querySelector('.nasa-error');
+                    
+                    if (heroMedia) {
+                        // Remove error message if it exists
+                        if (errorDiv) {
+                            errorDiv.remove();
+                        }
+                        
+                        // Update the media
+                        if (data.media_type === 'video') {
+                            heroMedia.innerHTML = `
+                                <iframe
+                                    src="${data.url}"
+                                    title="${data.title || 'APOD'}"
+                                    style="width:100%;height:100%;border:0;"
+                                    loading="lazy"
+                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                                    referrerpolicy="strict-origin-when-cross-origin"
+                                    allowfullscreen></iframe>
+                            `;
+                        } else {
+                            heroMedia.innerHTML = `
+                                <img
+                                    src="${data.url}"
+                                    alt="${data.title || 'Astronomy Picture of the Day'}"
+                                    loading="lazy"
+                                    decoding="async" />
+                            `;
+                        }
+                        
+                        // Update credit
+                        if (apodCredit) {
+                            const creditText = data.copyright 
+                                ? `Image Credit: ${data.copyright} / NASA`
+                                : 'Image Credit: NASA Astronomy Picture of the Day (APOD)';
+                            apodCredit.innerHTML = `
+                                ${creditText}
+                                <br>
+                                <a href="https://apod.nasa.gov/apod/astropix.html" target="_blank" rel="noopener noreferrer" style="color:#60a5fa; text-decoration:none;">View on NASA APOD</a>
+                            `;
+                        }
+                    }
+                }
+            })
+            .catch(error => {
+                console.error('Error loading APOD:', error);
+                // Update the error message
+                const errorDiv = document.querySelector('.nasa-error');
+                if (errorDiv) {
+                    errorDiv.textContent = 'Astronomy Picture of the Day is unavailable. Please try again later.';
+                }
+            });
+    });
+    </script>
 {% endblock %}
