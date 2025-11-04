@@ -492,7 +492,7 @@ html:has(body.nasa-page) {
   max-width: 1250px; 
   margin: 32px auto 80px; 
   padding: 0 20px;
-  padding-top: 120px; /* Account for fixed header */
+  padding-top: 10px; 
 }
 
 /* --- NASA Page Header --- */
@@ -1273,6 +1273,48 @@ body.full-media-page .site-footer {
 
 .back-button:hover {
   background-color: #3a3a3a;
+}
+
+/* Search form container */
+.search-form {
+  position: relative;
+}
+
+/* Search input with padding for button */
+.search-form .search-input {
+  padding-right: 50px;
+}
+
+/* Search submit button */
+.search-submit-btn {
+  position: absolute;
+  right: 5px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 8px 12px;
+  color: inherit;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.2s;
+}
+
+.search-submit-btn:hover {
+  opacity: 0.7;
+}
+
+.search-submit-btn:focus {
+  outline: 2px solid #4a9eff;
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* Filter buttons spacing */
+.filter-buttons {
+  margin-top: 0.75rem;
 }
 
 .error-message {
