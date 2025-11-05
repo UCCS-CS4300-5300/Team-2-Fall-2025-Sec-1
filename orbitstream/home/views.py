@@ -5,3 +5,6 @@ def index(request):
 
 def space_news(request):
     return render(request, 'space_news/nasa_news.html')
+
+def gallery(request):
+    return render(request, 'space_imagery/gallery.html')

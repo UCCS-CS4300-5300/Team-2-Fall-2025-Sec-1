@@ -12,13 +12,35 @@
   {# page-specific CSS goes here #}
   {% block extra_css %}{% endblock %}
 </head>
-<body class="{% block body_class %}{% endblock %}">
+<body id="top" class="{% block body_class %}{% endblock %}">
 
-  {% include 'partials/header.html' %}
+  {% block header %}
+    {% include 'partials/header.html' %}
+  {% endblock %}
 
   {% block content %}{% endblock %}
 
-  {% include 'partials/footer.html' %}
+  {% block footer %}
+    {% include 'partials/footer.html' %}
+  {% endblock %}
+  
 
 </body>
 </html>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const backToTopBtn = document.querySelector('.back-to-top');
+    if (backToTopBtn) {
+      backToTopBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+        const snapContainer = document.querySelector('.snap-container');
+        if (snapContainer) {
+          snapContainer.scrollTo({ top: 0, behavior: 'smooth' });
+        } else {
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+      });
+    }
+  });
+</script>

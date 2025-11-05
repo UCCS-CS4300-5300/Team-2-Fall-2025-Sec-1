@@ -20,6 +20,8 @@ from home.views import index  # Import from home app
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', index, name='index'),  # Your index view
-    path('news/', include('space_news.urls')), # space news page path
+    path('', index, name='index'),                      # Your index view
+    path('news/', include('space_news.urls')),          # space news page path
+    path('', include('users.urls')),                    # register and login page paths
+    path('gallery/', include('space_imagery.urls'))     # gallery page path
 ]
