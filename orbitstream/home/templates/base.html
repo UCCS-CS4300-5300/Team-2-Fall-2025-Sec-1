@@ -4,7 +4,14 @@
 <head>
   <meta charset="UTF-8" />
   <link rel="icon" type="image/png" href="{% static 'home/assets/Orbitstream logo.png' %}">
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  {# Mobile viewport and touch optimizations #}
+  <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=5, viewport-fit=cover" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="theme-color" content="#000000" />
+
   <title>{% block title %}OrbitStream{% endblock %}</title>
 
   <link rel="stylesheet" href="{% static 'home/styles.css' %}">
@@ -30,6 +37,7 @@
 
 <script>
   document.addEventListener('DOMContentLoaded', function() {
+    // Back to Top Button
     const backToTopBtn = document.querySelector('.back-to-top');
     if (backToTopBtn) {
       backToTopBtn.addEventListener('click', function(e) {
@@ -39,6 +47,59 @@
           snapContainer.scrollTo({ top: 0, behavior: 'smooth' });
         } else {
           window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+      });
+    }
+
+    // Mobile Navigation Toggle
+    const navToggle = document.querySelector('.nav-toggle');
+    const mobileNav = document.querySelector('.mobile-nav');
+    const mobileNavClose = document.querySelector('.mobile-nav__close');
+    const mobileNavBackdrop = document.querySelector('.mobile-nav__backdrop');
+
+    if (navToggle && mobileNav) {
+      // Open mobile menu
+      navToggle.addEventListener('click', function() {
+        const isExpanded = navToggle.getAttribute('aria-expanded') === 'true';
+        navToggle.setAttribute('aria-expanded', !isExpanded);
+        mobileNav.setAttribute('aria-hidden', isExpanded);
+
+        // Prevent body scroll when menu is open
+        if (!isExpanded) {
+          document.body.style.overflow = 'hidden';
+        } else {
+          document.body.style.overflow = '';
+        }
+      });
+
+      // Close mobile menu
+      function closeMobileNav() {
+        navToggle.setAttribute('aria-expanded', 'false');
+        mobileNav.setAttribute('aria-hidden', 'true');
+        document.body.style.overflow = '';
+      }
+
+      if (mobileNavClose) {
+        mobileNavClose.addEventListener('click', closeMobileNav);
+      }
+
+      if (mobileNavBackdrop) {
+        mobileNavBackdrop.addEventListener('click', closeMobileNav);
+      }
+
+      // Close menu when clicking on a link
+      const mobileLinks = document.querySelectorAll('.mobile-link, .mobile-auth-btn');
+      mobileLinks.forEach(link => {
+        link.addEventListener('click', function() {
+          // Small delay to allow navigation to occur
+          setTimeout(closeMobileNav, 100);
+        });
+      });
+
+      // Close menu on ESC key
+      document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' && mobileNav.getAttribute('aria-hidden') === 'false') {
+          closeMobileNav();
         }
       });
     }

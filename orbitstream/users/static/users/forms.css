@@ -85,3 +85,133 @@ form textarea:focus {
     list-style-type: none;
     padding-left: 0;
 }
+
+/* ===== AUTHENTICATION FORMS RESPONSIVE ===== */
+
+/* Tablet portrait (768px) */
+@media (max-width: 768px) {
+    .register-container,
+    .login-container {
+        max-width: 90%;
+        margin: 30px auto;
+        padding: 20px 24px;
+    }
+
+    .auth-page-wrapper {
+        padding-top: 100px;
+    }
+
+    .register-container h1,
+    .login-container h1 {
+        font-size: 24px;
+        margin-bottom: 16px;
+    }
+
+    form label {
+        margin-top: 12px;
+        font-size: 14px;
+    }
+
+    form input,
+    form select,
+    form textarea {
+        padding: 9px;
+        font-size: 15px;
+    }
+
+    .submit-button {
+        margin-top: 20px;
+        padding: 11px;
+        font-size: 1em;
+    }
+}
+
+/* Mobile landscape (640px) */
+@media (max-width: 640px) {
+    .register-container,
+    .login-container {
+        max-width: 95%;
+        margin: 24px auto;
+        padding: 18px 20px;
+        border-radius: 6px;
+    }
+
+    .auth-page-wrapper {
+        padding-top: 90px;
+    }
+
+    .register-container h1,
+    .login-container h1 {
+        font-size: 22px;
+        margin-bottom: 14px;
+    }
+
+    form label {
+        margin-top: 10px;
+        font-size: 13px;
+    }
+
+    form input,
+    form select,
+    form textarea {
+        padding: 8px;
+        font-size: 14px;
+    }
+
+    .submit-button {
+        margin-top: 18px;
+        padding: 10px;
+        font-size: 0.95em;
+    }
+
+    .errorlist {
+        font-size: 0.85em;
+    }
+}
+
+/* Mobile portrait (480px) */
+@media (max-width: 480px) {
+    .register-container,
+    .login-container {
+        max-width: 100%;
+        margin: 20px auto;
+        padding: 16px 18px;
+        border: none;
+        border-radius: 0;
+        box-shadow: none;
+        background-color: #fff;
+    }
+
+    .auth-page-wrapper {
+        padding-top: 80px;
+    }
+
+    .register-container h1,
+    .login-container h1 {
+        font-size: 20px;
+        margin-bottom: 12px;
+    }
+
+    form label {
+        margin-top: 8px;
+        font-size: 12px;
+    }
+
+    form input,
+    form select,
+    form textarea {
+        padding: 7px;
+        font-size: 13px;
+    }
+
+    .submit-button {
+        margin-top: 16px;
+        padding: 9px;
+        font-size: 0.9em;
+    }
+
+    .errorlist {
+        font-size: 0.8em;
+        margin-top: 3px;
+    }
+}
