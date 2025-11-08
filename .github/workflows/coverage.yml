@@ -40,6 +40,10 @@ jobs:
       # If your tests need env vars (DB creds, SECRET_KEY, etc.), add them here via repo/environment secrets.
 
       - name: Run coverage and check the threshold
+        env:
+          NASA_API_KEY: ${{ secrets.NASA_API_KEY }}
+          NEWS_API_KEY: ${{ secrets.NEWS_API_KEY }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
         run: |
           python -m coverage run manage.py test
           python -m coverage report -m --fail-under=80 # <-- prints the coverage table in the console

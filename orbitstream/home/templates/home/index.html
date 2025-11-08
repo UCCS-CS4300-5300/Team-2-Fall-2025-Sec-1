@@ -1,6 +1,9 @@
 {% extends 'base.html' %}
 {% load static %}
 
+{% block header %}{% endblock %}
+{% block footer %}{% endblock %}
+
 {% block title %}Home | OrbitStream{% endblock %}
 
 {% block content %}
@@ -8,6 +11,7 @@
   
   <!-- Panel 1 -->
   <section class="panel right">
+    {% include 'partials/header.html' %}
     <video class="bg-video" autoplay muted loop playsinline preload="metadata" poster="{% static 'home/assets/1st-image-poster.jpg' %}">
       <source src="https://res.cloudinary.com/dhnlbvpxn/video/upload/v1760739117/home_ziik28.mp4" type="video/mp4">
       <!-- Fallback image for very old browsers -->
@@ -20,11 +24,30 @@
         OrbitStream highlights recent global launches, provides insights into 
         methodologies and practices, and offers tools for basic satellite tracking.
       </p>
+      <a href="{% url 'users:register_view' %}" class="learn-more-signup">Start Exploring</span></a>
     </div>
   </section>
 
-  <!-- Panel 2 -->
-  <section class="panel left">
+    <!-- Panel 2 -->
+    <section class="panel left">
+      <video class="bg-video" autoplay muted loop playsinline preload="metadata" poster="{% static 'home/assets/2nd-image-poster.jpg' %}">
+        <source src="https://res.cloudinary.com/dhnlbvpxn/video/upload/v1761335281/SDA_f6ruel.mp4" type="video/mp4">
+        <img class="bg-image" src="{% static 'home/assets/2nd image.jpg' %}" alt="Launch background">
+      </video>
+      <div class="panel-inner">
+        <h2>What is Space Domain Awareness?</h2>
+        <p>
+          Space Domain Awareness (SDA) is the ability to detect, track, and understand objects 
+          and activities in orbit It ensures the safety, security, and sustainability of space operations
+          by monitoring satellites, debris, and potential threats. OrbitStream brings SDA insights to your 
+          fingertips, offering a clear view of what's happening above our planet.
+        </p>
+        <a href="#" class="learn-more">LEARN MORE <span class="arrow">&rarr;</span></a>
+      </div>
+    </section>
+
+  <!-- Panel 3 -->
+  <section class="panel right">
     <video class="bg-video" autoplay muted loop playsinline preload="metadata" poster="{% static 'home/assets/2nd-image-poster.jpg' %}">
       <source src="https://res.cloudinary.com/dhnlbvpxn/video/upload/v1760737212/228-135860602_jxxmjk.mp4" type="video/mp4">
       <img class="bg-image" src="{% static 'home/assets/2nd image.jpg' %}" alt="Launch background">
@@ -36,13 +59,14 @@
         to international missions, each entry highlights launch time, vehicle type, payload, 
         and objectives—keeping you informed in today's fast-moving space industry.
       </p>
+      <a href="#" class="learn-more">View Launches<span class="arrow">&rarr;</span></a>
     </div>
   </section>
 
-  <!-- Panel 3 -->
-  <section class="panel right">
+  <!-- Panel 4 -->
+  <section class="panel left">
     <video class="bg-video" autoplay muted loop playsinline preload="metadata" poster="{% static 'home/assets/3rd-image-poster.jpg' %}">
-      <source src="https://res.cloudinary.com/dhnlbvpxn/video/upload/v1760942602/satellite_jxgaft.mp4" type="video/mp4">
+      <source src="https://res.cloudinary.com/dhnlbvpxn/video/upload/v1761334845/New_Satellite_video_bznzcx.mp4" type="video/mp4">
       <img class="bg-image" src="{% static 'home/assets/3rd image.jpg' %}" alt="Space domain awareness background">
     </video>
     <div class="panel-inner">
@@ -52,10 +76,11 @@
         summarize key developments, regulations, and breakthroughs, ensuring you never miss 
         critical updates in this rapidly evolving field.
       </p>
+      <a href="{% url 'space_news:nasa_news' %}" class="learn-more">See Latest News<span class="arrow">&rarr;</span></a>
     </div>
   </section>
 
-  <!-- Panel 4 -->
+  <!-- Panel 5 -->
   <section class="panel left">
     <video class="bg-video" autoplay muted loop playsinline preload="metadata" poster="{% static 'home/assets/4th-image-poster.jpg' %}">
       <source src="https://res.cloudinary.com/dhnlbvpxn/video/upload/v1760739329/4_ykfe9b.mp4" type="video/mp4">
@@ -67,6 +92,7 @@
         OrbitStream makes satellite tracking simple. Enter your location to see nearby satellites, 
         visualize orbital paths, and explore mission details—all through clear, user-friendly tools.
       </p>
+      <a href="#" class="learn-more">Start Tracking<span class="arrow">&rarr;</span></a>
     </div>
   </section>
 

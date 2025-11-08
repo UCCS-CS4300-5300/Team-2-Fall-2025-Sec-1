@@ -1,6 +1,7 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from django.contrib.auth import login, logout
+from django.views.decorators.http import require_POST
 
 # For registering new users
 def register_view(request):
@@ -24,8 +25,8 @@ def login_view(request):
         form = AuthenticationForm()
     return render(request, "users/login.html", { "form": form})
 
-# For logged in users to logout
+# Logout for logged in users
+@require_POST
 def logout_view(request):
-    if request.method == "GET":
-        logout(request)
-        return redirect("/")
+    logout(request)
+    return redirect("index")
