@@ -3,75 +3,12 @@
 
 {% block title %}User Login{% endblock %}
 
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'users/forms.css' %}">
+{% endblock %}
+
 {% block content %}
-<style>
-    .login-container {
-        max-width: 400px;
-        margin: 40px auto;
-        padding: 25px 30px;
-        border: 1px solid #ddd;
-        border-radius: 8px;
-        background-color: #fafafa;
-        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-    }
-
-    .login-container h1 {
-        text-align: center;
-        margin-bottom: 20px;
-        color: #333;
-    }
-
-    form {
-        display: flex;
-        flex-direction: column;
-    }
-
-    form label {
-        margin-top: 15px;
-        font-weight: bold;
-        color: #555;
-    }
-
-    form input, form select, form textarea {
-        padding: 10px;
-        margin-top: 5px;
-        border: 1px solid #ccc;
-        border-radius: 5px;
-        font-size: 1em;
-    }
-
-    form input:focus, form select:focus, form textarea:focus {
-        outline: none;
-        border-color: #007BFF;
-        box-shadow: 0 0 5px rgba(0,123,255,0.5);
-    }
-
-    .submit-button {
-        margin-top: 25px;
-        padding: 12px;
-        background-color: #007BFF;
-        border: none;
-        border-radius: 5px;
-        color: white;
-        font-weight: bold;
-        font-size: 1.1em;
-        cursor: pointer;
-        transition: background-color 0.3s ease;
-    }
-
-    .submit-button:hover {
-        background-color: #0056b3;
-    }
-
-    .errorlist {
-        color: #e74c3c;
-        font-size: 0.9em;
-        margin-top: 5px;
-        list-style-type: none;
-        padding-left: 0;
-    }
-</style>
-<br><br><br><br><br><br>
+<div class="auth-page-wrapper">
 <div class="login-container">
     <h1>User Login</h1>
     <form action="/login/" method="post">
@@ -92,5 +29,6 @@
         
         <button type="submit" class="submit-button">Login</button>
     </form>
+</div>
 </div>
 {% endblock %}

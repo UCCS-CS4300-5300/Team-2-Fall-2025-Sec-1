@@ -1,0 +1,87 @@
+/* ============================================
+   User Authentication Forms CSS
+   Used by: register.html, login.html
+   ============================================ */
+
+/* Form Container - shared styling for register and login pages */
+.register-container,
+.login-container {
+    max-width: 400px;
+    margin: 40px auto;
+    padding: 25px 30px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background-color: #fafafa;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
+
+/* Page spacing from header */
+.auth-page-wrapper {
+    padding-top: 120px;
+}
+
+.register-container h1,
+.login-container h1 {
+    text-align: center;
+    margin-bottom: 20px;
+    color: #333;
+}
+
+/* Form Layout */
+form {
+    display: flex;
+    flex-direction: column;
+}
+
+form label {
+    margin-top: 15px;
+    font-weight: bold;
+    color: #555;
+}
+
+/* Form Inputs */
+form input,
+form select,
+form textarea {
+    padding: 10px;
+    margin-top: 5px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 1em;
+}
+
+/* Input Focus States */
+form input:focus,
+form select:focus,
+form textarea:focus {
+    outline: none;
+    border-color: #007BFF;
+    box-shadow: 0 0 5px rgba(0,123,255,0.5);
+}
+
+/* Submit Button */
+.submit-button {
+    margin-top: 25px;
+    padding: 12px;
+    background-color: #007BFF;
+    border: none;
+    border-radius: 5px;
+    color: white;
+    font-weight: bold;
+    font-size: 1.1em;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.submit-button:hover {
+    background-color: #0056b3;
+}
+
+/* Form Error Messages */
+.errorlist {
+    color: #e74c3c;
+    font-size: 0.9em;
+    margin-top: 5px;
+    list-style-type: none;
+    padding-left: 0;
+}

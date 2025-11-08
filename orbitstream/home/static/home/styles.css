@@ -432,17 +432,23 @@ html:has(body.nasa-page) {
   justify-content: center;
 }
 
-.nasa-hero-media img, 
+.nasa-hero-media img,
 .nasa-hero-media video {
-  width: 100%; 
-  height: 100%; 
-  object-fit: cover; 
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
   display: block;
 }
 
-.nasa-hero-fallback { 
-  color: #64748b; 
-  font-weight: 500; 
+.nasa-hero-media iframe {
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+
+.nasa-hero-fallback {
+  color: #64748b;
+  font-weight: 500;
 }
 
 /* --- Section title --- */
@@ -458,6 +464,10 @@ html:has(body.nasa-page) {
   grid-template-columns: repeat(3, 1fr);
   gap: 22px;
   margin-bottom: 100px;
+}
+
+.nasa-empty-message {
+  color: #64748b;
 }
 
 .nasa-f-card {
@@ -476,15 +486,24 @@ html:has(body.nasa-page) {
   justify-content: center;
 }
 
-.nasa-f-media img { 
-  width: 100%; 
-  height: 100%; 
-  object-fit: cover; 
-  display: block; 
+.nasa-f-media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
 }
 
-.nasa-f-body { 
-  padding: 10px 12px 32px; 
+.nasa-image-fallback {
+  color: #94a3b8;
+  font-weight: 600;
+}
+
+.nasa-f-body {
+  padding: 10px 12px 32px;
+}
+
+.nasa-f-body .nasa-feed-meta {
+  margin-top: 12px;
 }
 
 .nasa-f-snippet {
