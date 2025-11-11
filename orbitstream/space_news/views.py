@@ -27,29 +27,77 @@ from readability import Document
 import bleach
 import hashlib
 from collections import defaultdict
+from datetime import datetime, timedelta
+import random
+from datetime import datetime, timedelta
+import random
 
 
-def fetch_apod():
+def fetch_apod(date=None):
     """
     Get NASA APOD once an hour and normalize to the keys nasa_news.html expects.
+
+    Args:
+        date: Optional date string in 'YYYY-MM-DD' format.
+              If None, fetches today's APOD.
+              Can also be 'random' to get a random historical APOD.
+
     Returns a dict like:
       {"title","date","url","media_type","explanation","copyright"}
     or None on failure.
     """
-    cache_key = "apod:current"
-    cached = cache.get(cache_key)
-    if cached is not None:
-        return cached
+    # Create cache key based on date
+    if date == 'random':
+        # Don't cache random requests
+        cache_key = None
+    elif date:
+        cache_key = f"apod:{date}"
+    else:
+        cache_key = "apod:current"
+
+    # Check cache
+    if cache_key:
+        cached = cache.get(cache_key)
+        if cached is not None:
+            return cached
 
     NASA_APOD_URL = "https://api.nasa.gov/planetary/apod"
     api_key = getattr(settings, "NASA_API_KEY", None)
+    print(f"DEBUG: NASA_API_KEY = {api_key}")
     if not api_key:
+        print("ERROR: NASA_API_KEY is not set!")
         return None
 
     try:
         params = {"api_key": api_key, "thumbs": True}
-        r = requests.get(NASA_APOD_URL, params=params, timeout=10)
-        r.raise_for_status()
+
+        # Handle random date
+        if date == 'random':
+            # APOD started on June 16, 1995
+            start_date = datetime(1995, 6, 16)
+            end_date = datetime.now()
+            time_between = end_date - start_date
+            days_between = time_between.days
+            random_days = random.randrange(days_between)
+            random_date = start_date + timedelta(days=random_days)
+            date = random_date.strftime('%Y-%m-%d')
+
+        # Add date parameter if specified
+        if date:
+            params['date'] = date
+
+        # Retry logic with longer timeout
+        max_retries = 1
+        for attempt in range(max_retries):
+            try:
+                r = requests.get(NASA_APOD_URL, params=params, timeout=20)
+                r.raise_for_status()
+                break
+            except requests.exceptions.Timeout:
+                if attempt == max_retries - 1:
+                    raise
+                print(f"APOD request timeout, retrying... (attempt {attempt + 1}/{max_retries})")
+
         data = r.json()
 
         media_type = data.get("media_type", "image")
@@ -69,18 +117,106 @@ def fetch_apod():
             "copyright": data.get("copyright"),
         }
 
-        cache.set(cache_key, apod, timeout=60 * 60)  # 1 hour
+        # Cache the result
+        if cache_key:
+            # Cache historical dates for longer (24 hours)
+            # Cache current date for 1 hour
+            timeout = 60 * 60 * 24 if date else 60 * 60
+            cache.set(cache_key, apod, timeout=timeout)
+
         return apod
-    except Exception:
-        return None
+    except Exception as e:
+        print(f"APOD fetch error: {e}")
+        import traceback
+        traceback.print_exc()
+
+        # Fallback: Return a rotating static APOD if API fails
+        print("Using fallback APOD data...")
+
+        # Array of fallback APODs
+        fallback_apods = [
+            {
+                "title": "The Pencil Nebula Supernova Shock Wave",
+                "date": "2024-02-23",
+                "url": "https://apod.nasa.gov/apod/image/2402/NGC2736_Helge_Buesing1024.jpg",
+                "media_type": "image",
+                "explanation": "This supernova shock wave plows through interstellar space at over 500,000 kilometers per hour",
+                "copyright": "Helge Buesing"
+            },
+            {
+                "title": "Enceladus by Saturnshine",
+                "date": "2023-02-05",
+                "url": "https://apod.nasa.gov/apod/image/2302/enceladus12_cassini_960.jpg",
+                "media_type": "image",
+                "explanation": "This moon is shining by the light of its planet. Specifically, a large portion of Enceladus pictured here is illuminated primarily by sunlight first reflected from the planet Saturn.",
+                "copyright": "Gordan Ugarkovic"
+            },
+            {
+                "title": "A Cosmic Rose: The Rosette Nebula in Monoceros",
+                "date": "2019-04-12",
+                "url": "https://apod.nasa.gov/apod/image/1904/JMD_Rosette_Rotated1024.jpg",
+                "media_type": "image",
+                "explanation": "The Rosette Nebula, NGC 2237, is not the only cosmic cloud of gas and dust to evoke the imagery of flowers, but it is the most famous. At the edge of a large molecular cloud in Monoceros some 5,000 light years away, the petals of this cosmic rose are actually a stellar nursery. The lovely, symmetric shape is sculpted by the winds and radiation from its central cluster of hot young, O-type stars.",
+                "copyright": "Jean Dean"
+            },
+            {
+                "title": "M101: The Pinwheel Galaxy",
+                "date": "2003-03-10",
+                "url": "https://apod.nasa.gov/apod/image/0303/m101_cfht.jpg",
+                "media_type": "image",
+                "explanation": "Why do many galaxies appear as spirals? A striking example is M101, shown above, whose relatively close distance of about 22 million light years allow it to be studied in some detail.",
+                "copyright": "Jean-Charles Cuillandre (CFHT), Hawaiian Starlight, CFHT"
+            },
+            {
+                "title": "Elliptical Galaxy M87",
+                "date": "2004-07-16",
+                "url": "https://apod.nasa.gov/apod/image/0406/m87_cfht.jpg",
+                "media_type": "image",
+                "explanation": "Elliptical galaxy M87 is a type of galaxy that looks much different than our own Milky Way Galaxy. ",
+                "copyright": "Canada-France-Hawaii Telescope, J.-C. Cuillandre (CFHT), Coelum"
+            },
+
+        ]
+
+        # Use day of year to rotate through fallbacks (changes daily)
+        from datetime import datetime
+        day_of_year = datetime.now().timetuple().tm_yday
+        fallback_index = day_of_year % len(fallback_apods)
+        fallback_apod = fallback_apods[fallback_index]
+
+        print(f"Selected fallback #{fallback_index + 1}: {fallback_apod['title']}")
+
+        # Cache the fallback briefly (5 minutes) so we don't spam retries
+        if cache_key:
+            cache.set(cache_key, fallback_apod, timeout=300)
+
+        return fallback_apod
 
 
 def fetch_apod_async(request):
     """
     AJAX endpoint to fetch APOD asynchronously.
     Called by JavaScript after page loads.
+
+    Supports query parameters:
+    - date: Specific date in YYYY-MM-DD format
+    - random: If present, fetches a random historical APOD
     """
-    apod = fetch_apod()
+    date_param = request.GET.get('date')
+    random_param = request.GET.get('random')
+
+    if random_param:
+        apod = fetch_apod('random')
+    elif date_param:
+        # Validate date format
+        try:
+            datetime.strptime(date_param, '%Y-%m-%d')
+            apod = fetch_apod(date_param)
+        except ValueError:
+            return JsonResponse({"error": "Invalid date format. Use YYYY-MM-DD"}, status=400)
+    else:
+        apod = fetch_apod()
+
     if apod:
         return JsonResponse(apod)
     return JsonResponse({"error": "APOD unavailable"}, status=503)
@@ -168,22 +304,22 @@ def _prioritize_sources(articles):
     """
     priority = []
     regular = []
-    
+
     for article in articles:
         url = (article.get('url') or '').lower()
         source_name = (article.get('source', {}).get('name') or '').lower()
-        
+
         # Check if article is from a reliable source
         is_reliable = any(
-            source in url or source.replace('.', ' ') in source_name 
+            source in url or source.replace('.', ' ') in source_name
             for source in RELIABLE_IMAGE_SOURCES
         )
-        
+
         if is_reliable:
             priority.append(article)
         else:
             regular.append(article)
-    
+
     return priority + regular
 
 
@@ -194,7 +330,7 @@ def _is_excluded_domain(article_url, excluded_domains):
     """
     if not article_url:
         return False
-    
+
     url_lower = article_url.lower()
     return any(domain.lower() in url_lower for domain in excluded_domains)
 
@@ -260,16 +396,16 @@ def nasa_news(request):
                     keyword in title_l or keyword in description_l
                     for keyword in SPACE_KEYWORDS_ALL
                 )
-                
+
                 if not has_space_keyword:
                     continue
-                
+
                 # Skip if article is primarily about excluded topics
                 has_excluded_topic = any(
                     topic in title_l or topic in description_l
                     for topic in EXCLUDED_TOPICS_ALL
                 )
-                
+
                 if has_excluded_topic:
                     continue
 
@@ -301,13 +437,13 @@ def nasa_news(request):
             # Diversity filter: Limit to max articles per source for variety
             source_counts = defaultdict(int)
             diverse_articles = []
-            
+
             for article in filtered_articles:
                 source_name = article.get('source', {}).get('name', '')
                 if source_counts[source_name] < MAX_ARTICLES_PER_SOURCE:
                     diverse_articles.append(article)
                     source_counts[source_name] += 1
-            
+
             filtered_articles = diverse_articles
 
             # Limit to configured maximum

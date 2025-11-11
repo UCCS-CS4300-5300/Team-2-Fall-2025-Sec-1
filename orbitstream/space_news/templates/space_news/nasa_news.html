@@ -11,20 +11,28 @@
     <header class="nasa-page-header">
       <h1>Astronomy Picture of the Day!</h1>
       <p class="nasa-subtitle"></p>
-
     </header>
 
-  <!-- HERO -->
-  <section class="nasa-hero">
-    <div class="nasa-hero-title"></div>
-    <div class="nasa-hero-media">
-      <img
-        src="{% static 'home/assets/WitchBroom_Meyers_1080.jpg' %}"
-        alt="Temporary Space Image"
-        loading="lazy"
-        decoding="async" />
-    </div>
-  </section>
+    <!-- HERO -->
+    <section class="nasa-hero">
+      <div class="nasa-hero-title" id="apod-title" style="text-align:center; font-size:1.5em; font-weight:600; color:#000000; margin-bottom:12px;"></div>
+      <div class="nasa-hero-date" id="apod-date-display" style="text-align:center; font-size:0.95em; color:#000000; margin-bottom:16px;"></div>
+
+      <div class="nasa-hero-media" style="width:100%; max-width:100%; height:auto; border-radius:8px; overflow:hidden;">
+        <img
+          src="{% static 'home/assets/WitchBroom_Meyers_1080.jpg' %}"
+          alt="Loading Astronomy Picture of the Day..."
+          loading="lazy"
+          decoding="async"
+          style="width:100%; height:auto; display:block; object-fit:contain;" />
+      </div>
+
+      <div class="nasa-apod-credit" style="text-align:center; font-size:0.9em; color:#000000; margin-top:12px;">
+        <span id="copyright-text">Loading credit information...</span>
+        <br>
+        <a href="https://apod.nasa.gov/apod/astropix.html" target="_blank" rel="noopener noreferrer" style="color:#60a5fa; text-decoration:none;">View on NASA APOD</a>
+      </div>
+    </section>
 
     {% include "news_filter/filter_bar.html" %}
 
@@ -42,9 +50,9 @@
           <a class="nasa-f-link" href="{% url 'space_news:article_detail' article.uid %}" aria-label="{{ article.title }}">
             <div class="nasa-f-media">
               {% if article.urlToImage %}
-                <img 
-                  class="nasa-f-img" 
-                  src="{{ article.urlToImage }}" 
+                <img
+                  class="nasa-f-img"
+                  src="{{ article.urlToImage }}"
                   alt="{{ article.title }}"
                   onerror="this.style.display='none'; this.parentElement.classList.add('no-image');"
                   loading="lazy">
@@ -82,8 +90,8 @@
           <div class="nasa-feed-thumb">
             {% if article.urlToImage %}
               <a href="{% url 'space_news:article_detail' article.uid %}">
-                <img 
-                  src="{{ article.urlToImage }}" 
+                <img
+                  src="{{ article.urlToImage }}"
                   alt="{{ article.title }}"
                   onerror="this.style.display='none'; this.closest('.nasa-feed-thumb').innerHTML='<span style=\'color:#94a3b8;font-weight:600;\'>No image</span>';"
                   loading="lazy">
@@ -119,6 +127,61 @@
   </div>
 
   <script>
+    function updateAPODDisplay(data) {
+        const heroMedia = document.querySelector('.nasa-hero-media');
+        const copyrightText = document.getElementById('copyright-text');
+        const apodTitle = document.getElementById('apod-title');
+        const apodDateDisplay = document.getElementById('apod-date-display');
+
+        if (heroMedia) {
+            // Update title and date
+            if (apodTitle && data.title) {
+                apodTitle.textContent = data.title;
+            }
+            if (apodDateDisplay && data.date) {
+                const dateObj = new Date(data.date + 'T00:00:00');
+                const formattedDate = dateObj.toLocaleDateString('en-US', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                });
+                apodDateDisplay.textContent = formattedDate;
+            }
+
+            // Update the media
+            if (data.media_type === 'video') {
+                heroMedia.innerHTML = `
+                    <iframe
+                        src="${data.url}"
+                        title="${data.title || 'APOD'}"
+                        style="width:100%;height:600px;border:0;border-radius:8px;"
+                        loading="lazy"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                        referrerpolicy="strict-origin-when-cross-origin"
+                        allowfullscreen></iframe>
+                `;
+            } else {
+                heroMedia.innerHTML = `
+                    <img
+                        src="${data.url}"
+                        alt="${data.title || 'Astronomy Picture of the Day'}"
+                        loading="lazy"
+                        decoding="async"
+                        style="width:100%; height:auto; display:block; object-fit:contain; border-radius:8px;" />
+                `;
+            }
+
+            // Update copyright credit
+            if (copyrightText) {
+                if (data.copyright) {
+                    copyrightText.textContent = `Image Credit & Copyright: ${data.copyright}`;
+                } else {
+                    copyrightText.textContent = 'Image Credit: NASA';
+                }
+            }
+        }
+    }
+
     // Fetch APOD after page loads
     document.addEventListener('DOMContentLoaded', function() {
         fetch('{% url "space_news:fetch_apod_async" %}')
@@ -130,61 +193,16 @@
             })
             .then(data => {
                 if (data.url) {
-                    // Find the hero section
-                    const heroMedia = document.querySelector('.nasa-hero-media');
-                    const apodCredit = document.querySelector('.nasa-apod-credit');
-                    const errorDiv = document.querySelector('.nasa-error');
-                    
-                    if (heroMedia) {
-                        // Remove error message if it exists
-                        if (errorDiv) {
-                            errorDiv.remove();
-                        }
-                        
-                        // Update the media
-                        if (data.media_type === 'video') {
-                            heroMedia.innerHTML = `
-                                <iframe
-                                    src="${data.url}"
-                                    title="${data.title || 'APOD'}"
-                                    style="width:100%;height:100%;border:0;"
-                                    loading="lazy"
-                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                                    referrerpolicy="strict-origin-when-cross-origin"
-                                    allowfullscreen></iframe>
-                            `;
-                        } else {
-                            heroMedia.innerHTML = `
-                                <img
-                                    src="${data.url}"
-                                    alt="${data.title || 'Astronomy Picture of the Day'}"
-                                    loading="lazy"
-                                    decoding="async" />
-                            `;
-                        }
-                        
-                        // Update credit
-                        if (apodCredit) {
-                            const creditText = data.copyright 
-                                ? `Image Credit: ${data.copyright} / NASA`
-                                : 'Image Credit: NASA Astronomy Picture of the Day (APOD)';
-                            apodCredit.innerHTML = `
-                                ${creditText}
-                                <br>
-                                <a href="https://apod.nasa.gov/apod/astropix.html" target="_blank" rel="noopener noreferrer" style="color:#60a5fa; text-decoration:none;">View on NASA APOD</a>
-                            `;
-                        }
-                    }
+                    updateAPODDisplay(data);
                 }
             })
             .catch(error => {
                 console.error('Error loading APOD:', error);
-                // Update the error message
-                const errorDiv = document.querySelector('.nasa-error');
-                if (errorDiv) {
-                    errorDiv.textContent = 'Astronomy Picture of the Day is unavailable. Please try again later.';
+                const copyrightText = document.getElementById('copyright-text');
+                if (copyrightText) {
+                    copyrightText.textContent = 'APOD temporarily unavailable';
                 }
             });
     });
-    </script>
+  </script>
 {% endblock %}
