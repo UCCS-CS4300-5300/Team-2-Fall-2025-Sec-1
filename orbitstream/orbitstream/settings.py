@@ -13,6 +13,7 @@ from pathlib import Path
 import dj_database_url
 import os
 from dotenv import load_dotenv
+import sys
 
 load_dotenv()
 
@@ -179,3 +180,17 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 CSRF_COOKIE_SECURE = False #change to True when deploying
 SESSION_COOKIE_SECURE = True
+
+# Use SQLite for testing to avoid connecting to production PostgreSQL database
+if 'test' in sys.argv or 'test_coverage' in sys.argv:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': ':memory:',  # Use in-memory database for faster tests
+        }
+    }
+
+    # Speed up password hashing in tests
+    PASSWORD_HASHERS = [
+        'django.contrib.auth.hashers.MD5PasswordHasher',
+    ]
