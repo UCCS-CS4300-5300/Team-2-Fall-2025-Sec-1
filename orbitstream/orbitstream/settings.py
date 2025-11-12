@@ -13,6 +13,8 @@ from pathlib import Path
 import dj_database_url
 import os
 from dotenv import load_dotenv
+import sys
+
 
 load_dotenv()
 
@@ -173,3 +175,11 @@ if not DEBUG:
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+# Use SQLite for testing to avoid connecting to production PostgreSQL database
+if 'test' in sys.argv:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': ':memory:',
+        }
+    }

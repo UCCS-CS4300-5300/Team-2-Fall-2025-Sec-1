@@ -416,16 +416,29 @@ class FetchApodEssentialTests(TestCase):
             
             self.assertEqual(result["title"], "Cached")
             mock_get.assert_not_called()
-    
+
     @patch("space_news.views.requests.get")
     @override_settings(NASA_API_KEY="test-key-12345")
-    def test_fetch_apod_returns_none_on_failure(self, mock_get):
-        """Test that None is returned when API fails."""
+    def test_fetch_apod_returns_fallback_on_failure(self, mock_get):
+        """Test that Fallback is returned when API fails."""
         mock_get.side_effect = Exception("API down")
-        
+
         result = v.fetch_apod()
-        
-        self.assertIsNone(result)
+
+        # Should return fallback data, not None
+        self.assertIsNotNone(result)
+        self.assertIsInstance(result, dict)
+
+        # Check that it has the required fields
+        self.assertIn('title', result)
+        self.assertIn('date', result)
+        self.assertIn('url', result)
+        self.assertIn('media_type', result)
+        self.assertIn('explanation', result)
+
+        # Verify it's valid fallback data
+        self.assertEqual(result['media_type'], 'image')
+        self.assertTrue(len(result['title']) > 0)
 
 
 @override_settings(CACHES={"default": {"BACKEND": "django.core.cache.backends.locmem.LocMemCache"}})
