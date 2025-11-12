@@ -23,5 +23,7 @@ urlpatterns = [
     path('', index, name='index'),                      # Your index view
     path('news/', include('space_news.urls')),          # space news page path
     path('', include('users.urls')),                    # register and login page paths
-    path('gallery/', include('space_imagery.urls'))     # gallery page path
+    path('gallery/', include('space_imagery.urls')),     # gallery page path
+
+    path('learn_page/', include('learn_page.urls')),  # learn page path
 ]

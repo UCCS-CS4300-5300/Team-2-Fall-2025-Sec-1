@@ -21,6 +21,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 NASA_API_KEY = os.getenv("NASA_API_KEY")
 NEWS_API_KEY = os.getenv("NEWS_API_KEY")
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 
 
 # Quick-start development settings - unsuitable for production
@@ -42,7 +43,9 @@ ALLOWED_HOSTS = [
 CSRF_TRUSTED_ORIGINS = [
     "https://team-2-fall-2025-sec-1.onrender.com",
     "https://app-cs4300advancedswe-19.devedu.io", #temp DELETE BEFORE MERGE BACK TO MAIN
-    "http://app-cs4300advancedswe-19.devedu.io", #temp 
+    "http://app-cs4300advancedswe-19.devedu.io", #temp
+    "http://orbitstream.space",
+    "https://localhost:8000",
 ]
 
 # Behind Render’s proxy, tell Django requests are HTTPS
@@ -63,6 +66,7 @@ INSTALLED_APPS = [
     'users',
     'news_filter',
     'space_imagery',
+    'learn_page',
 ]
 
 MIDDLEWARE = [
@@ -173,3 +177,5 @@ if not DEBUG:
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+CSRF_COOKIE_SECURE = False #change to True when deploying
+SESSION_COOKIE_SECURE = True

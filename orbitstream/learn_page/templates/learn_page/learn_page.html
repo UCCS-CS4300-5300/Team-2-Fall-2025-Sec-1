@@ -1,0 +1,255 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Learn About Space - OrbitStream{% endblock %}
+
+{% block extra_css %}
+<style>
+  /* Learn page specific styles */
+  .learn-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 40px 20px;
+    min-height: 100vh;
+  }
+  
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+  
+  #custom-topic-input:focus {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="learn-container">
+  
+  <!-- Header -->
+  <header style="text-align: center; margin-bottom: 50px;">
+    <h1 style="font-size: 2.5em; font-weight: 700; color: #1e293b; margin-bottom: 12px;">
+      🚀 Learn About Space
+    </h1>
+    <p style="font-size: 1.1em; color: #64748b; max-width: 600px; margin: 0 auto;">
+      Explore space topics with AI-powered summaries. Select a topic below or search for anything space-related!
+    </p>
+  </header>
+
+  <!-- Search Bar -->
+  <div style="max-width: 600px; margin: 0 auto 40px; position: relative;">
+    <input 
+      type="text" 
+      id="custom-topic-input"
+      placeholder="Ask about any space topic... (e.g., 'Mars rovers', 'gravitational waves')"
+      style="width: 100%; padding: 16px 60px 16px 20px; font-size: 16px; border: 2px solid #cbd5e1; border-radius: 12px; outline: none; transition: border-color 0.3s;"
+      onkeypress="if(event.key === 'Enter') searchCustomTopic()">
+    <button 
+      onclick="searchCustomTopic()"
+      style="position: absolute; right: 8px; top: 50%; transform: translateY(-50%); padding: 10px 20px; background: #3b82f6; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; transition: background 0.3s;"
+      onmouseover="this.style.background='#2563eb'"
+      onmouseout="this.style.background='#3b82f6'">
+      Search
+    </button>
+  </div>
+
+  <!-- Predefined Topics Grid -->
+  <section style="margin-bottom: 50px;">
+    <h2 style="font-size: 1.8em; font-weight: 600; color: #1e293b; margin-bottom: 24px; text-align: center;">
+      Popular Topics
+    </h2>
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px;">
+      {% for topic in topics %}
+        <div 
+          class="topic-card"
+          onclick="loadTopic('{{ topic.title }}')"
+          style="background: white; border: 2px solid #e2e8f0; border-radius: 12px; padding: 24px; cursor: pointer; transition: all 0.3s; box-shadow: 0 1px 3px rgba(0,0,0,0.1);"
+          onmouseover="this.style.borderColor='#3b82f6'; this.style.transform='translateY(-4px)'; this.style.boxShadow='0 4px 12px rgba(59,130,246,0.2)'"
+          onmouseout="this.style.borderColor='#e2e8f0'; this.style.transform='translateY(0)'; this.style.boxShadow='0 1px 3px rgba(0,0,0,0.1)'">
+          <div style="font-size: 2.5em; margin-bottom: 12px;">{{ topic.icon }}</div>
+          <h3 style="font-size: 1.2em; font-weight: 600; color: #1e293b; margin-bottom: 8px;">{{ topic.title }}</h3>
+          <p style="font-size: 0.9em; color: #64748b; line-height: 1.5;">{{ topic.description }}</p>
+        </div>
+      {% endfor %}
+    </div>
+  </section>
+
+  <!-- Summary Display Section -->
+  <section 
+    id="summary-section" 
+    style="display: none; max-width: 800px; margin: 0 auto; background: white; border-radius: 16px; padding: 40px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); animation: fadeIn 0.5s;">
+    
+    <!-- Topic Title -->
+    <h2 id="summary-title" style="font-size: 2em; font-weight: 700; color: #1e293b; margin-bottom: 20px; border-left: 4px solid #3b82f6; padding-left: 16px;"></h2>
+    
+    <!-- Loading Spinner -->
+    <div id="loading-spinner" style="text-align: center; padding: 40px;">
+      <div style="display: inline-block; width: 50px; height: 50px; border: 4px solid #e2e8f0; border-top-color: #3b82f6; border-radius: 50%; animation: spin 1s linear infinite;"></div>
+      <p style="margin-top: 16px; color: #64748b; font-size: 1.1em;">Generating summary...</p>
+    </div>
+    
+    <!-- Summary Content -->
+    <div id="summary-content" style="display: none;">
+      <div id="summary-text" style="font-size: 1.1em; line-height: 1.8; color: #334155; margin-bottom: 24px;"></div>
+      
+      <!-- Keywords Section -->
+      <div id="keywords-section" style="background: #f1f5f9; border-radius: 12px; padding: 20px; margin-top: 24px;">
+        <h3 style="font-size: 1.2em; font-weight: 600; color: #1e293b; margin-bottom: 12px;">🔍 Related Topics</h3>
+        <div id="keywords-list" style="display: flex; flex-wrap: wrap; gap: 10px;"></div>
+      </div>
+      
+      <!-- Try Another Button -->
+      <button 
+        onclick="resetSearch()"
+        style="margin-top: 24px; padding: 12px 24px; background: #3b82f6; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 1em; transition: background 0.3s;"
+        onmouseover="this.style.background='#2563eb'"
+        onmouseout="this.style.background='#3b82f6'">
+        ← Explore Another Topic
+      </button>
+    </div>
+    
+    <!-- Error Message -->
+    <div id="error-message" style="display: none; text-align: center; padding: 40px;">
+      <div style="font-size: 3em; margin-bottom: 16px;">😔</div>
+      <p id="error-text" style="font-size: 1.1em; color: #ef4444; line-height: 1.6;"></p>
+      <button 
+        onclick="resetSearch()"
+        style="margin-top: 20px; padding: 12px 24px; background: #64748b; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600;"
+        onmouseover="this.style.background='#475569'"
+        onmouseout="this.style.background='#64748b'">
+        Try Again
+      </button>
+    </div>
+  </section>
+
+</div>
+
+<script>
+  // Get CSRF token from cookie
+  function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+      const cookies = document.cookie.split(';');
+      for (let i = 0; i < cookies.length; i++) {
+        const cookie = cookies[i].trim();
+        if (cookie.substring(0, name.length + 1) === (name + '=')) {
+          cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+          break;
+        }
+      }
+    }
+    return cookieValue;
+  }
+
+  // Get CSRF token from Django template
+  function getCSRFToken() {
+    // First try to get from cookie
+    const cookieToken = getCookie('csrftoken');
+    if (cookieToken) {
+      return cookieToken;
+    }
+
+    // Fallback: get from hidden input or meta tag
+    const tokenInput = document.querySelector('[name=csrfmiddlewaretoken]');
+    if (tokenInput) {
+      return tokenInput.value;
+    }
+
+    const tokenMeta = document.querySelector('meta[name="csrf-token"]');
+    if (tokenMeta) {
+      return tokenMeta.content;
+    }
+
+    return null;
+  }
+
+  function loadTopic(topicName) {
+    const summarySection = document.getElementById('summary-section');
+    const summaryTitle = document.getElementById('summary-title');
+    const loadingSpinner = document.getElementById('loading-spinner');
+    const summaryContent = document.getElementById('summary-content');
+    const errorMessage = document.getElementById('error-message');
+    
+    // Show section with loading state
+    summarySection.style.display = 'block';
+    summaryTitle.textContent = topicName;
+    loadingSpinner.style.display = 'block';
+    summaryContent.style.display = 'none';
+    errorMessage.style.display = 'none';
+    
+    // Scroll to summary section
+    summarySection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    
+    // Fetch summary from API
+    fetch('{% url "learn_page:generate_summary" %}', {
+      method: 'POST',
+      credentials: 'same-origin',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': getCSRFToken(),
+      },
+      body: JSON.stringify({ topic: topicName })
+    })
+    .then(response => response.json())
+    .then(data => {
+      loadingSpinner.style.display = 'none';
+      
+      if (data.success) {
+        // Display summary
+        document.getElementById('summary-text').textContent = data.summary;
+        
+        // Display keywords
+        const keywordsList = document.getElementById('keywords-list');
+        keywordsList.innerHTML = '';
+        
+        if (data.keywords) {
+          const keywords = data.keywords.split(',').map(k => k.trim());
+          keywords.forEach(keyword => {
+            const badge = document.createElement('span');
+            badge.textContent = keyword;
+            badge.style.cssText = 'background: #dbeafe; color: #1e40af; padding: 6px 12px; border-radius: 6px; font-size: 0.9em; font-weight: 500;';
+            keywordsList.appendChild(badge);
+          });
+        }
+        
+        summaryContent.style.display = 'block';
+      } else {
+        // Show error
+        document.getElementById('error-text').textContent = data.error || 'Sorry, I don\'t have enough data on that topic yet! Try another topic or rephrase your query.';
+        errorMessage.style.display = 'block';
+      }
+    })
+    .catch(error => {
+      console.error('Error:', error);
+      loadingSpinner.style.display = 'none';
+      document.getElementById('error-text').textContent = 'Sorry, something went wrong. Please try again later.';
+      errorMessage.style.display = 'block';
+    });
+  }
+
+  function searchCustomTopic() {
+    const input = document.getElementById('custom-topic-input');
+    const topic = input.value.trim();
+    
+    if (!topic) {
+      alert('Please enter a topic to search for.');
+      return;
+    }
+    
+    loadTopic(topic);
+  }
+
+  function resetSearch() {
+    document.getElementById('summary-section').style.display = 'none';
+    document.getElementById('custom-topic-input').value = '';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+</script>
+
+{% endblock %}
