@@ -19,7 +19,9 @@
       <li><a href="#" class="nav-link"><span>GPS Tracking</span></a></li>
       <li><a href="#" class="nav-link"><span>Launches</span></a></li>
       <li><a href="#" class="nav-link"><span>Preferences</span></a></li>
-      <li><a href="{% url 'space_imagery:gallery' %}" class="nav-link"><span>Gallery</span></a></li>
+        <li><a href="{% url 'space_imagery:gallery' %}" class="nav-link"><span>Gallery</span></a></li>
+        <li><a href="{% url 'learn_page:learn_page' %}" class="nav-link">Learn</a></li>
+
     </ul>
 
     <!-- User Auth Links -->
@@ -116,6 +118,7 @@
         <li><a href="{% url 'space_imagery:gallery' %}" class="mobile-link">
           <span class="link-orb"></span>Gallery
         </a></li>
+        <li><a href="{% url 'learn_page:learn_page' %}" class="mobile-link"><span class="link-orb"></span>Learn</a></li>
       </ul>
 
       <div class="mobile-nav__auth">
