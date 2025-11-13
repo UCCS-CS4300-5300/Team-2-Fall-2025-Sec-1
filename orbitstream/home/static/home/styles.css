@@ -1572,8 +1572,8 @@ html:has(body.nasa-page) {
 
 /* --- Hero (NASA pic of the day) --- */
 .nasa-hero {
-  background: #fff;
-  border: 1px solid #d9dde8;
+  background: transparent;
+  border: transparent;
   border-radius: 12px;
   padding: 0px;
   margin-bottom: 48px;
@@ -1591,9 +1591,8 @@ html:has(body.nasa-page) {
   margin-top: 0px;
   border-radius: 10px;
   overflow: hidden;
-  border: 1px solid #e5e7ef;
-  background: #eef1f7;
-  height: 500px;
+  border: 1px solid transparent;
+  background:transparent;
   display: flex; 
   align-items: center; 
   justify-content: center;
@@ -1602,14 +1601,14 @@ html:has(body.nasa-page) {
 .nasa-hero-media img,
 .nasa-hero-media video {
   width: 100%;
-  height: 100%;
-  object-fit: cover;
+  height: auto;
+  object-fit: contain;
   display: block;
 }
 
 .nasa-hero-media iframe {
   width: 100%;
-  height: 100%;
+  height: auto;
   border: 0;
 }
 
