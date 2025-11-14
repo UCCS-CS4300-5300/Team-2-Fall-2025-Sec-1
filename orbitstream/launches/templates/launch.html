@@ -1,0 +1,168 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Space Shuttle Launches{% endblock %}
+{% block body_class %}launch-page{% endblock %}
+
+{% block content %}
+
+<div class="launch-body">
+
+    <div class="launch-hero">
+        <div class="launch-hero-bg" style="background-image: url('{{ hero.background_image }}');"></div>
+        <div class="launch-hero-info"
+             data-launch-time="{{ hero.launch_time }}">
+            <p id="hero-countdown" class="hero-countdown">{{ hero.launch_time }}</p>
+            <h1 class="hero-mission">{{ hero.mission_name }}</h1>
+        </div>
+        <a href="#" class="learn-more">Watch<span class="arrow">&rarr;</span></a>
+    </div>
+
+    <h1 class="upcoming-launches">Upcoming Launches</h1>
+    <div class="launch-feature">
+        <div class="launch-feature-card">
+            <img class="upcoming-image" src="{% static 'home/assets/space 1.jpeg' %}" alt="Temp Image">
+            <div class="launch-feature-text">
+                <h1>Starlink Mission</h1>
+                <h2>SpaceX</h2>
+                <p>In-Flight</p>
+                <p>November 10, 2025</p>
+                <p>Falcon 9</p>
+            </div>
+        </div>
+    </div>
+
+    <h1 class="recent-launches">Recent Launches</h1>
+    <table class="recent-launch-tabel">
+        <thead>
+            <tr>
+                <th scope="col">MISSION</th>
+                <th scope="col">Vehicle</th>
+                <th scope="col">LAUNCH SITE</th>
+                <th scope="col">LANDING SITE</th>
+                <th scope="col">DATE & TIME</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>Starlink Mission</td>
+                <td>Falcon 9</td>
+                <td>SLC-40, Florida</td>
+                <td>Droneship</td>
+                <td>November 10, 2025</td>
+            </tr>
+            <tr>
+                <td>Starlink Mission</td>
+                <td>Falcon 9</td>
+                <td>SLC-40, Florida</td>
+                <td>Droneship</td>
+                <td>November 10, 2025</td>
+            </tr>
+            <tr>
+                <td>Starlink Mission</td>
+                <td>Falcon 9</td>
+                <td>SLC-40, Florida</td>
+                <td>Droneship</td>
+                <td>November 10, 2025</td>
+            </tr>
+            <tr>
+                <td>Starlink Mission</td>
+                <td>Falcon 9</td>
+                <td>SLC-40, Florida</td>
+                <td>Droneship</td>
+                <td>November 10, 2025</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h1 class="completed-launches">Completed Missions</h1>
+    <table class="completed-launch-tabel">
+        <thead>
+            <tr>
+                <th scope="col">MISSION</th>
+                <th scope="col">Vehicle</th>
+                <th scope="col">LAUNCH SITE</th>
+                <th scope="col">LANDING SITE</th>
+                <th scope="col">DATE & TIME</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>Starlink Mission</td>
+                <td>Falcon 9</td>
+                <td>SLC-40, Florida</td>
+                <td>Droneship</td>
+                <td>November 10, 2025</td>
+            </tr>
+            <tr>
+                <td>Starlink Mission</td>
+                <td>Falcon 9</td>
+                <td>SLC-40, Florida</td>
+                <td>Droneship</td>
+                <td>November 10, 2025</td>
+            </tr>
+            <tr>
+                <td>Starlink Mission</td>
+                <td>Falcon 9</td>
+                <td>SLC-40, Florida</td>
+                <td>Droneship</td>
+                <td>November 10, 2025</td>
+            </tr>
+            <tr>
+                <td>Starlink Mission</td>
+                <td>Falcon 9</td>
+                <td>SLC-40, Florida</td>
+                <td>Droneship</td>
+                <td>November 10, 2025</td>
+            </tr>
+        </tbody>
+    </table>
+
+</div>
+
+<script>
+    (function() {
+      const info = document.querySelector('.launch-hero-info');
+      if (!info) return;
+    
+      const launchIso = info.dataset.launchTime;
+      if (!launchIso) return;
+    
+      const countdownEl = document.getElementById('hero-countdown');
+      if (!countdownEl) return;
+    
+      const launchTime = new Date(launchIso);
+    
+      function updateCountdown() {
+        const now = new Date();
+        const diffMs = launchTime - now;
+    
+        if (diffMs <= 0) {
+          countdownEl.textContent = 'Launched';
+          clearInterval(timer);
+          return;
+        }
+    
+        const totalSeconds = Math.floor(diffMs / 1000);
+        const days = Math.floor(totalSeconds / 86400);
+        const hours = Math.floor((totalSeconds % 86400) / 3600);
+        const minutes = Math.floor((totalSeconds % 3600) / 60);
+        const seconds = totalSeconds % 60;
+    
+        const dayPart = days ? `T-${days}d ` : 'T-';
+        const hh = String(hours).padStart(2, '0');
+        const mm = String(minutes).padStart(2, '0');
+        const ss = String(seconds).padStart(2, '0');
+    
+        countdownEl.textContent = `${dayPart}${hh}:${mm}:${ss}`;
+      }
+    
+      updateCountdown();
+      const timer = setInterval(updateCountdown, 1000);
+    })();
+    </script>
+
+{% endblock %}
+
+
+    

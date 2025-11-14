@@ -17,7 +17,7 @@
     <ul class="nav__links nav__links--desktop">
       <li><a href="{% url 'space_news:nasa_news' %}" class="nav-link"><span>News</span></a></li>
       <li><a href="#" class="nav-link"><span>GPS Tracking</span></a></li>
-      <li><a href="#" class="nav-link"><span>Launches</span></a></li>
+      <li><a href="{% url 'launches:launch' %}" class="nav-link"><span>Launches</span></a></li>
       <li><a href="#" class="nav-link"><span>Preferences</span></a></li>
         <li><a href="{% url 'space_imagery:gallery' %}" class="nav-link"><span>Gallery</span></a></li>
         <li><a href="{% url 'learn_page:learn_page' %}" class="nav-link">Learn</a></li>

@@ -68,6 +68,7 @@ INSTALLED_APPS = [
     'news_filter',
     'space_imagery',
     'learn_page',
+    'launches',
 ]
 
 MIDDLEWARE = [

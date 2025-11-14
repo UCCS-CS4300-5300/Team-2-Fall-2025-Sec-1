@@ -13,6 +13,7 @@
    4. Article Page
    5. Space Imagery
    6. Full Media Page
+   7. Space Shuttle Launches
 
    ========================================================================== */
 
@@ -1130,6 +1131,8 @@ html, body {
   gap: 0.5rem;
 }
 
+
+/* We will keep this disabled until I can find what else is using title orbs
 .title-orb {
   width: 8px;
   height: 8px;
@@ -1137,6 +1140,8 @@ html, body {
   background: linear-gradient(135deg, #8b5cf6, #60a5fa);
   box-shadow: 0 0 10px rgba(139, 92, 246, 0.6);
 }
+*/
+
 
 /* Footer Links */
 .footer__links {
@@ -3547,3 +3552,201 @@ body.full-media-page .site-footer {
     font-size: 11px;
   }
 }
+
+/*=====================================================
+              Space Shuttle Launches
+=======================================================*/
+
+.launch-page{
+  overflow-y: scroll !important;
+  overflow-x: hidden !important;
+  color: #0f172a;
+  color: #fff;
+  min-height: 100vh;
+
+}
+
+.launch-body {
+  width: 100%;
+}
+
+/* Hero */
+.launch-hero .launch-hero-bg{
+  position: relative;
+  width: 100%;
+  min-height: 100vh;
+  overflow: hidden;
+}
+
+.launch-hero-info {
+  position: absolute;
+  left: 10%;
+  bottom: 28%;
+  color: #ffffff;
+}
+
+.hero-countdown {
+  font-size: 1.2rem;
+  opacity: 0.85;
+}
+
+.hero-mission {
+  font-size: 2.5rem;
+  font-weight: 700;
+}
+
+.hero-countdown {
+  font-size: 1.4rem;
+  letter-spacing: 0.08em;
+  margin-bottom: 0.6rem;
+}
+.hero-mission {
+  margin-top: 0;
+}
+
+
+
+/* Override any homepage styles so the text shows, not just the arrow */
+.launch-hero .learn-more {
+  position: absolute;
+  left: 10%;
+  bottom: 15%;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  background: rgba(15, 23, 42, 0.5);
+  backdrop-filter: blur(8px);
+
+  color: #ffffff !important;
+  font-size: 1rem !important;
+  font-weight: 500;
+  text-decoration: none;
+}
+
+.launch-hero .learn-more .arrow {
+  font-size: 1.1rem;
+}
+
+/*
+Upcoming Lauches section
+*/
+/* Section headings */
+
+.upcoming-launches{
+  width: 100%; 
+  max-width: 1300px; 
+  margin: 4rem auto 2rem; 
+  font-size: 3.5rem; 
+  font-weight: 700;
+}
+
+.recent-launches,
+.completed-launches {
+  width: 100%;
+  margin: 3rem 4.5rem 2rem;
+  font-size: 3.5rem;
+  font-weight: 700;
+}
+
+
+/* Upcoming feature section */
+.launch-feature {
+  width: 100%;
+  max-width: 1300px;
+  max-height: 500px;
+  margin: 0 auto 7rem;
+  display: flex;
+  justify-content: center;
+}
+
+.launch-feature-card {
+  display: flex;
+  width: 100%;
+  max-width: 100%;     
+  border-radius: 1rem;
+  overflow: hidden;
+  background: #242424;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
+}
+
+/* Image left, text right */
+.upcoming-image {
+  width: auto;
+  height: auto;
+  object-fit: cover;
+  display: block;
+}
+
+.launch-feature-text {
+  flex: 1;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: start;
+  gap: 0.35rem;
+  color: #ffffff;
+}
+
+.launch-feature-text h1 {
+  font-size: 3rem;
+  font-weight: 600;
+}
+
+.launch-feature-text h2 {
+  font-size: 1.7rem;
+  opacity: 0.8;
+}
+
+.launch-feature-text p {
+  margin: 0;
+  font-size: 1rem;
+  opacity: 0.9;
+}
+
+
+/*
+Recent Lauches section
+*/
+.recent-launch-tabel,
+.completed-launch-tabel {
+  width: 95%;
+  margin-left: auto;
+  margin-right: auto;
+  margin-bottom: 10rem;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+  color: #ffffff;
+}
+
+
+/* Table headers */
+.recent-launch-tabel thead th,
+.completed-launch-tabel thead th {
+  text-align: left;
+  padding: 0.75rem 1rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 0.8rem;
+  color: rgba(148, 163, 184, 0.95); 
+  border-bottom: 3px solid rgba(148, 163, 184, 0.6);
+}
+
+/* Body rows */
+.recent-launch-tabel th,
+.recent-launch-tabel td,
+.completed-launch-tabel th,
+.completed-launch-tabel td {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+  padding: 3rem 2.5rem;   
+}
+
+
+/* Hover effect like a clickable row */
+.recent-launch-tabel tbody tr:hover,
+.completed-launch-tabel tbody tr:hover {
+  background: rgba(15, 23, 42, 0.9);
+}
+
