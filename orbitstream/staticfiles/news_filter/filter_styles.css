@@ -1,0 +1,247 @@
+.nasa-filter-bar {
+  background: rgba(15, 23, 42, 0.6);
+  border: 1px solid rgba(148, 163, 184, 0.1);
+  border-radius: 12px;
+  padding: 24px;
+  margin: 32px 0;
+  backdrop-filter: blur(10px);
+}
+
+.nasa-filter-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.nasa-filter-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 16px;
+}
+
+.nasa-filter-field {
+  display: flex;
+  flex-direction: column;
+}
+
+.nasa-filter-field label {
+  color: #94a3b8;
+  font-size: 13px;
+  font-weight: 600;
+  margin-bottom: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.filter-input,
+.filter-select {
+  width: 100%;
+  padding: 10px 14px;
+  background: rgba(30, 41, 59, 0.8);
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  border-radius: 6px;
+  color: #e2e8f0;
+  font-size: 14px;
+  transition: all 0.3s ease;
+}
+
+.filter-input:focus,
+.filter-select:focus {
+  outline: none;
+  border-color: #3b82f6;
+  background: rgba(30, 41, 59, 0.95);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.filter-input::placeholder {
+  color: #64748b;
+}
+
+.nasa-filter-actions {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.nasa-filter-btn {
+  padding: 10px 20px;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  border: none;
+}
+
+.nasa-filter-btn svg {
+  margin-right: 6px;
+}
+
+.nasa-filter-btn-primary {
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  color: white;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+
+.nasa-filter-btn-primary:hover {
+  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+  box-shadow: 0 6px 16px rgba(59, 130, 246, 0.4);
+  transform: translateY(-1px);
+}
+
+.nasa-filter-btn-secondary {
+  background: transparent;
+  color: #94a3b8;
+  border: 1px solid rgba(148, 163, 184, 0.3);
+}
+
+.nasa-filter-btn-secondary:hover {
+  border-color: #94a3b8;
+  color: #e2e8f0;
+  background: rgba(148, 163, 184, 0.1);
+}
+
+.nasa-active-filters {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.nasa-filter-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 14px;
+  background: rgba(59, 130, 246, 0.15);
+  color: #60a5fa;
+  border-radius: 16px;
+  font-size: 12px;
+  font-weight: 600;
+  border: 1px solid rgba(59, 130, 246, 0.3);
+}
+
+.nasa-filter-badge svg {
+  margin-right: 4px;
+}
+
+/* ===== FILTER BAR RESPONSIVE ===== */
+
+/* Tablet portrait (768px) */
+@media (max-width: 768px) {
+  .nasa-filter-bar {
+    padding: 16px;
+    margin: 24px 0;
+  }
+
+  .nasa-filter-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+
+  .nasa-filter-field label {
+    font-size: 12px;
+    margin-bottom: 6px;
+  }
+
+  .filter-input,
+  .filter-select {
+    padding: 8px 12px;
+    font-size: 13px;
+  }
+
+  .nasa-filter-actions {
+    gap: 10px;
+  }
+
+  .nasa-filter-btn {
+    padding: 8px 16px;
+    font-size: 13px;
+  }
+
+  .nasa-filter-badge {
+    font-size: 11px;
+    padding: 5px 12px;
+  }
+}
+
+/* Mobile landscape (640px) */
+@media (max-width: 640px) {
+  .nasa-filter-bar {
+    padding: 14px;
+    margin: 20px 0;
+    border-radius: 10px;
+  }
+
+  .nasa-filter-grid {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .nasa-filter-field label {
+    font-size: 11px;
+    margin-bottom: 5px;
+  }
+
+  .filter-input,
+  .filter-select {
+    padding: 7px 10px;
+    font-size: 12px;
+  }
+
+  .nasa-filter-actions {
+    flex-direction: column;
+    width: 100%;
+    gap: 8px;
+  }
+
+  .nasa-filter-btn {
+    width: 100%;
+    justify-content: center;
+    padding: 9px 16px;
+    font-size: 12px;
+  }
+
+  .nasa-filter-btn svg {
+    margin-right: 5px;
+  }
+
+  .nasa-filter-badge {
+    font-size: 10px;
+    padding: 4px 10px;
+  }
+
+  .nasa-filter-badge svg {
+    margin-right: 3px;
+  }
+}
+
+/* Mobile portrait (480px) */
+@media (max-width: 480px) {
+  .nasa-filter-bar {
+    padding: 12px;
+    margin: 16px 0;
+  }
+
+  .nasa-filter-grid {
+    gap: 8px;
+  }
+
+  .nasa-filter-field label {
+    font-size: 10px;
+    margin-bottom: 4px;
+  }
+
+  .filter-input,
+  .filter-select {
+    padding: 6px 8px;
+    font-size: 11px;
+  }
+
+  .nasa-filter-btn {
+    padding: 8px 14px;
+    font-size: 11px;
+  }
+}
