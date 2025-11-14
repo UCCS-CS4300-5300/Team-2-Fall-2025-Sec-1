@@ -4,7 +4,14 @@
 <head>
   <meta charset="UTF-8" />
   <link rel="icon" type="image/png" href="{% static 'home/assets/Orbitstream logo.png' %}">
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  {# Mobile viewport and touch optimizations #}
+  <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=5, viewport-fit=cover" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="theme-color" content="#000000" />
+
   <title>{% block title %}OrbitStream{% endblock %}</title>
 
   <link rel="stylesheet" href="{% static 'home/styles.css' %}">
@@ -30,6 +37,7 @@
 
 <script>
   document.addEventListener('DOMContentLoaded', function() {
+    // Back to Top Button
     const backToTopBtn = document.querySelector('.back-to-top');
     if (backToTopBtn) {
       backToTopBtn.addEventListener('click', function(e) {
@@ -41,6 +49,108 @@
           window.scrollTo({ top: 0, behavior: 'smooth' });
         }
       });
+    }
+
+    // Mobile Navigation Toggle
+    const navToggle = document.querySelector('.nav-toggle');
+    const mobileNav = document.querySelector('.mobile-nav');
+    const mobileNavClose = document.querySelector('.mobile-nav__close');
+    const mobileNavBackdrop = document.querySelector('.mobile-nav__backdrop');
+
+    if (navToggle && mobileNav) {
+      // Open mobile menu
+      navToggle.addEventListener('click', function() {
+        const isExpanded = navToggle.getAttribute('aria-expanded') === 'true';
+        navToggle.setAttribute('aria-expanded', !isExpanded);
+        mobileNav.setAttribute('aria-hidden', isExpanded);
+
+        // Prevent body scroll when menu is open
+        if (!isExpanded) {
+          document.body.style.overflow = 'hidden';
+        } else {
+          document.body.style.overflow = '';
+        }
+      });
+
+      // Close mobile menu
+      function closeMobileNav() {
+        navToggle.setAttribute('aria-expanded', 'false');
+        mobileNav.setAttribute('aria-hidden', 'true');
+        document.body.style.overflow = '';
+      }
+
+      if (mobileNavClose) {
+        mobileNavClose.addEventListener('click', closeMobileNav);
+      }
+
+      if (mobileNavBackdrop) {
+        mobileNavBackdrop.addEventListener('click', closeMobileNav);
+      }
+
+      // Close menu when clicking on a link
+      const mobileLinks = document.querySelectorAll('.mobile-link, .mobile-auth-btn');
+      mobileLinks.forEach(link => {
+        link.addEventListener('click', function() {
+          // Small delay to allow navigation to occur
+          setTimeout(closeMobileNav, 100);
+        });
+      });
+
+      // Close menu on ESC key
+      document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' && mobileNav.getAttribute('aria-hidden') === 'false') {
+          closeMobileNav();
+        }
+      });
+    }
+
+    // User Dropdown Toggle
+    const userDropdownToggle = document.querySelector('.user-dropdown-toggle');
+    const userDropdownMenu = document.querySelector('.user-dropdown-menu');
+
+    if (userDropdownToggle && userDropdownMenu) {
+      // Toggle dropdown on click
+      userDropdownToggle.addEventListener('click', function(e) {
+        e.stopPropagation();
+        const isExpanded = userDropdownToggle.getAttribute('aria-expanded') === 'true';
+        userDropdownToggle.setAttribute('aria-expanded', !isExpanded);
+        userDropdownMenu.setAttribute('aria-hidden', isExpanded);
+      });
+
+      // Close dropdown when clicking outside
+      document.addEventListener('click', function(e) {
+        if (!userDropdownToggle.contains(e.target) && !userDropdownMenu.contains(e.target)) {
+          userDropdownToggle.setAttribute('aria-expanded', 'false');
+          userDropdownMenu.setAttribute('aria-hidden', 'true');
+        }
+      });
+
+      // Close dropdown on ESC key
+      document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' && userDropdownMenu.getAttribute('aria-hidden') === 'false') {
+          userDropdownToggle.setAttribute('aria-expanded', 'false');
+          userDropdownMenu.setAttribute('aria-hidden', 'true');
+        }
+      });
+
+      // Optional: Show dropdown on hover (in addition to click)
+      const userDropdown = document.querySelector('.user-dropdown');
+      if (userDropdown) {
+        let hoverTimeout;
+
+        userDropdown.addEventListener('mouseenter', function() {
+          clearTimeout(hoverTimeout);
+          userDropdownToggle.setAttribute('aria-expanded', 'true');
+          userDropdownMenu.setAttribute('aria-hidden', 'false');
+        });
+
+        userDropdown.addEventListener('mouseleave', function() {
+          hoverTimeout = setTimeout(function() {
+            userDropdownToggle.setAttribute('aria-expanded', 'false');
+            userDropdownMenu.setAttribute('aria-hidden', 'true');
+          }, 200);
+        });
+      }
     }
   });
 </script>

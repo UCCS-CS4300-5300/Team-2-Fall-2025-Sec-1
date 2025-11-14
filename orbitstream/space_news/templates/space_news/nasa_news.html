@@ -4,6 +4,10 @@
 {% block title %}NASA Space News{% endblock %}
 {% block body_class %}nasa-page{% endblock %}
 
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'news_filter/filter_styles.css' %}">
+{% endblock %}
+
 {% block content %}
   <div class="nasa-container">
 
@@ -11,7 +15,15 @@
     <header class="nasa-page-header">
       <h1>Astronomy Picture of the Day!</h1>
       <p class="nasa-subtitle"></p>
+
     </header>
+
+    <!-- APOD error handling -->
+    {% if apod_error %}
+        <div class="nasa-apod-error">
+            {{  apod_error }}
+        </div>
+    {% endif %}
 
     <!-- HERO -->
     <section class="nasa-hero">
@@ -32,13 +44,48 @@
         <br>
         <a href="https://apod.nasa.gov/apod/astropix.html" target="_blank" rel="noopener noreferrer" style="color:#60a5fa; text-decoration:none;">View on NASA APOD</a>
       </div>
+      <div class="nasa-hero-title"></div>
+      {% if apod and apod.url %}
+        <div class="nasa-hero-media">
+          {% if apod.media_type == "video" %}
+            <iframe
+              src="{{ apod.url }}"
+              title="{{ apod.title|default:'APOD' }}"
+              loading="lazy"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+              referrerpolicy="strict-origin-when-cross-origin"
+              allowfullscreen></iframe>
+          {% else %}
+            <img
+              src="{{ apod.url }}"
+              alt="{{ apod.title|default:'Astronomy Picture of the Day' }}"
+              loading="lazy"
+              decoding="async" />
+          {% endif %}
+        </div>
+            <div class="nasa-apod-credit">
+                {% if apod.copyright %}
+                  Image Credit: {{ apod.copyright }} / NASA
+                {% else %}
+                  Image Credit: NASA Astronomy Picture of the Day (APOD)
+                {% endif %}
+                <br>
+                <a href="https://apod.nasa.gov/apod/astropix.html" target="_blank" rel="noopener noreferrer">View on NASA APOD </a>
+            </div>
+
+
+      {% else %}
+        <div class="nasa-hero-media">
+          <div class="nasa-hero-fallback">APOD preview will appear here</div>
+        </div>
+      {% endif %}
     </section>
 
     {% include "news_filter/filter_bar.html" %}
 
     <h2 class="nasa-section-title">
       Featured News
-      {% if has_active_filters %}<span style="color:#60a5fa;font-size:.85em;font-weight:400;"> (Filtered)</span>{% endif %}
+      {% if has_active_filters %}<span class="nasa-filtered-badge"> (Filtered)</span>{% endif %}
     </h2>
 
     {% if error %}<div class="nasa-error">{{ error }}</div>{% endif %}
@@ -50,9 +97,9 @@
           <a class="nasa-f-link" href="{% url 'space_news:article_detail' article.uid %}" aria-label="{{ article.title }}">
             <div class="nasa-f-media">
               {% if article.urlToImage %}
-                <img
-                  class="nasa-f-img"
-                  src="{{ article.urlToImage }}"
+                <img 
+                  class="nasa-f-img" 
+                  src="{{ article.urlToImage }}" 
                   alt="{{ article.title }}"
                   onerror="this.style.display='none'; this.parentElement.classList.add('no-image');"
                   loading="lazy">
@@ -78,7 +125,7 @@
           </a>
         </article>
       {% empty %}
-        <p style="color:#64748b;">No featured articles found.</p>
+        <p class="nasa-empty-message">No featured articles found.</p>
       {% endfor %}
     </section>
 
@@ -93,7 +140,7 @@
                 <img
                   src="{{ article.urlToImage }}"
                   alt="{{ article.title }}"
-                  onerror="this.style.display='none'; this.closest('.nasa-feed-thumb').innerHTML='<span style=\'color:#94a3b8;font-weight:600;\'>No image</span>';"
+                  onerror="this.style.display='none'; this.closest('.nasa-feed-thumb').innerHTML='<span class=\'nasa-image-fallback\'>No image</span>';"
                   loading="lazy">
               </a>
             {% else %}
@@ -120,7 +167,7 @@
     </section>
 
     {% if total_results %}
-      <div style="text-align:center;color:#94a3b8;margin:24px 0;">
+      <div class="nasa-results-count">
         Showing {{ total_results }} article{{ total_results|pluralize }}
       </div>
     {% endif %}
@@ -188,6 +235,61 @@
             .then(response => {
                 if (!response.ok) {
                     throw new Error('APOD service unavailable');
+    // Fetch APOD after page loads
+    document.addEventListener('DOMContentLoaded', function() {
+        fetch('{% url "space_news:fetch_apod_async" %}')
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('APOD service unavailable');
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.url) {
+                    // Find the hero section
+                    const heroMedia = document.querySelector('.nasa-hero-media');
+                    const apodCredit = document.querySelector('.nasa-apod-credit');
+                    const errorDiv = document.querySelector('.nasa-error');
+
+                    if (heroMedia) {
+                        // Remove error message if it exists
+                        if (errorDiv) {
+                            errorDiv.remove();
+                        }
+
+                        // Update the media
+                        if (data.media_type === 'video') {
+                            heroMedia.innerHTML = `
+                                <iframe
+                                    src="${data.url}"
+                                    title="${data.title || 'APOD'}"
+                                    loading="lazy"
+                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                                    referrerpolicy="strict-origin-when-cross-origin"
+                                    allowfullscreen></iframe>
+                            `;
+                        } else {
+                            heroMedia.innerHTML = `
+                                <img
+                                    src="${data.url}"
+                                    alt="${data.title || 'Astronomy Picture of the Day'}"
+                                    loading="lazy"
+                                    decoding="async" />
+                            `;
+                        }
+
+                        // Update credit
+                        if (apodCredit) {
+                            const creditText = data.copyright
+                                ? `Image Credit: ${data.copyright} / NASA`
+                                : 'Image Credit: NASA Astronomy Picture of the Day (APOD)';
+                            apodCredit.innerHTML = `
+                                ${creditText}
+                                <br>
+                                <a href="https://apod.nasa.gov/apod/astropix.html" target="_blank" rel="noopener noreferrer">View on NASA APOD</a>
+                            `;
+                        }
+                    }
                 }
                 return response.json();
             })
