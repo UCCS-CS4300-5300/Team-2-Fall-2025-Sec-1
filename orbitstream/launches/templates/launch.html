@@ -18,19 +18,27 @@
         <a href="#" class="learn-more">Watch<span class="arrow">&rarr;</span></a>
     </div>
 
+
     <h1 class="upcoming-launches">Upcoming Launches</h1>
     <div class="launch-feature">
+        {% if upcoming %}
         <div class="launch-feature-card">
-            <img class="upcoming-image" src="{% static 'home/assets/space 1.jpeg' %}" alt="Temp Image">
+            <img class="upcoming-image"
+                 src="{{ upcoming.image }}"
+                 alt="{{ upcoming.name }}">
             <div class="launch-feature-text">
-                <h1>Starlink Mission</h1>
-                <h2>SpaceX</h2>
-                <p>In-Flight</p>
-                <p>November 10, 2025</p>
-                <p>Falcon 9</p>
+                <h1>{{ upcoming.name }}</h1>
+                <h2>{{ upcoming.launch_service_provider.name }}</h2>
+                <p>{{ upcoming.status.name }}</p>
+                <p>{{ upcoming.net }}</p>
+                <p>{{ upcoming.rocket.configuration.full_name }}</p>
             </div>
         </div>
+        {% else %}
+        <p>No upcoming launch found.</p>
+        {% endif %}
     </div>
+    
 
     <h1 class="recent-launches">Recent Launches</h1>
     <table class="recent-launch-tabel">
@@ -44,36 +52,22 @@
             </tr>
         </thead>
         <tbody>
+            {% for launch in recent %}
             <tr>
-                <td>Starlink Mission</td>
-                <td>Falcon 9</td>
-                <td>SLC-40, Florida</td>
-                <td>Droneship</td>
-                <td>November 10, 2025</td>
+                <td>{{ launch.name }}</td>
+                <td>{{ launch.rocket.configuration.full_name }}</td>
+                <td>{{ launch.pad.location.name }}</td>
+                <td>—</td>
+                <td>{{ launch.net }}</td>
             </tr>
+            {% empty %}
             <tr>
-                <td>Starlink Mission</td>
-                <td>Falcon 9</td>
-                <td>SLC-40, Florida</td>
-                <td>Droneship</td>
-                <td>November 10, 2025</td>
+                <td colspan="5">No recent launches found.</td>
             </tr>
-            <tr>
-                <td>Starlink Mission</td>
-                <td>Falcon 9</td>
-                <td>SLC-40, Florida</td>
-                <td>Droneship</td>
-                <td>November 10, 2025</td>
-            </tr>
-            <tr>
-                <td>Starlink Mission</td>
-                <td>Falcon 9</td>
-                <td>SLC-40, Florida</td>
-                <td>Droneship</td>
-                <td>November 10, 2025</td>
-            </tr>
+            {% endfor %}
         </tbody>
     </table>
+    
 
     <h1 class="completed-launches">Completed Missions</h1>
     <table class="completed-launch-tabel">
@@ -87,34 +81,19 @@
             </tr>
         </thead>
         <tbody>
+            {% for launch in completed %}
             <tr>
-                <td>Starlink Mission</td>
-                <td>Falcon 9</td>
-                <td>SLC-40, Florida</td>
-                <td>Droneship</td>
-                <td>November 10, 2025</td>
+                <td>{{ launch.name }}</td>
+                <td>{{ launch.rocket.configuration.full_name }}</td>
+                <td>{{ launch.pad.location.name }}</td>
+                <td>—</td>
+                <td>{{ launch.net }}</td>
             </tr>
+            {% empty %}
             <tr>
-                <td>Starlink Mission</td>
-                <td>Falcon 9</td>
-                <td>SLC-40, Florida</td>
-                <td>Droneship</td>
-                <td>November 10, 2025</td>
+                <td colspan="5">No completed launches found.</td>
             </tr>
-            <tr>
-                <td>Starlink Mission</td>
-                <td>Falcon 9</td>
-                <td>SLC-40, Florida</td>
-                <td>Droneship</td>
-                <td>November 10, 2025</td>
-            </tr>
-            <tr>
-                <td>Starlink Mission</td>
-                <td>Falcon 9</td>
-                <td>SLC-40, Florida</td>
-                <td>Droneship</td>
-                <td>November 10, 2025</td>
-            </tr>
+            {% endfor %}
         </tbody>
     </table>
 
