@@ -2,11 +2,10 @@
 Tests for the launches app.
 """
 from unittest.mock import patch, MagicMock
-from django.test import TestCase, RequestFactory
+from django.test import TestCase
 from django.urls import reverse
 import requests
 
-from launches.views import show_launches, full_launch_detail
 from launches.api import spacedev_api
 
 
@@ -124,10 +123,6 @@ class SpaceDevAPITests(TestCase):
 class LaunchViewsTests(TestCase):
     """Test suite for launch views."""
 
-    def setUp(self):
-        """Set up test fixtures."""
-        self.factory = RequestFactory()
-
     @patch('launches.views.get_upcoming_launches')
     @patch('launches.views.get_recent_launches')
     @patch('launches.views.get_completed_launches')
@@ -135,24 +130,27 @@ class LaunchViewsTests(TestCase):
     def test_show_launches_view(self, mock_hero, mock_completed,
                                 mock_recent, mock_upcoming):
         """Test show_launches view."""
-        mock_hero.return_value = {"mission_name": "Test"}
-        mock_upcoming.return_value = [{"id": "1"}]
+        mock_hero.return_value = {
+            "mission_name": "Test",
+            "launch_id": "test-123"
+        }
+        mock_upcoming.return_value = [{"id": "1", "name": "Test"}]
         mock_recent.return_value = []
         mock_completed.return_value = []
 
-        request = self.factory.get('/launches/')
-        response = show_launches(request)
+        response = self.client.get(reverse('launches:launch'))
 
         self.assertEqual(response.status_code, 200)
-        self.assertIn('hero', response.context_data)
+        self.assertIn('hero', response.context)
 
     @patch('launches.views.get_launch_by_id')
     def test_full_launch_detail_success(self, mock_get_launch):
         """Test full_launch_detail view."""
         mock_get_launch.return_value = {"id": "test-123", "name": "Test"}
 
-        request = self.factory.get('/launches/test-123/')
-        response = full_launch_detail(request, launch_id="test-123")
+        response = self.client.get(
+            reverse('launches:full_launch', args=['test-123'])
+        )
 
         self.assertEqual(response.status_code, 200)
-        self.assertIn('launch', response.context_data)
+        self.assertIn('launch', response.context)
