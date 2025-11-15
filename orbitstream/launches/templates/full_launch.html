@@ -1,0 +1,161 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{{ launch.name }} - Launch Details{% endblock %}
+{% block body_class %}full-launch-page{% endblock %}
+
+{% block content %}
+
+<div class="full-launch-body">
+
+    <!-- Hero Section with Rocket Image -->
+    <div class="full-launch-hero">
+        <div class="full-launch-hero-bg" style="background-image: url('{{ launch.image }}');"></div>
+        <div class="full-launch-hero-info">
+            <h1 class="full-hero-mission">{{ launch.name }}</h1>
+            <p class="full-hero-countdown" data-launch-time="{{ launch.net }}">{{ launch.net }}</p>
+        </div>
+        <a href="{% url 'launches:launch' %}" class="back-button">
+            <span class="arrow">&larr;</span> Back
+        </a>
+        <a href="{{ launch.webcast_live }}" target="_blank" class="watch-button">
+            WATCH <span class="arrow">&rarr;</span>
+        </a>
+    </div>
+
+    <!-- Main Content Area -->
+    <div class="full-launch-content">
+        
+        <!-- Launch Details Section -->
+        <div class="full-launch-details">
+            <h2 class="detail-section-title">{{ launch.name }}</h2>
+            
+            <div class="details-wrapper">
+                <!-- Left: Detail Grid -->
+                <div class="detail-grid">
+                    <div class="detail-item">
+                        <span class="detail-label">Status</span>
+                        <span class="detail-value status-{{ launch.status.abbrev|lower }}">{{ launch.status.name }}</span>
+                    </div>
+                    
+                    <div class="detail-item">
+                        <span class="detail-label">Vehicle</span>
+                        <span class="detail-value">{{ launch.rocket.configuration.full_name }}</span>
+                    </div>
+                    
+                    <div class="detail-item">
+                        <span class="detail-label">Date & Time</span>
+                        <span class="detail-value">{{ launch.net }}</span>
+                    </div>
+                    
+                    <div class="detail-item">
+                        <span class="detail-label">Location</span>
+                        <span class="detail-value">{{ launch.pad.location.name }}</span>
+                    </div>
+                    
+                    {% if launch.pad.name %}
+                    <div class="detail-item">
+                        <span class="detail-label">Who Launched it</span>
+                        <span class="detail-value">{{ launch.launch_service_provider.name }}</span>
+                    </div>
+                    {% endif %}
+                    
+                    <div class="detail-item">
+                        <span class="detail-label">Launch Pad</span>
+                        <span class="detail-value">{{ launch.pad.name }}</span>
+                    </div>
+                    
+                    <div class="detail-item">
+                        <span class="detail-label">Landing</span>
+                        <span class="detail-value">—</span>
+                    </div>
+                    
+                    <div class="detail-item">
+                        <span class="detail-label">Destination</span>
+                        <span class="detail-value">{% if launch.mission %}{{ launch.mission.orbit.name }}{% else %}—{% endif %}</span>
+                    </div>
+                    
+                    <div class="detail-item">
+                        <span class="detail-label">Mission type</span>
+                        <span class="detail-value">{% if launch.mission %}{{ launch.mission.type }}{% else %}—{% endif %}</span>
+                    </div>
+                </div>
+
+                <!-- Right: Mission Description -->
+                {% if launch.mission.description %}
+                <div class="mission-description-section">
+                    <p>{{ launch.mission.description }}</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+    </div> <!-- Close full-launch-content -->
+
+    <!-- Map Section (Outside of content container) -->
+    <div class="full-launch-map">
+        <iframe 
+            width="100%" 
+            height="100%" 
+            frameborder="0" 
+            style="border:0; border-radius: 8px;" 
+            src="https://www.google.com/maps/embed/v1/place?key=YOUR_GOOGLE_MAPS_API_KEY&q={{ launch.pad.latitude }},{{ launch.pad.longitude }}&zoom=4" 
+            allowfullscreen>
+        </iframe>
+        
+        <!-- Map Markers Legend -->
+        <div class="map-legend">
+            <div class="legend-item">
+                <span class="legend-marker marker-launch"></span>
+                <span class="legend-text">Launch</span>
+            </div>
+            <div class="legend-item">
+                <span class="legend-marker marker-land"></span>
+                <span class="legend-text">Land</span>
+            </div>
+        </div>
+    </div>
+
+</div> <!-- Close full-launch-body -->
+
+<script>
+// Countdown timer for full launch page
+(function() {
+  const countdownEl = document.querySelector('.full-hero-countdown');
+  if (!countdownEl) return;
+
+  const launchIso = countdownEl.dataset.launchTime;
+  if (!launchIso) return;
+
+  const launchTime = new Date(launchIso);
+
+  function updateCountdown() {
+    const now = new Date();
+    const diffMs = launchTime - now;
+
+    if (diffMs <= 0) {
+      countdownEl.textContent = 'Launched';
+      clearInterval(timer);
+      return;
+    }
+
+    const totalSeconds = Math.floor(diffMs / 1000);
+    const days = Math.floor(totalSeconds / 86400);
+    const hours = Math.floor((totalSeconds % 86400) / 3600);
+    const minutes = Math.floor((totalSeconds % 3600) / 60);
+    const seconds = totalSeconds % 60;
+
+    const dayPart = days ? `T-${days}d ` : 'T-';
+    const hh = String(hours).padStart(2, '0');
+    const mm = String(minutes).padStart(2, '0');
+    const ss = String(seconds).padStart(2, '0');
+
+    countdownEl.textContent = `${dayPart}${hh}:${mm}:${ss}`;
+  }
+
+  updateCountdown();
+  const timer = setInterval(updateCountdown, 1000);
+})();
+</script>
+
+{% endblock %}

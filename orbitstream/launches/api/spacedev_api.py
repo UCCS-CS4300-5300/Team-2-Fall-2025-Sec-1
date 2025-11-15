@@ -49,6 +49,16 @@ def _do_spacedevs_get(path, params=None):
     return resp.json()
 
 
+def _parse_net_to_dt(net_str):
+    if not net_str:
+        return None
+    if net_str.endswith("Z"):
+        net_str = net_str.replace("Z", "+00:00")
+    try:
+        return datetime.datetime.fromisoformat(net_str)
+    except ValueError:
+        return None
+
 
 def get_next_launch():
     """
@@ -56,6 +66,7 @@ def get_next_launch():
       1. Asking Launch Library 2 for several upcoming launches.
       2. Filtering in Python to pick the earliest launch whose NET is >= now.
     Uses in-memory caching so we don't hammer the API.
+    Returns the full launch object with all details.
     """
     cache_key = "next_launch"
     cached = _get_cached(cache_key)
@@ -72,7 +83,7 @@ def get_next_launch():
         data = _do_spacedevs_get("/launch/upcoming/", params=params)
     except requests.RequestException as e:
         print("SpaceDevs API error:", e)
-        # If we had a stale cached value, we already would’ve returned it.
+        # If we had a stale cached value, we already would've returned it.
         return None
 
     results = data.get("results") or []
@@ -113,14 +124,6 @@ def get_next_launch():
 def spacedev_hero():
     """
     Build the hero dictionary used by your template from the next launch.
-    Keys:
-      - mission_name
-      - launch_time
-      - background_image
-      - rocket_name
-      - pad_name
-      - pad_location
-      - webcast_url (best-effort)
     """
     launch = get_next_launch()
     if not launch:
@@ -129,6 +132,7 @@ def spacedev_hero():
     mission_name = launch.get("name")
     launch_time = launch.get("net")
     background_image = launch.get("image")
+    launch_id = launch.get("id")  # ADD THIS LINE
 
     rocket = launch.get("rocket") or {}
     rocket_cfg = rocket.get("configuration") or {}
@@ -145,6 +149,7 @@ def spacedev_hero():
         "mission_name": mission_name,
         "launch_time": launch_time,
         "background_image": background_image,
+        "launch_id": launch_id,  # ADD THIS LINE
         "rocket_name": rocket_name,
         "pad_name": pad_name,
         "pad_location": pad_location,
@@ -152,19 +157,28 @@ def spacedev_hero():
     }
 
 
-# Function to fill the upcoming launches
-def get_upcoming_launches(limit=4):
+def get_full_launch_data():
+    """
+    Get the complete launch object for the detail page.
+    Returns the full API response for the next upcoming launch.
+    """
+    return get_next_launch()
+
+
+def get_upcoming_launches(limit):
     """
     Return a list of upcoming launches (dicts from Launch Library 2).
     Used for the 'Upcoming Launches' feature card area.
+    Only returns launches that haven't happened yet.
     """
     cache_key = f"upcoming_{limit}"
     cached = _get_cached(cache_key)
     if cached is not None:
         return cached
 
+    # Request more than needed since we'll filter out past launches
     params = {
-        "limit": limit,
+        "limit": limit * 3,  # Request 3x to account for filtering
         "ordering": "net",
         "hide_recent_previous": "true",
     }
@@ -189,63 +203,108 @@ def get_upcoming_launches(limit=4):
         except ValueError:
             return None
 
+    # Filter to only truly future launches
     future = []
     for launch in results:
         net_dt = parse_net(launch.get("net"))
         if net_dt and net_dt >= now:
             future.append(launch)
+            # Stop once we have enough
+            if len(future) >= limit:
+                break
 
     _set_cache(cache_key, future)
     return future
 
 
-# Function to fill recent launches
-def get_recent_launches(limit=5):
+def get_recent_and_completed(recent_limit, completed_limit):
+    """
+    Make ONE call to /launch/previous/ and split it into:
+      - recent: newest `recent_limit` launches (any status)
+      - completed: older launches where status.name == "Success",
+                   up to `completed_limit` items.
+    """
+    cache_key = f"recent_completed_{recent_limit}_{completed_limit}"
+    cached = _get_cached(cache_key)
+    if cached is not None:
+        return cached
+
+    # Grab enough results to cover both lists.
+    # We over-fetch a bit so we can filter for completed successes.
+    total_limit = recent_limit + completed_limit * 2
+
+    params = {
+        "limit": total_limit,
+        "ordering": "-net",
+    }
+
+    try:
+        data = _do_spacedevs_get("/launch/previous/", params=params)
+    except requests.RequestException as e:
+        print("SpaceDevs recent+completed error:", e)
+        return cached or {"recent": [], "completed": []}
+
+    results = data.get("results") or []
+
+    # Attach parsed datetime for nicer formatting
+    for launch in results:
+        launch["net_dt"] = _parse_net_to_dt(launch.get("net"))
+
+    # Newest launches → "recent"
+    recent = results[:recent_limit]
+
+    # Older launches → candidates for "completed"
+    older = results[recent_limit:]
+    completed_success = []
+
+    for launch in older:
+        status = launch.get("status") or {}
+        status_name = status.get("name")
+        if status_name == "Success":
+            completed_success.append(launch)
+            if len(completed_success) >= completed_limit:
+                break
+
+    split_data = {
+        "recent": recent,
+        "completed": completed_success,
+    }
+
+    _set_cache(cache_key, split_data)
+    return split_data
+
+def get_launch_by_id(launch_id):
+    """
+    Fetch a specific launch by its ID.
+    """
+    cache_key = f"launch_{launch_id}"
+    cached = _get_cached(cache_key)
+    if cached is not None:
+        return cached
+
+    try:
+        data = _do_spacedevs_get(f"/launch/{launch_id}/")
+    except requests.RequestException as e:
+        print(f"SpaceDevs API error fetching launch {launch_id}:", e)
+        return None
+
+    _set_cache(cache_key, data)
+    return data
+
+
+def get_recent_launches(limit):
     """
     Recent launches (most recent first) for the 'Recent Launches' table.
+    Uses the shared recent+completed helper so we only hit the API once.
     """
-    cache_key = f"recent_{limit}"
-    cached = _get_cached(cache_key)
-    if cached is not None:
-        return cached
-
-    params = {
-        "limit": limit,
-        "ordering": "-net",
-    }
-
-    try:
-        data = _do_spacedevs_get("/launch/previous/", params=params)
-    except requests.RequestException as e:
-        print("SpaceDevs recent error:", e)
-        return cached or []
-
-    results = data.get("results") or []
-    _set_cache(cache_key, results)
-    return results
+    split = get_recent_and_completed(recent_limit=limit, completed_limit=limit)
+    return split.get("recent", [])
 
 
-# Function for getting completed missions
-def get_completed_launches(limit=5):
+def get_completed_launches(limit):
     """
-    Completed launches (i.e., anything in the past).
+    Completed launches for the 'Completed Missions' table.
+    Uses the same shared data as get_recent_launches.
     """
-    cache_key = f"completed_{limit}"
-    cached = _get_cached(cache_key)
-    if cached is not None:
-        return cached
-
-    params = {
-        "limit": limit,
-        "ordering": "-net",
-    }
-
-    try:
-        data = _do_spacedevs_get("/launch/previous/", params=params)
-    except requests.RequestException as e:
-        print("SpaceDevs Previous API error:", e)
-        return cached or []
-
-    results = data.get("results") or []
-    _set_cache(cache_key, results)
-    return results
+    split = get_recent_and_completed(recent_limit=limit, completed_limit=limit)
+    return split.get("completed", [])
