@@ -52,6 +52,9 @@ CSRF_TRUSTED_ORIGINS = [
 # Behind Render’s proxy, tell Django requests are HTTPS
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 
+# Make sure we send a usable Referer header for embedded YouTube iframes.
+SECURE_REFERRER_POLICY = "strict-origin-when-cross-origin"
+
 # Application definition
 
 INSTALLED_APPS = [

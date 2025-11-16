@@ -1,4 +1,4 @@
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render
 from .api.spacedev_api import (
     spacedev_hero,
     get_upcoming_launches,
@@ -6,6 +6,7 @@ from .api.spacedev_api import (
     get_completed_launches,
     get_launch_by_id,
 )
+
 
 def show_launches(request):
     hero = spacedev_hero()
@@ -19,7 +20,7 @@ def show_launches(request):
     context = {
         "hero": hero,
         "upcoming": upcoming,
-        "upcoming_list": upcoming_list,   
+        "upcoming_list": upcoming_list,
         "recent": recent_launches,
         "completed": completed_launches,
     }
@@ -29,16 +30,19 @@ def show_launches(request):
 def full_launch_detail(request, launch_id):
     """
     Display the full launch detail page for a specific launch ID.
+    Includes pad latitude/longitude for the Leaflet map.
     """
-    from .api.spacedev_api import get_launch_by_id
-    
-    # Get the specific launch data by ID
-    launch = get_launch_by_id(launch_id)
-    
-    if not launch:
-        launch = {}
-    
+    # Get the specific launch data by ID (fallback to empty dict if None)
+    launch = get_launch_by_id(launch_id) or {}
+
+    # Safely pull pad + coordinates
+    pad = launch.get("pad") or {}
+    latitude = pad.get("latitude")
+    longitude = pad.get("longitude")
+
     context = {
         "launch": launch,
+        "pad_lat": latitude,
+        "pad_lon": longitude,
     }
     return render(request, "full_launch.html", context)

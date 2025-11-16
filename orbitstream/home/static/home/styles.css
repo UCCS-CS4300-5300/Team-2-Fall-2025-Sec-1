@@ -4206,6 +4206,82 @@ body.full-media-page .site-footer {
   gap: 0.5rem;
 }
 
+/* Video Player Section */
+/* Video Modal */
+.video-modal {
+  display: none;
+  position: fixed;
+  z-index: 9999;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.95);
+  backdrop-filter: blur(10px);
+}
+
+.video-modal-content {
+  position: relative;
+  margin: 5% auto;
+  width: 90%;
+  max-width: 1400px;
+}
+
+.video-modal-close {
+  position: absolute;
+  top: -50px;
+  right: 0;
+  color: #ffffff;
+  font-size: 40px;
+  font-weight: 300;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  z-index: 10000;
+}
+
+.video-modal-close:hover {
+  color: #60a5fa;
+  transform: scale(1.1);
+}
+
+.video-modal-player {
+  position: relative;
+  width: 100%;
+  padding-bottom: 56.25%; /* 16:9 aspect ratio */
+  background: #000;
+  border-radius: 1rem;
+  overflow: hidden;
+}
+
+.modal-video-iframe {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border: none;
+}
+
+.video-placeholder {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  color: #94a3b8;
+}
+
+.video-placeholder p {
+  margin: 0.5rem 0;
+  font-size: 1.2rem;
+}
+
+.video-note {
+  font-size: 0.9rem !important;
+  opacity: 0.7;
+}
+/*End of launch video section */
+
 .btn-primary-launch {
   background: linear-gradient(135deg, #3b82f6, #2563eb);
   color: #ffffff;
@@ -4219,19 +4295,203 @@ body.full-media-page .site-footer {
   transform: translateY(-2px);
 }
 
-.btn-secondary-launch {
-  background: transparent;
-  color: #ffffff;
-  border: 2px solid rgba(255, 255, 255, 0.3);
+.btn-icon {
+  font-size: 1rem;
 }
 
-.btn-secondary-launch:hover {
-  background: rgba(255, 255, 255, 0.1);
-  border-color: rgba(255, 255, 255, 0.5);
+/*=====================================================
+         INFO CARD SECTIONS (Agency, Mission, Rocket)
+=======================================================*/
+
+/* Info Card Section - Aligned with launch details */
+.info-card-section {
+  position: relative;
+  width: 100%;
+  height: auto;
+  min-height: 600px;
+  background: transparent;
+  border: transparent;
+  display: flex;
+  flex-direction: column;
+  max-width: 2000px;
+  margin: 3rem auto 0;
+  padding: 0 2rem 3rem;
+}
+
+.info-card-title {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #ffffff;
+  margin: 0 0 2.5rem 0;
+  padding-left: 2.5rem;
+  text-align: left;
+}
+
+.info-card-container {
+  width: 100%;
+  background: transparent;
+  backdrop-filter: none;
+  border: none;
+  padding: 0 2.5rem;
+  display: grid;
+  grid-template-columns: 300px 1fr;
+  gap: 3rem;
+  overflow: visible;
+}
+
+/* Left side - Logo/Image */
+.info-card-left {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 0.75rem;
+  padding: 2rem;
+  height: fit-content;
+  max-height: 500px;
+}
+
+/* Special styling for mission patch container */
+.info-card-left.mission-patch-container {
+  padding: 0;
+  overflow: hidden;
+  height: 100%;
+  min-height: 400px;
+}
+
+/* Mission patch background div */
+.mission-patch-bg {
+  height: 100%;
+  width: 100%;
+  background-size: contain;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-origin: content-box;
+  padding: 0.5rem;
+}
+
+/* Special styling for rocket image container - make it fill the space */
+.info-card-left.rocket-image-container {
+  padding: 0;
+  overflow: hidden;
+  max-height: 600px;
+  height: 100%;
+}
+
+.info-card-logo {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+.info-card-logo.mission-patch {
+  border-radius: 50%;
+}
+
+.mission-patch-placeholder {
+  width: 200px;
+  height: 200px;
+  border-radius: 50%;
+  background: rgba(59, 130, 246, 0.1);
+  border: 2px solid rgba(59, 130, 246, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.mission-patch-placeholder .patch-icon {
+  font-size: 4rem;
+  opacity: 0.5;
+}
+
+.info-card-logo.rocket-image {
+  object-fit: cover;
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  max-height: none;
+}
+
+/* Right side - Content */
+.info-card-right {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  color: #ffffff;
+}
+
+.info-card-description {
+  font-size: 0.95rem;
+  line-height: 1.8;
+  color: #cbd5e1;
+  margin: 0 0 2rem 0;
+}
+
+/* Rocket Stats Grid */
+.rocket-stats-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.rocket-stat-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+}
+
+.rocket-stat-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.rocket-stat-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.rocket-stat-value {
+  font-size: 1rem;
+  color: #ffffff;
+  font-weight: 500;
+}
+
+/* Info Card Buttons */
+.info-card-buttons {
+  display: flex;
+  gap: 1rem;
+  margin-top: auto;
+}
+
+.info-card-btn {
+  padding: 1rem 2rem;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  background: rgba(0, 0, 0, 0.4);
+  color: #ffffff !important;
+  font-size: 0.9rem !important;
+  font-weight: 600;
+  text-decoration: none;
+  text-align: center;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.info-card-btn:hover {
+  background: rgba(59, 130, 246, 0.3);
+  border-color: rgba(59, 130, 246, 0.6);
   transform: translateY(-2px);
 }
 
-.btn-icon {
+.info-card-btn .btn-icon {
   font-size: 1rem;
 }
 
@@ -4239,22 +4499,33 @@ body.full-media-page .site-footer {
 .full-launch-map {
   position: relative;
   width: 100%;
-  height: 800px;
-  background: rgba(20, 20, 20, 0.6);
+  height: 900px;
+  background: transparent;
+  border: transparent;
   padding: 2rem;
   display: flex;
-  justify-content: center;
-  align-items: center;
+  flex-direction: column;
+  align-items: left;
   margin: 3rem auto 5rem;
-  max-width: 1700px; /* ADD THIS LINE */
+  max-width: 1700px; 
 }
 
-.full-launch-map iframe {
+.map-title {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #ffffff;
+  margin-bottom: 2rem;
+  text-align: left;
+}
+
+/* The Leaflet map div inside the map section */
+.full-launch-map #launchMap {
   width: 100%;
-  height: 100%;
+  height: 100%;  /* fills the 900px height of .full-launch-map */
   border: none;
   border-radius: 1rem;
   border: 1px solid rgba(255, 255, 255, 0.08);
+  overflow: hidden;
 }
 
 /* Map Legend */
@@ -4332,6 +4603,13 @@ body.full-media-page .site-footer {
 }
 
 /* Responsive Design */
+@media (max-width: 1400px) {
+  .info-card-container {
+    grid-template-columns: 250px 1fr;
+    gap: 2rem;
+  }
+}
+
 @media (max-width: 1024px) {
   .details-wrapper {
     grid-template-columns: 1fr;
@@ -4341,6 +4619,25 @@ body.full-media-page .site-footer {
   .detail-grid {
     grid-template-columns: 1fr;
     gap: 1.5rem;
+  }
+  
+  .info-card-section {
+    height: auto;
+    min-height: 600px;
+  }
+  
+  .info-card-title {
+    padding-left: 1.5rem;
+  }
+  
+  .info-card-container {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+    padding: 0 1.5rem;
+  }
+  
+  .info-card-left {
+    max-height: 300px;
   }
   
   .full-launch-map {
@@ -4372,6 +4669,29 @@ body.full-media-page .site-footer {
   .back-button {
     top: 1rem;
     left: 1rem;
+  }
+  
+  .info-card-section {
+    padding: 0 1rem 3rem;
+    min-height: 500px;
+  }
+  
+  .info-card-title {
+    font-size: 1.5rem;
+    padding-left: 1rem;
+  }
+  
+  .info-card-container {
+    padding: 0 1rem;
+  }
+  
+  .rocket-stat-row {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+  
+  .info-card-buttons {
+    flex-direction: column;
   }
   
   .full-launch-map {

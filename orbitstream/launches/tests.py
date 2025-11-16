@@ -119,6 +119,56 @@ class SpaceDevAPITests(TestCase):
         self.assertIsNotNone(result)
         self.assertEqual(result["id"], "specific-123")
 
+    @patch('launches.api.spacedev_api.requests.get')
+    def test_get_mission_patches(self, mock_get):
+        """Test fetching mission patches."""
+        mock_response = MagicMock()
+        mock_response.json.return_value = {"results": []}
+        mock_response.raise_for_status = MagicMock()
+        mock_get.return_value = mock_response
+
+        result = spacedev_api.get_mission_patches("mission-123")
+
+        self.assertEqual(result, [])
+
+    def test_extract_youtube_id(self):
+        """Test YouTube ID extraction."""
+        url = "https://www.youtube.com/watch?v=abc123defgh"
+        result = spacedev_api.extract_youtube_id(url)
+        self.assertEqual(result, "abc123defgh")
+
+    def test_get_best_video_url(self):
+        """Test video URL extraction."""
+        launch = {
+            "vidURLs": [
+                {"url": "https://example.com/1", "type": {"name": "Other"}},
+                {"url": "https://example.com/2", "type": {"name": "Official Webcast"}}
+            ]
+        }
+        result = spacedev_api.get_best_video_url(launch)
+        self.assertEqual(result, "https://example.com/2")
+
+    @patch('launches.api.spacedev_api.get_next_launch')
+    def test_get_full_launch_data(self, mock_next):
+        """Test full launch data retrieval."""
+        mock_next.return_value = {"id": "test", "vidURLs": []}
+        result = spacedev_api.get_full_launch_data()
+        self.assertIn("video_url", result)
+
+    @patch('launches.api.spacedev_api.get_recent_and_completed')
+    def test_get_recent_launches(self, mock_split):
+        """Test recent launches helper."""
+        mock_split.return_value = {"recent": [{"id": "1"}], "completed": []}
+        result = spacedev_api.get_recent_launches(5)
+        self.assertEqual(len(result), 1)
+
+    @patch('launches.api.spacedev_api.get_recent_and_completed')
+    def test_get_completed_launches(self, mock_split):
+        """Test completed launches helper."""
+        mock_split.return_value = {"recent": [], "completed": [{"id": "1"}]}
+        result = spacedev_api.get_completed_launches(5)
+        self.assertEqual(len(result), 1)
+
 
 class LaunchViewsTests(TestCase):
     """Test suite for launch views."""

@@ -2,7 +2,7 @@
 import datetime
 import os
 import time
-
+import re
 import requests
 
 SPACEDEVS_BASE = "https://ll.thespacedevs.com/2.0.0"
@@ -60,6 +60,87 @@ def _parse_net_to_dt(net_str):
         return None
 
 
+def extract_youtube_id(url):
+    """
+    Extract YouTube video ID from various YouTube URL formats.
+    Supports:
+    - https://www.youtube.com/watch?v=VIDEO_ID
+    - https://youtu.be/VIDEO_ID
+    - https://www.youtube.com/embed/VIDEO_ID
+    - https://www.youtube.com/live/VIDEO_ID
+    """
+    if not url:
+        return None
+
+    patterns = [
+        r'(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/|youtube\.com\/live\/)([a-zA-Z0-9_-]{11})',
+        r'youtube\.com\/watch\?.*v=([a-zA-Z0-9_-]{11})',
+    ]
+
+    for pattern in patterns:
+        match = re.search(pattern, url)
+        if match:
+            return match.group(1)
+
+    return None
+
+
+def get_best_video_url(launch):
+    """
+    Return the best video URL for a launch, preferably the 'Official Webcast'
+    from launch['vidURLs'], otherwise the first URL available.
+    """
+    if not launch:
+        return None
+
+    vid_urls = launch.get("vidURLs") or []
+    if not vid_urls:
+        return None
+
+    official = None
+    fallback = None
+
+    for entry in vid_urls:
+        url = entry.get("url")
+        if not url:
+            continue
+
+        if not fallback:
+            fallback = url
+
+        type_obj = entry.get("type") or {}
+        if type_obj.get("name") == "Official Webcast":
+            official = url
+            break
+
+    return official or fallback
+
+
+def get_mission_patches(mission_id):
+    """
+    Fetch mission patches for a specific mission ID.
+    Returns a list of mission patch objects with image_url.
+    """
+    cache_key = f"mission_patches_{mission_id}"
+    cached = _get_cached(cache_key)
+    if cached is not None:
+        return cached
+
+    params = {
+        "mission": mission_id,
+    }
+
+    try:
+        data = _do_spacedevs_get("/mission_patches/", params=params)
+    except requests.RequestException as e:
+        print(f"SpaceDevs API error fetching mission patches for {mission_id}:", e)
+        return []
+
+    results = data.get("results") or []
+    _set_cache(cache_key, results)
+    return results
+
+
 def get_next_launch():
     """
     Fetch the next *truly upcoming* launch by:
@@ -83,7 +164,6 @@ def get_next_launch():
         data = _do_spacedevs_get("/launch/upcoming/", params=params)
     except requests.RequestException as e:
         print("SpaceDevs API error:", e)
-        # If we had a stale cached value, we already would've returned it.
         return None
 
     results = data.get("results") or []
@@ -132,7 +212,7 @@ def spacedev_hero():
     mission_name = launch.get("name")
     launch_time = launch.get("net")
     background_image = launch.get("image")
-    launch_id = launch.get("id")  # ADD THIS LINE
+    launch_id = launch.get("id")
 
     rocket = launch.get("rocket") or {}
     rocket_cfg = rocket.get("configuration") or {}
@@ -143,17 +223,19 @@ def spacedev_hero():
     location = pad.get("location") or {}
     pad_location = location.get("name")
 
-    webcast_url = launch.get("webcast_live") or launch.get("url")
+    video_url = get_best_video_url(launch)
+    youtube_id = extract_youtube_id(video_url)
 
     return {
         "mission_name": mission_name,
         "launch_time": launch_time,
         "background_image": background_image,
-        "launch_id": launch_id,  # ADD THIS LINE
+        "launch_id": launch_id,
         "rocket_name": rocket_name,
         "pad_name": pad_name,
         "pad_location": pad_location,
-        "webcast_url": webcast_url,
+        "webcast_url": video_url,   # direct link
+        "youtube_id": youtube_id,   # for embed if you want
     }
 
 
@@ -162,7 +244,47 @@ def get_full_launch_data():
     Get the complete launch object for the detail page.
     Returns the full API response for the next upcoming launch.
     """
-    return get_next_launch()
+    launch = get_next_launch()
+    if launch:
+        video_url = get_best_video_url(launch)
+        youtube_id = extract_youtube_id(video_url)
+        launch["video_url"] = video_url
+        launch["youtube_id"] = youtube_id
+    return launch
+
+
+def get_launch_by_id(launch_id):
+    """
+    Fetch a specific launch by its ID.
+    Now also fetches mission patches if available.
+    """
+    cache_key = f"launch_{launch_id}"
+    cached = _get_cached(cache_key)
+    if cached is not None:
+        return cached
+
+    try:
+        data = _do_spacedevs_get(f"/launch/{launch_id}/")
+    except requests.RequestException as e:
+        print(f"SpaceDevs API error fetching launch {launch_id}:", e)
+        return None
+
+    video_url = get_best_video_url(data)
+    youtube_id = extract_youtube_id(video_url)
+
+    data["video_url"] = video_url
+    data["youtube_id"] = youtube_id
+
+    # Fetch mission patches if mission exists
+    mission = data.get("mission")
+    if mission and mission.get("id"):
+        mission_patches = get_mission_patches(mission["id"])
+        data["mission_patches"] = mission_patches
+    else:
+        data["mission_patches"] = []
+
+    _set_cache(cache_key, data)
+    return data
 
 
 def get_upcoming_launches(limit):
@@ -208,8 +330,8 @@ def get_upcoming_launches(limit):
     for launch in results:
         net_dt = parse_net(launch.get("net"))
         if net_dt and net_dt >= now:
+            launch["net_dt"] = net_dt
             future.append(launch)
-            # Stop once we have enough
             if len(future) >= limit:
                 break
 
@@ -273,24 +395,6 @@ def get_recent_and_completed(recent_limit, completed_limit):
     _set_cache(cache_key, split_data)
     return split_data
 
-def get_launch_by_id(launch_id):
-    """
-    Fetch a specific launch by its ID.
-    """
-    cache_key = f"launch_{launch_id}"
-    cached = _get_cached(cache_key)
-    if cached is not None:
-        return cached
-
-    try:
-        data = _do_spacedevs_get(f"/launch/{launch_id}/")
-    except requests.RequestException as e:
-        print(f"SpaceDevs API error fetching launch {launch_id}:", e)
-        return None
-
-    _set_cache(cache_key, data)
-    return data
-
 
 def get_recent_launches(limit):
     """
@@ -308,3 +412,4 @@ def get_completed_launches(limit):
     """
     split = get_recent_and_completed(recent_limit=limit, completed_limit=limit)
     return split.get("completed", [])
+    
