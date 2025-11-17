@@ -1,0 +1,11 @@
+Requirement already satisfied: Brotli in /home/wamba/orbitstream_project/.venv/lib/python3.12/site-packages (1.1.0)
+Collecting Brotli
+  Downloading brotli-1.2.0-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.whl.metadata (6.1 kB)
+Downloading brotli-1.2.0-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.whl (1.4 MB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 1.4/1.4 MB 10.4 MB/s eta 0:00:00
+Installing collected packages: Brotli
+  Attempting uninstall: Brotli
+    Found existing installation: Brotli 1.1.0
+    Uninstalling Brotli-1.1.0:
+      Successfully uninstalled Brotli-1.1.0
+Successfully installed Brotli-1.2.0

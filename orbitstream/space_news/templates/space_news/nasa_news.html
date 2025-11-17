@@ -4,6 +4,10 @@
 {% block title %}NASA Space News{% endblock %}
 {% block body_class %}nasa-page{% endblock %}
 
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'news_filter/filter_styles.css' %}">
+{% endblock %}
+
 {% block content %}
   <div class="nasa-container">
 
@@ -14,23 +18,57 @@
 
     </header>
 
-  <!-- HERO -->
-  <section class="nasa-hero">
-    <div class="nasa-hero-title"></div>
-    <div class="nasa-hero-media">
-      <img
-        src="{% static 'home/assets/WitchBroom_Meyers_1080.jpg' %}"
-        alt="Temporary Space Image"
-        loading="lazy"
-        decoding="async" />
-    </div>
-  </section>
+    <!-- APOD error handling -->
+    {% if apod_error %}
+        <div class="nasa-apod-error">
+            {{  apod_error }}
+        </div>
+    {% endif %}
+
+    <!-- HERO -->
+    <section class="nasa-hero">
+      <div class="nasa-hero-title"></div>
+      {% if apod and apod.url %}
+        <div class="nasa-hero-media">
+          {% if apod.media_type == "video" %}
+            <iframe
+              src="{{ apod.url }}"
+              title="{{ apod.title|default:'APOD' }}"
+              loading="lazy"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+              referrerpolicy="strict-origin-when-cross-origin"
+              allowfullscreen></iframe>
+          {% else %}
+            <img
+              src="{{ apod.url }}"
+              alt="{{ apod.title|default:'Astronomy Picture of the Day' }}"
+              loading="lazy"
+              decoding="async" />
+          {% endif %}
+        </div>
+            <div class="nasa-apod-credit">
+                {% if apod.copyright %}
+                  Image Credit: {{ apod.copyright }} / NASA
+                {% else %}
+                  Image Credit: NASA Astronomy Picture of the Day (APOD)
+                {% endif %}
+                <br>
+                <a href="https://apod.nasa.gov/apod/astropix.html" target="_blank" rel="noopener noreferrer">View on NASA APOD </a>
+            </div>
+
+
+      {% else %}
+        <div class="nasa-hero-media">
+          <div class="nasa-hero-fallback">APOD preview will appear here</div>
+        </div>
+      {% endif %}
+    </section>
 
     {% include "news_filter/filter_bar.html" %}
 
     <h2 class="nasa-section-title">
       Featured News
-      {% if has_active_filters %}<span style="color:#60a5fa;font-size:.85em;font-weight:400;"> (Filtered)</span>{% endif %}
+      {% if has_active_filters %}<span class="nasa-filtered-badge"> (Filtered)</span>{% endif %}
     </h2>
 
     {% if error %}<div class="nasa-error">{{ error }}</div>{% endif %}
@@ -70,7 +108,7 @@
           </a>
         </article>
       {% empty %}
-        <p style="color:#64748b;">No featured articles found.</p>
+        <p class="nasa-empty-message">No featured articles found.</p>
       {% endfor %}
     </section>
 
@@ -82,10 +120,10 @@
           <div class="nasa-feed-thumb">
             {% if article.urlToImage %}
               <a href="{% url 'space_news:article_detail' article.uid %}">
-                <img 
-                  src="{{ article.urlToImage }}" 
+                <img
+                  src="{{ article.urlToImage }}"
                   alt="{{ article.title }}"
-                  onerror="this.style.display='none'; this.closest('.nasa-feed-thumb').innerHTML='<span style=\'color:#94a3b8;font-weight:600;\'>No image</span>';"
+                  onerror="this.style.display='none'; this.closest('.nasa-feed-thumb').innerHTML='<span class=\'nasa-image-fallback\'>No image</span>';"
                   loading="lazy">
               </a>
             {% else %}
@@ -112,7 +150,7 @@
     </section>
 
     {% if total_results %}
-      <div style="text-align:center;color:#94a3b8;margin:24px 0;">
+      <div class="nasa-results-count">
         Showing {{ total_results }} article{{ total_results|pluralize }}
       </div>
     {% endif %}
@@ -147,7 +185,6 @@
                                 <iframe
                                     src="${data.url}"
                                     title="${data.title || 'APOD'}"
-                                    style="width:100%;height:100%;border:0;"
                                     loading="lazy"
                                     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                                     referrerpolicy="strict-origin-when-cross-origin"
@@ -165,13 +202,13 @@
                         
                         // Update credit
                         if (apodCredit) {
-                            const creditText = data.copyright 
+                            const creditText = data.copyright
                                 ? `Image Credit: ${data.copyright} / NASA`
                                 : 'Image Credit: NASA Astronomy Picture of the Day (APOD)';
                             apodCredit.innerHTML = `
                                 ${creditText}
                                 <br>
-                                <a href="https://apod.nasa.gov/apod/astropix.html" target="_blank" rel="noopener noreferrer" style="color:#60a5fa; text-decoration:none;">View on NASA APOD</a>
+                                <a href="https://apod.nasa.gov/apod/astropix.html" target="_blank" rel="noopener noreferrer">View on NASA APOD</a>
                             `;
                         }
                     }

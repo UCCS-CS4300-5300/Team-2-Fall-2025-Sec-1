@@ -1,0 +1,31 @@
+name: Pylint
+
+# This controls when the workflow is going to run
+on:
+  push: # Triggers the workflow everytime there's a push or pull request for all the branches of the repo
+    branches: ["**"]         # Run on every branch for each commit
+  pull_request:              # Also run on PRs 
+    types: [opened, synchronize, reopened, ready_for_review]
+
+jobs:
+  pylint:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: "3.12"
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+  
+    - name: Run pylint
+      working-directory: ./orbitstream # this should take care of the errors I was getting, then add each app individually to run command
+      run: |
+        pylint orbitstream --fail-under=8.0
