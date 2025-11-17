@@ -1,0 +1,184 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Closest Satellite - OrbitStream{% endblock %}
+{% block body_class %}satellite-tracking-page{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'satellite_tracking/closest_satellite.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="satellite-container">
+  <div class="satellite-header">
+    <h1 class="satellite-title">Find Closest Satellite</h1>
+    <p class="satellite-subtitle">Discover which satellite is closest to your location</p>
+  </div>
+
+  <div class="location-buttons">
+    <button id="manual-location-btn" class="location-btn location-btn-primary">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+        <circle cx="12" cy="10" r="3"></circle>
+      </svg>
+      Manual Location
+    </button>
+
+    <button id="gps-btn" class="location-btn location-btn-secondary">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="12" cy="12" r="10"></circle>
+        <circle cx="12" cy="12" r="6"></circle>
+        <circle cx="12" cy="12" r="2"></circle>
+      </svg>
+      Use GPS
+    </button>
+  </div>
+
+  <!-- Manual Location Dialog -->
+  <div id="manual-location-dialog" class="dialog-overlay" style="display: none;">
+    <div class="dialog-box">
+      <div class="dialog-header">
+        <h2>Enter Coordinates</h2>
+        <button class="dialog-close" aria-label="Close dialog">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+
+      <form id="coordinates-form" class="coordinates-form">
+        <div class="form-group">
+          <label for="latitude">Latitude</label>
+          <input
+            type="number"
+            id="latitude"
+            name="latitude"
+            step="any"
+            min="-90"
+            max="90"
+            placeholder="e.g., 40.7128"
+            required
+          >
+          <span class="form-hint">Between -90 and 90</span>
+        </div>
+
+        <div class="form-group">
+          <label for="longitude">Longitude</label>
+          <input
+            type="number"
+            id="longitude"
+            name="longitude"
+            step="any"
+            min="-180"
+            max="180"
+            placeholder="e.g., -74.0060"
+            required
+          >
+          <span class="form-hint">Between -180 and 180</span>
+        </div>
+
+        <div class="form-group">
+          <label for="altitude">Altitude (meters)</label>
+          <input
+            type="number"
+            id="altitude"
+            name="altitude"
+            step="any"
+            min="0"
+            value="0"
+            placeholder="e.g., 0"
+          >
+          <span class="form-hint">Optional, defaults to 0</span>
+        </div>
+
+        <button type="submit" class="submit-btn">
+          Find Satellite
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Loading Indicator -->
+  <div id="loading-indicator" class="loading-indicator" style="display: none;">
+    <div class="spinner"></div>
+    <p>Searching for satellites...</p>
+  </div>
+
+  <!-- Error Message -->
+  <div id="error-message" class="error-message" style="display: none;"></div>
+
+  <!-- Satellite Information Display -->
+  <div id="satellite-info" class="satellite-info" style="display: none;">
+    <h2 class="info-title">Closest Satellite Found</h2>
+
+    <div class="info-grid">
+      <div class="info-card info-card-primary">
+        <h3>Satellite Details</h3>
+        <div class="info-row">
+          <span class="info-label">Name:</span>
+          <span class="info-value" id="sat-name">-</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">ID:</span>
+          <span class="info-value" id="sat-id">-</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Altitude:</span>
+          <span class="info-value" id="sat-altitude">-</span>
+        </div>
+      </div>
+
+      <div class="info-card">
+        <h3>Position</h3>
+        <div class="info-row">
+          <span class="info-label">Latitude:</span>
+          <span class="info-value" id="sat-lat">-</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Longitude:</span>
+          <span class="info-value" id="sat-lng">-</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Elevation:</span>
+          <span class="info-value" id="sat-elevation">-</span>
+        </div>
+      </div>
+
+      <div class="info-card">
+        <h3>Orientation</h3>
+        <div class="info-row">
+          <span class="info-label">Azimuth:</span>
+          <span class="info-value" id="sat-azimuth">-</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Right Ascension:</span>
+          <span class="info-value" id="sat-ra">-</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Declination:</span>
+          <span class="info-value" id="sat-dec">-</span>
+        </div>
+      </div>
+
+      <div class="info-card">
+        <h3>Your Location</h3>
+        <div class="info-row">
+          <span class="info-label">Latitude:</span>
+          <span class="info-value" id="user-lat">-</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Longitude:</span>
+          <span class="info-value" id="user-lng">-</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Total Found:</span>
+          <span class="info-value" id="total-sats">-</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="{% static 'satellite_tracking/closest_satellite.js' %}"></script>
+{% endblock %}
