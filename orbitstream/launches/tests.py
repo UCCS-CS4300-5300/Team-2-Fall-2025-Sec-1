@@ -84,7 +84,8 @@ class SpaceDevAPITests(TestCase):
 
         result = spacedev_api.get_upcoming_launches(limit=3)
 
-        self.assertEqual(len(result), 3)
+        # Expects 2 because the function pops the first launch (hero launch)
+        self.assertEqual(len(result), 2)
 
     @patch('launches.api.spacedev_api.requests.get')
     def test_get_recent_and_completed(self, mock_get):
