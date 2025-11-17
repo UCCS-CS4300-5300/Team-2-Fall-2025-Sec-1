@@ -11,7 +11,7 @@ from .api.spacedev_api import (
 def show_launches(request):
     hero = spacedev_hero()
 
-    upcoming_list = get_upcoming_launches(limit=4)  # slider uses this
+    upcoming_list = get_upcoming_launches(limit=5)  # slider uses this
     upcoming = upcoming_list[0] if upcoming_list else None  # keep your single card base if needed
 
     recent_launches = get_recent_launches(limit=10)

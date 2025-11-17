@@ -3732,6 +3732,11 @@ body.full-media-page .site-footer {
   color: #ffffff;
 }
 
+.status-tbd {
+  background: linear-gradient(135deg, #ef4444, #b91c1c);
+  color: #ffffff;
+}
+
 /* Text Content Area */
 .launch-feature-text {
   flex: 1;

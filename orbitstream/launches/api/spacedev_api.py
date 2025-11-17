@@ -334,7 +334,8 @@ def get_upcoming_launches(limit):
             future.append(launch)
             if len(future) >= limit:
                 break
-
+    future.pop(0)
+    
     _set_cache(cache_key, future)
     return future
 
