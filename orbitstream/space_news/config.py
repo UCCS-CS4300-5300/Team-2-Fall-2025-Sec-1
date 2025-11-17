@@ -147,7 +147,8 @@ EXCLUDED_DOMAINS = [
     "techpowerup.com",
     "siliconangle.com",
     "Biztoc.com",
-    "newser.com"
+    "newser.com",
+    "Balloon-juice.com"
 ]
 
 # Reliable sources with consistent high-quality images and content

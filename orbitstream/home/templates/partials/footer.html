@@ -28,12 +28,14 @@
       <section class="footer__col">
         <h3 class="footer__title">
           Navigation
-        </h3>
+        </h3> 
         <ul class="footer__links">
           <li><a href="{% url 'space_news:nasa_news' %}" class="footer-link"><span class="link-dot"></span>News</a></li>
           <li><a href="#" class="footer-link"><span class="link-dot"></span>GPS Tracking</a></li>
-          <li><a href="#" class="footer-link"><span class="link-dot"></span>Launches</a></li>
+          <li><a href="{% url 'launches:launch' %}" class="footer-link"><span class="link-dot"></span>Launches</span></a></li>
+          <li><a href="#" class="footer-link"><span class="link-dot"></span>Preferences</a></li>
           <li><a href="{% url 'space_imagery:gallery' %}" class="footer-link"><span class="link-dot"></span>Gallery</a></li>
+          <li><a href="{% url 'learn_page:learn_page' %}" class="footer-link"><span class="link-dot"></span>Learn</a></li>
         </ul>
       </section>
 

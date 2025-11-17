@@ -1,0 +1,443 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{{ launch.name }} - Launch Details{% endblock %}
+{% block body_class %}full-launch-page{% endblock %}
+
+{% block content %}
+
+<link
+  rel="stylesheet"
+  href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+/>
+<script
+  src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js">
+</script>
+
+<div class="full-launch-body">
+
+    <!-- Hero Section with Rocket Image -->
+    <div class="full-launch-hero">
+        <div class="full-launch-hero-bg" style="background-image: url('{{ launch.image }}');"></div>
+        <div class="full-launch-hero-info">
+            <h1 class="full-hero-mission">{{ launch.name }}</h1>
+            <p class="full-hero-countdown" data-launch-time="{{ launch.net }}">{{ launch.net }}</p>
+        </div>
+        <a href="{% url 'launches:launch' %}" class="back-button">
+            <span class="arrow">&larr;</span> Back
+        </a>
+        <a href="#" class="watch-button" id="openVideoBtn">
+            WATCH <span class="arrow">&rarr;</span>
+        </a>
+    </div>
+
+    <!-- Main Content Area -->
+    <div class="full-launch-content">
+        
+        <!-- Launch Details Section -->
+        <div class="full-launch-details">
+            <h2 class="detail-section-title">{{ launch.name }}</h2>
+            
+            <div class="details-wrapper">
+                <!-- Left: Detail Grid -->
+                <div class="detail-grid">
+                    <div class="detail-item">
+                        <span class="detail-label">Status</span>
+                        <span class="detail-value status-{{ launch.status.abbrev|lower }}">{{ launch.status.name }}</span>
+                    </div>
+                    
+                    <div class="detail-item">
+                        <span class="detail-label">Vehicle</span>
+                        <span class="detail-value">{{ launch.rocket.configuration.full_name }}</span>
+                    </div>
+                    
+                    <div class="detail-item">
+                        <span class="detail-label">Date & Time</span>
+                        <span class="detail-value">{{ launch.net }}</span>
+                    </div>
+                    
+                    <div class="detail-item">
+                        <span class="detail-label">Location</span>
+                        <span class="detail-value">{{ launch.pad.location.name }}</span>
+                    </div>
+                    
+                    {% if launch.pad.name %}
+                    <div class="detail-item">
+                        <span class="detail-label">Who Launched it</span>
+                        <span class="detail-value">{{ launch.launch_service_provider.name }}</span>
+                    </div>
+                    {% endif %}
+                    
+                    <div class="detail-item">
+                        <span class="detail-label">Launch Pad</span>
+                        <span class="detail-value">{{ launch.pad.name }}</span>
+                    </div>
+                    
+                    <div class="detail-item">
+                        <span class="detail-label">Landing</span>
+                        <span class="detail-value">—</span>
+                    </div>
+                    
+                    <div class="detail-item">
+                        <span class="detail-label">Destination</span>
+                        <span class="detail-value">{% if launch.mission %}{{ launch.mission.orbit.name }}{% else %}—{% endif %}</span>
+                    </div>
+                    
+                    <div class="detail-item">
+                        <span class="detail-label">Mission type</span>
+                        <span class="detail-value">{% if launch.mission %}{{ launch.mission.type }}{% else %}—{% endif %}</span>
+                    </div>
+                </div>
+
+                <!-- Right: Mission Description -->
+                {% if launch.mission.description %}
+                <div class="mission-description-section">
+                    <p>{{ launch.mission.description }}</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+    </div> <!-- Close full-launch-content -->
+
+    <!--Video Player to show the launch-->
+    <!-- Video Modal (Hidden by default) -->
+    <div id="videoModal" class="video-modal">
+        <div class="video-modal-content">
+            <span class="video-modal-close">&times;</span>
+            <div class="video-modal-player">
+                {% if launch.youtube_id %}
+                <iframe 
+                    id="videoPlayer"
+                    class="modal-video-iframe"
+                    width="100%" 
+                    height="100%" 
+                    src="https://www.youtube.com/embed/{{ launch.youtube_id }}?rel=0&modestbranding=1" 
+                    frameborder="0" 
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                    allowfullscreen>
+                </iframe>
+                {% else %}
+                <div class="video-placeholder">
+                    <p>No video available</p>
+                    <p class="video-note">The webcast will appear here when available</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Agency Card Section -->
+    <div class="info-card-section">
+        {% if launch.launch_service_provider %}
+        <div class="info-card-container">
+            <div class="info-card-left">
+                {% if launch.launch_service_provider.logo_url %}
+                <img src="{{ launch.launch_service_provider.logo_url }}" alt="{{ launch.launch_service_provider.name }}" class="info-card-logo">
+                {% endif %}
+            </div>
+            <div class="info-card-right">
+                <p class="info-card-description">{{ launch.launch_service_provider.description|default:"No description available" }}</p>
+                <div class="info-card-buttons">
+                    {% if launch.launch_service_provider.info_url %}
+                    <a href="{{ launch.launch_service_provider.info_url }}" target="_blank" class="info-card-btn">
+                        <span class="btn-icon">🏢</span> AGENCY
+                    </a>
+                    {% endif %}
+                    {% if launch.launch_service_provider.wiki_url %}
+                    <a href="{{ launch.launch_service_provider.wiki_url }}" target="_blank" class="info-card-btn">
+                        <span class="btn-icon">🌐</span> WEBSITE
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Mission Card Section -->
+    <div class="info-card-section">
+        {% if launch.mission %}
+        <h2 class="info-card-title">{{ launch.mission.name }}</h2>
+        <div class="info-card-container">
+            <div class="info-card-left mission-patch-container">
+                {% if launch.mission_patches and launch.mission_patches|length > 0 %}
+                <div class="mission-patch-bg" style="background-image: url('{{ launch.mission_patches.0.image_url }}');"></div>
+                {% elif launch.mission.mission_patches and launch.mission.mission_patches|length > 0 %}
+                <div class="mission-patch-bg" style="background-image: url('{{ launch.mission.mission_patches.0.image_url }}');"></div>
+                {% else %}
+                <div class="mission-patch-placeholder">
+                    <span class="patch-icon">🛰️</span>
+                </div>
+                {% endif %}
+            </div>
+            <div class="info-card-right">
+                <p class="info-card-description">{{ launch.mission.description|default:"No mission description available" }}</p>
+                <div class="info-card-buttons">
+                    {% if launch.launch_service_provider.info_url %}
+                    <a href="{{ launch.launch_service_provider.info_url }}" target="_blank" class="info-card-btn">
+                        <span class="btn-icon">🏢</span> AGENCY
+                    </a>
+                    {% endif %}
+                    <a href="#" class="info-card-btn">
+                        <span class="btn-icon">ℹ️</span> MORE INFORMATION
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Rocket Card Section -->
+    <div class="info-card-section">
+        {% if launch.rocket.configuration %}
+        <h2 class="info-card-title">{{ launch.rocket.configuration.full_name }}</h2>
+        <div class="info-card-container">
+            <div class="info-card-left rocket-image-container">
+                {% if launch.rocket.configuration.image_url %}
+                <img src="{{ launch.rocket.configuration.image_url }}" alt="{{ launch.rocket.configuration.full_name }}" class="info-card-logo rocket-image">
+                {% elif launch.image %}
+                <img src="{{ launch.image }}" alt="{{ launch.rocket.configuration.full_name }}" class="info-card-logo rocket-image">
+                {% endif %}
+            </div>
+            <div class="info-card-right">
+                <div class="rocket-stats-grid">
+                    <div class="rocket-stat-row">
+                        <div class="rocket-stat-item">
+                            <span class="rocket-stat-label">Height</span>
+                            <span class="rocket-stat-value">{% if launch.rocket.configuration.length %}{{ launch.rocket.configuration.length }} Meters{% else %}—{% endif %}</span>
+                        </div>
+                        <div class="rocket-stat-item">
+                            <span class="rocket-stat-label">Diameter</span>
+                            <span class="rocket-stat-value">{% if launch.rocket.configuration.diameter %}{{ launch.rocket.configuration.diameter }} Meters{% else %}—{% endif %}</span>
+                        </div>
+                    </div>
+                    <div class="rocket-stat-row">
+                        <div class="rocket-stat-item">
+                            <span class="rocket-stat-label">Max Stages</span>
+                            <span class="rocket-stat-value">{% if launch.rocket.configuration.max_stage %}{{ launch.rocket.configuration.max_stage }}{% else %}—{% endif %}</span>
+                        </div>
+                        <div class="rocket-stat-item">
+                            <span class="rocket-stat-label">Mass To LEO</span>
+                            <span class="rocket-stat-value">{% if launch.rocket.configuration.leo_capacity %}{{ launch.rocket.configuration.leo_capacity }} kg{% else %}—{% endif %}</span>
+                        </div>
+                    </div>
+                    <div class="rocket-stat-row">
+                        <div class="rocket-stat-item">
+                            <span class="rocket-stat-label">Mass To GTO</span>
+                            <span class="rocket-stat-value">{% if launch.rocket.configuration.gto_capacity %}{{ launch.rocket.configuration.gto_capacity }} kg{% else %}—{% endif %}</span>
+                        </div>
+                        <div class="rocket-stat-item">
+                            <span class="rocket-stat-label">Liftoff Mass</span>
+                            <span class="rocket-stat-value">{% if launch.rocket.configuration.launch_mass %}{{ launch.rocket.configuration.launch_mass|floatformat:0 }} Tonnes{% else %}—{% endif %}</span>
+                        </div>
+                    </div>
+                    <div class="rocket-stat-row">
+                        <div class="rocket-stat-item">
+                            <span class="rocket-stat-label">Liftoff Thrust</span>
+                            <span class="rocket-stat-value">{% if launch.rocket.configuration.to_thrust %}{{ launch.rocket.configuration.to_thrust }} kN{% else %}—{% endif %}</span>
+                        </div>
+                        <div class="rocket-stat-item">
+                            <span class="rocket-stat-label">Launch Success</span>
+                            <span class="rocket-stat-value">{% if launch.rocket.configuration.successful_launches %}{{ launch.rocket.configuration.successful_launches }}{% else %}0{% endif %}</span>
+                        </div>
+                    </div>
+                    <div class="rocket-stat-row">
+                        <div class="rocket-stat-item">
+                            <span class="rocket-stat-label">Consecutive Success</span>
+                            <span class="rocket-stat-value">{% if launch.rocket.configuration.consecutive_successful_launches %}{{ launch.rocket.configuration.consecutive_successful_launches }}{% else %}0{% endif %}</span>
+                        </div>
+                        <div class="rocket-stat-item">
+                            <span class="rocket-stat-label">Launch Failures</span>
+                            <span class="rocket-stat-value">{% if launch.rocket.configuration.failed_launches %}{{ launch.rocket.configuration.failed_launches }}{% else %}0{% endif %}</span>
+                        </div>
+                    </div>
+                    <div class="rocket-stat-row">
+                        <div class="rocket-stat-item">
+                            <span class="rocket-stat-label">Maiden Flight</span>
+                            <span class="rocket-stat-value">{% if launch.rocket.configuration.maiden_flight %}{{ launch.rocket.configuration.maiden_flight }}{% else %}—{% endif %}</span>
+                        </div>
+                        <div class="rocket-stat-item">
+                            <!-- Empty for layout balance -->
+                        </div>
+                    </div>
+                </div>
+                <div class="info-card-buttons">
+                    <a href="#" class="info-card-btn">
+                        <span class="btn-icon">🚀</span> VIEW LAUNCHES
+                    </a>
+                    {% if launch.rocket.configuration.wiki_url %}
+                    <a href="{{ launch.rocket.configuration.wiki_url }}" target="_blank" class="info-card-btn">
+                        <span class="btn-icon">📖</span> WIKI
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Map Section (Outside of content container) -->
+    <!-- Leaflet Map Section -->
+    <div class="full-launch-map">
+        {% if pad_lat and pad_lon %}
+            <h2 class="map-title">Launch Site: {{ launch.pad.name }} — {{ launch.pad.location.name }}</h2>
+    
+            <!-- Clean map container using your CSS -->
+            <div
+                id="launchMap"
+                class="launch-map-box"
+                data-lat="{{ pad_lat }}"
+                data-lon="{{ pad_lon }}">
+            </div>
+    
+            <div class="map-legend">
+                <div class="legend-item">
+                    <span class="legend-marker marker-launch"></span>
+                    <span class="legend-text">Launch Site</span>
+                </div>
+            </div>
+        {% else %}
+            <p>No map data available.</p>
+        {% endif %}
+    </div>
+    
+
+</div> <!-- Close full-launch-body -->
+
+<script>
+// Countdown timer for full launch page
+(function() {
+  const countdownEl = document.querySelector('.full-hero-countdown');
+  if (!countdownEl) return;
+
+  const launchIso = countdownEl.dataset.launchTime;
+  if (!launchIso) return;
+
+  const launchTime = new Date(launchIso);
+
+  function updateCountdown() {
+    const now = new Date();
+    const diffMs = launchTime - now;
+
+    if (diffMs <= 0) {
+      countdownEl.textContent = 'Launched';
+      clearInterval(timer);
+      return;
+    }
+
+    const totalSeconds = Math.floor(diffMs / 1000);
+    const days = Math.floor(totalSeconds / 86400);
+    const hours = Math.floor((totalSeconds % 86400) / 3600);
+    const minutes = Math.floor((totalSeconds % 3600) / 60);
+    const seconds = totalSeconds % 60;
+
+    const dayPart = days ? `T-${days}d ` : 'T-';
+    const hh = String(hours).padStart(2, '0');
+    const mm = String(minutes).padStart(2, '0');
+    const ss = String(seconds).padStart(2, '0');
+
+    countdownEl.textContent = `${dayPart}${hh}:${mm}:${ss}`;
+  }
+
+  updateCountdown();
+  const timer = setInterval(updateCountdown, 1000);
+})();
+</script>
+
+
+<script>
+    // Video Modal Control
+    (function() {
+      const modal = document.getElementById('videoModal');
+      const openBtn = document.getElementById('openVideoBtn');
+      const closeBtn = document.querySelector('.video-modal-close');
+      const videoFrame = document.getElementById('videoPlayer');
+    
+      // Open modal
+      if (openBtn) {
+        openBtn.addEventListener('click', function(e) {
+          e.preventDefault();
+          if (modal) {
+            modal.style.display = 'block';
+            document.body.style.overflow = 'hidden'; // Prevent scrolling
+          }
+        });
+      }
+    
+      // Close modal
+      if (closeBtn) {
+        closeBtn.addEventListener('click', function() {
+          closeModal();
+        });
+      }
+    
+      // Close when clicking outside video
+      if (modal) {
+        modal.addEventListener('click', function(e) {
+          if (e.target === modal) {
+            closeModal();
+          }
+        });
+      }
+    
+      // Close on ESC key
+      document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' && modal.style.display === 'block') {
+          closeModal();
+        }
+      });
+    
+      function closeModal() {
+        if (modal) {
+          modal.style.display = 'none';
+          document.body.style.overflow = 'auto'; // Re-enable scrolling
+          
+          // Stop video by reloading iframe src
+          if (videoFrame) {
+            const src = videoFrame.src;
+            videoFrame.src = '';
+            videoFrame.src = src.replace('autoplay=1', 'autoplay=0');
+          }
+        }
+      }
+    })();
+    </script>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const mapEl = document.getElementById("launchMap");
+        if (!mapEl) {
+            return;  // no map for this launch
+        }
+
+        // Read coordinates from data attributes
+        const lat = parseFloat(mapEl.dataset.lat);
+        const lon = parseFloat(mapEl.dataset.lon);
+
+        if (isNaN(lat) || isNaN(lon)) {
+            console.warn("No valid pad coordinates for this launch");
+            return;
+        }
+
+        // Create map
+        const map = L.map("launchMap").setView([lat, lon], 8);
+
+        // Add OpenStreetMap tiles
+        L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+            maxZoom: 18,
+            attribution: "&copy; OpenStreetMap contributors"
+        }).addTo(map);
+
+        // Marker at launch pad
+        L.marker([lat, lon])
+            .addTo(map)
+            .bindPopup(
+                `<strong>{{ launch.name|escapejs }}</strong><br>
+                 {{ launch.pad.name|escapejs }}<br>
+                 {{ launch.pad.location.name|escapejs }}`
+            );
+    });
+</script>
+
+{% endblock %}
