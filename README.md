@@ -65,6 +65,16 @@ OrbitStream requires API keys to function properly. You'll need to obtain an API
 - **Purpose:** Fetches NASA’s “Astronomy Picture of the Day,” including images, videos, titles, and explanations, featured   at the top of the *Space News* page.
 - **Setup:** Sign up for a free API key at [https://api.nasa.gov/](https://api.nasa.gov/) then add it to your environment or Django settings.
 
+### NASA Image & Video Library API
+- **Documentation:** https://images.nasa.gov/docs/images.nasa.gov_api_docs.pdf
+- **Purpose:** Powers the *Gallery* page by providing curated NASA images and videos based on user search queries.
+- **Setup:** Does **not** require an API key. Requests are made directly using query parameters (keywords, media type, page, etc.).
+
+### SpaceDevs Launch Library API
+- **Documentation:** https://thespacedevs.com/llapi
+- **Purpose:** Supplies real-time and historical launch data for the *Launches* section, including upcoming and recent launches, mission details, countdown timers, and rocket metadata.
+- **Setup:** Accessible through public endpoints. If using the authenticated tier, configure the API key through an environment variable.
+
 ## AI Usage
 
 During the development of OrbitStream, AI tools were utilized to assist with:
