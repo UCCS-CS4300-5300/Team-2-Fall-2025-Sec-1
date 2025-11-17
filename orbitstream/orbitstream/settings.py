@@ -23,6 +23,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 NASA_API_KEY = os.getenv("NASA_API_KEY")
 NEWS_API_KEY = os.getenv("NEWS_API_KEY")
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+N2YO_API_KEY = os.getenv("N2YO_API_KEY")
 
 
 # Quick-start development settings - unsuitable for production
@@ -68,6 +69,7 @@ INSTALLED_APPS = [
     'news_filter',
     'space_imagery',
     'learn_page',
+    'satellite_tracking',
 ]
 
 MIDDLEWARE = [
