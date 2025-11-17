@@ -2,13 +2,11 @@
 <header class="site-header">
   <!-- Cosmic background effect -->
   <div class="header-stars"></div>
-  <div class="header-glow"></div>
 
   <nav class="nav container">
     <!-- Logo/Brand -->
     <div class="nav__left">
       <a class="brand" href="{% url 'index' %}">
-        <div class="logo-glow"></div>
         <img src="{% static 'home/assets/Orbitstream logo.png' %}" alt="OrbitStream" class="brand__logo">
       </a>
     </div>
@@ -18,10 +16,8 @@
       <li><a href="{% url 'space_news:nasa_news' %}" class="nav-link"><span>News</span></a></li>
       <li><a href="#" class="nav-link"><span>GPS Tracking</span></a></li>
       <li><a href="#" class="nav-link"><span>Launches</span></a></li>
-      <li><a href="#" class="nav-link"><span>Preferences</span></a></li>
-        <li><a href="{% url 'space_imagery:gallery' %}" class="nav-link"><span>Gallery</span></a></li>
-        <li><a href="{% url 'learn_page:learn_page' %}" class="nav-link">Learn</a></li>
-
+      <li><a href="{% url 'space_imagery:gallery' %}" class="nav-link"><span>Gallery</span></a></li>
+      <li><a href="{% url 'learn_page:learn_page' %}" class="nav-link">Learn</a></li>
     </ul>
 
     <!-- User Auth Links -->
@@ -77,7 +73,6 @@
 
     <!-- Hamburger Toggle Button -->
     <button class="nav-toggle" aria-label="Toggle navigation" aria-expanded="false">
-      <span class="toggle-glow"></span>
       <span class="hamburger">
         <span class="hamburger-line"></span>
         <span class="hamburger-line"></span>
@@ -111,9 +106,6 @@
         </a></li>
         <li><a href="#" class="mobile-link">
           <span class="link-orb"></span>Launches
-        </a></li>
-        <li><a href="#" class="mobile-link">
-          <span class="link-orb"></span>Preferences
         </a></li>
         <li><a href="{% url 'space_imagery:gallery' %}" class="mobile-link">
           <span class="link-orb"></span>Gallery
