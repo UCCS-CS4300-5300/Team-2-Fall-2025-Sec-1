@@ -25,7 +25,7 @@ jobs:
     steps:
       # Step 1: Checkout the repository
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         # This pulls your code from GitHub so subsequent steps can run on it
 
       # Step 2: Set up Python
