@@ -9,11 +9,14 @@ https://docs.djangoproject.com/en/5.2/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.2/ref/settings/
 """
-from pathlib import Path
-import dj_database_url
+# Standard library imports
 import os
-from dotenv import load_dotenv
 import sys
+from pathlib import Path
+
+# Third-party imports
+import dj_database_url
+from dotenv import load_dotenv
 
 load_dotenv()
 
@@ -201,3 +204,4 @@ if 'test' in sys.argv or 'test_coverage' in sys.argv:
     PASSWORD_HASHERS = [
         'django.contrib.auth.hashers.MD5PasswordHasher',
     ]
+
