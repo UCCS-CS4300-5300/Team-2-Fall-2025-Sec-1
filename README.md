@@ -75,6 +75,12 @@ OrbitStream requires API keys to function properly. You'll need to obtain an API
 - **Purpose:** Supplies real-time and historical launch data for the *Launches* section, including upcoming and recent launches, mission details, countdown timers, and rocket metadata.
 - **Setup:** Accessible through public endpoints. If using the authenticated tier, configure the API key through an environment variable.
 
+### N2YO Satellite Tracking API
+
+- **Documentation:** https://www.n2yo.com/api/
+- **Purpose:** Provides real-time satellite tracking data including positions, passes, visual passes, and TLE (Two-Line Element) data for satellites. Used for tracking satellite trajectories and predicting visibility windows.
+- **Setup:** Requires API key registration at N2YO. Configure the API key as an environment variable (e.g., N2YO_API_KEY) in your project settings.
+
 ## AI Usage
 
 During the development of OrbitStream, AI tools were utilized to assist with:

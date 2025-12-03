@@ -5,26 +5,400 @@
 
 {% block extra_css %}
 <style>
-  /* Learn page specific styles */
+  /* ========================================
+     Learn Page Styles - Space Theme
+     ======================================== */
+  
+  /* Layout */
   .learn-container {
     max-width: 1200px;
     margin: 0 auto;
     padding: 40px 20px;
     min-height: 100vh;
+    background: #000000;
   }
   
-  @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(20px); }
-    to { opacity: 1; transform: translateY(0); }
+  /* Header */
+  .learn-header {
+    text-align: center;
+    margin-bottom: 50px;
   }
   
-  @keyframes spin {
-    to { transform: rotate(360deg); }
+  .learn-header h1 {
+    font-size: 2.5em;
+    font-weight: 700;
+    background: linear-gradient(135deg, #60a5fa 0%, #a78bfa 50%, #f472b6 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 12px;
+    text-shadow: 0 0 30px rgba(96, 165, 250, 0.3);
+  }
+  
+  .learn-header p {
+    font-size: 1.1em;
+    color: #cbd5e1;
+    max-width: 600px;
+    margin: 0 auto;
+    line-height: 1.6;
+  }
+  
+  /* Search Bar */
+  .search-wrapper {
+    max-width: 600px;
+    margin: 0 auto 40px;
+    position: relative;
+  }
+  
+  #custom-topic-input {
+    width: 100%;
+    padding: 16px 60px 16px 20px;
+    font-size: 16px;
+    background: rgba(30, 41, 59, 0.6);
+    border: 2px solid rgba(96, 165, 250, 0.3);
+    border-radius: 12px;
+    outline: none;
+    transition: all 0.3s ease;
+    color: #e2e8f0;
+    backdrop-filter: blur(10px);
   }
   
   #custom-topic-input:focus {
-    border-color: #3b82f6;
-    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    border-color: #60a5fa;
+    box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.2), 0 0 20px rgba(96, 165, 250, 0.3);
+    background: rgba(30, 41, 59, 0.8);
+  }
+  
+  #custom-topic-input::placeholder {
+    color: #94a3b8;
+  }
+  
+  .search-button {
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    padding: 10px 20px;
+    background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4);
+  }
+  
+  .search-button:hover {
+    transform: translateY(-50%) scale(1.05);
+    box-shadow: 0 6px 25px rgba(59, 130, 246, 0.6);
+  }
+  
+  .search-button:active {
+    transform: translateY(-50%) scale(0.98);
+  }
+  
+  /* Topics Section */
+  .topics-section {
+    margin-bottom: 50px;
+  }
+  
+  .topics-section h2 {
+    font-size: 1.8em;
+    font-weight: 600;
+    color: #e2e8f0;
+    margin-bottom: 24px;
+    text-align: center;
+  }
+  
+  .topics-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+  }
+  
+  /* Topic Cards */
+  .topic-card {
+    background: rgba(30, 41, 59, 0.6);
+    border: 2px solid rgba(96, 165, 250, 0.2);
+    border-radius: 12px;
+    padding: 24px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(10px);
+  }
+  
+  .topic-card:hover {
+    border-color: #60a5fa;
+    transform: translateY(-4px);
+    box-shadow: 0 8px 30px rgba(96, 165, 250, 0.4);
+    background: rgba(30, 41, 59, 0.8);
+  }
+  
+  .topic-card:active {
+    transform: translateY(-2px);
+  }
+  
+  .topic-card-icon {
+    font-size: 2.5em;
+    margin-bottom: 12px;
+    filter: drop-shadow(0 0 10px rgba(96, 165, 250, 0.5));
+  }
+  
+  .topic-card h3 {
+    font-size: 1.2em;
+    font-weight: 600;
+    color: #f1f5f9;
+    margin-bottom: 8px;
+  }
+  
+  .topic-card p {
+    font-size: 0.9em;
+    color: #cbd5e1;
+    line-height: 1.5;
+    margin: 0;
+  }
+  
+  /* Summary Section */
+  #summary-section {
+    display: none;
+    max-width: 800px;
+    margin: 0 auto;
+    background: rgba(30, 41, 59, 0.8);
+    border: 1px solid rgba(96, 165, 250, 0.3);
+    border-radius: 16px;
+    padding: 40px;
+    box-shadow: 0 8px 40px rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(10px);
+    animation: fadeIn 0.5s ease;
+  }
+  
+  #summary-title {
+    font-size: 2em;
+    font-weight: 700;
+    background: linear-gradient(135deg, #60a5fa 0%, #a78bfa 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 20px;
+    border-left: 4px solid #60a5fa;
+    padding-left: 16px;
+  }
+  
+  /* Loading Spinner */
+  #loading-spinner {
+    text-align: center;
+    padding: 40px;
+  }
+  
+  .spinner {
+    display: inline-block;
+    width: 50px;
+    height: 50px;
+    border: 4px solid rgba(96, 165, 250, 0.2);
+    border-top-color: #60a5fa;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    box-shadow: 0 0 20px rgba(96, 165, 250, 0.5);
+  }
+  
+  #loading-spinner p {
+    margin-top: 16px;
+    color: #cbd5e1;
+    font-size: 1.1em;
+  }
+  
+  /* Summary Content */
+  #summary-content {
+    display: none;
+  }
+  
+  #summary-text {
+    font-size: 1.1em;
+    line-height: 1.8;
+    color: #e2e8f0;
+    margin-bottom: 24px;
+    white-space: pre-wrap;
+  }
+  
+  /* Keywords Section */
+  #keywords-section {
+    background: rgba(49, 46, 129, 0.4);
+    border: 1px solid rgba(167, 139, 250, 0.3);
+    border-radius: 12px;
+    padding: 20px;
+    margin-top: 24px;
+  }
+  
+  #keywords-section h3 {
+    font-size: 1.2em;
+    font-weight: 600;
+    color: #f1f5f9;
+    margin-bottom: 12px;
+  }
+  
+  #keywords-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  
+  .keyword-badge {
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.3) 0%, rgba(139, 92, 246, 0.3) 100%);
+    border: 1px solid rgba(96, 165, 250, 0.5);
+    color: #bfdbfe;
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 0.9em;
+    font-weight: 500;
+    transition: all 0.3s ease;
+  }
+  
+  .keyword-badge:hover {
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.5) 0%, rgba(139, 92, 246, 0.5) 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(96, 165, 250, 0.4);
+  }
+  
+  /* Buttons */
+  .btn-primary {
+    margin-top: 24px;
+    padding: 12px 24px;
+    background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 1em;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4);
+  }
+  
+  .btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 25px rgba(59, 130, 246, 0.6);
+  }
+  
+  .btn-primary:active {
+    transform: translateY(0);
+  }
+  
+  .btn-secondary {
+    margin-top: 20px;
+    padding: 12px 24px;
+    background: rgba(100, 116, 139, 0.6);
+    color: white;
+    border: 1px solid rgba(148, 163, 184, 0.5);
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(5px);
+  }
+  
+  .btn-secondary:hover {
+    background: rgba(100, 116, 139, 0.8);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(100, 116, 139, 0.5);
+  }
+  
+  .btn-secondary:active {
+    transform: translateY(0);
+  }
+  
+  /* Error Message */
+  #error-message {
+    display: none;
+    text-align: center;
+    padding: 40px;
+  }
+  
+  .error-icon {
+    font-size: 3em;
+    margin-bottom: 16px;
+    filter: drop-shadow(0 0 10px rgba(239, 68, 68, 0.5));
+  }
+  
+  #error-text {
+    font-size: 1.1em;
+    color: #fca5a5;
+    line-height: 1.6;
+  }
+  
+  /* Animations */
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  @keyframes spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+  
+  /* Responsive Design */
+  @media (max-width: 768px) {
+    .learn-container {
+      padding: 30px 15px;
+    }
+    
+    .learn-header h1 {
+      font-size: 2em;
+    }
+    
+    .learn-header p {
+      font-size: 1em;
+    }
+    
+    .topics-grid {
+      grid-template-columns: 1fr;
+    }
+    
+    #summary-section {
+      padding: 24px;
+    }
+    
+    #summary-title {
+      font-size: 1.5em;
+    }
+    
+    #summary-text {
+      font-size: 1em;
+    }
+    
+    #custom-topic-input {
+      padding: 14px 60px 14px 16px;
+      font-size: 14px;
+    }
+  }
+  
+  @media (max-width: 480px) {
+    .learn-header h1 {
+      font-size: 1.75em;
+    }
+    
+    .search-button {
+      padding: 8px 16px;
+      font-size: 14px;
+    }
+    
+    .topic-card {
+      padding: 20px;
+    }
+    
+    #summary-section {
+      padding: 20px;
+      border-radius: 12px;
+    }
   }
 </style>
 {% endblock %}
@@ -33,96 +407,68 @@
 <div class="learn-container">
   
   <!-- Header -->
-  <header style="text-align: center; margin-bottom: 50px;">
-    <h1 style="font-size: 2.5em; font-weight: 700; color: #1e293b; margin-bottom: 12px;">
-      🚀 Learn About Space
-    </h1>
-    <p style="font-size: 1.1em; color: #64748b; max-width: 600px; margin: 0 auto;">
-      Explore space topics with AI-powered summaries. Select a topic below or search for anything space-related!
-    </p>
+  <header class="learn-header">
+    <h1>Learn About Space</h1>
+    <p>Explore space topics with AI-powered summaries. Select a topic below or search for anything space-related!</p>
   </header>
 
   <!-- Search Bar -->
-  <div style="max-width: 600px; margin: 0 auto 40px; position: relative;">
+  <div class="search-wrapper">
     <input 
       type="text" 
       id="custom-topic-input"
-      placeholder="Ask about any space topic... (e.g., 'Mars rovers', 'gravitational waves')"
-      style="width: 100%; padding: 16px 60px 16px 20px; font-size: 16px; border: 2px solid #cbd5e1; border-radius: 12px; outline: none; transition: border-color 0.3s;"
+      placeholder="Ask about any space topic..."
       onkeypress="if(event.key === 'Enter') searchCustomTopic()">
-    <button 
-      onclick="searchCustomTopic()"
-      style="position: absolute; right: 8px; top: 50%; transform: translateY(-50%); padding: 10px 20px; background: #3b82f6; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; transition: background 0.3s;"
-      onmouseover="this.style.background='#2563eb'"
-      onmouseout="this.style.background='#3b82f6'">
-      Search
-    </button>
+    <button class="search-button" onclick="searchCustomTopic()">Search</button>
   </div>
 
   <!-- Predefined Topics Grid -->
-  <section style="margin-bottom: 50px;">
-    <h2 style="font-size: 1.8em; font-weight: 600; color: #1e293b; margin-bottom: 24px; text-align: center;">
-      Popular Topics
-    </h2>
-    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px;">
+  <section class="topics-section">
+    <h2>Popular Topics</h2>
+    <div class="topics-grid">
       {% for topic in topics %}
-        <div 
-          class="topic-card"
-          onclick="loadTopic('{{ topic.title }}')"
-          style="background: white; border: 2px solid #e2e8f0; border-radius: 12px; padding: 24px; cursor: pointer; transition: all 0.3s; box-shadow: 0 1px 3px rgba(0,0,0,0.1);"
-          onmouseover="this.style.borderColor='#3b82f6'; this.style.transform='translateY(-4px)'; this.style.boxShadow='0 4px 12px rgba(59,130,246,0.2)'"
-          onmouseout="this.style.borderColor='#e2e8f0'; this.style.transform='translateY(0)'; this.style.boxShadow='0 1px 3px rgba(0,0,0,0.1)'">
-          <div style="font-size: 2.5em; margin-bottom: 12px;">{{ topic.icon }}</div>
-          <h3 style="font-size: 1.2em; font-weight: 600; color: #1e293b; margin-bottom: 8px;">{{ topic.title }}</h3>
-          <p style="font-size: 0.9em; color: #64748b; line-height: 1.5;">{{ topic.description }}</p>
+        <div class="topic-card" onclick="loadTopic('{{ topic.title }}')">
+          <div class="topic-card-icon">{{ topic.icon }}</div>
+          <h3>{{ topic.title }}</h3>
+          <p>{{ topic.description }}</p>
         </div>
       {% endfor %}
     </div>
   </section>
 
   <!-- Summary Display Section -->
-  <section 
-    id="summary-section" 
-    style="display: none; max-width: 800px; margin: 0 auto; background: white; border-radius: 16px; padding: 40px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); animation: fadeIn 0.5s;">
+  <section id="summary-section">
     
     <!-- Topic Title -->
-    <h2 id="summary-title" style="font-size: 2em; font-weight: 700; color: #1e293b; margin-bottom: 20px; border-left: 4px solid #3b82f6; padding-left: 16px;"></h2>
+    <h2 id="summary-title"></h2>
     
     <!-- Loading Spinner -->
-    <div id="loading-spinner" style="text-align: center; padding: 40px;">
-      <div style="display: inline-block; width: 50px; height: 50px; border: 4px solid #e2e8f0; border-top-color: #3b82f6; border-radius: 50%; animation: spin 1s linear infinite;"></div>
-      <p style="margin-top: 16px; color: #64748b; font-size: 1.1em;">Generating summary...</p>
+    <div id="loading-spinner">
+      <div class="spinner"></div>
+      <p>Generating summary...</p>
     </div>
     
     <!-- Summary Content -->
-    <div id="summary-content" style="display: none;">
-      <div id="summary-text" style="font-size: 1.1em; line-height: 1.8; color: #334155; margin-bottom: 24px;"></div>
+    <div id="summary-content">
+      <div id="summary-text"></div>
       
       <!-- Keywords Section -->
-      <div id="keywords-section" style="background: #f1f5f9; border-radius: 12px; padding: 20px; margin-top: 24px;">
-        <h3 style="font-size: 1.2em; font-weight: 600; color: #1e293b; margin-bottom: 12px;">🔍 Related Topics</h3>
-        <div id="keywords-list" style="display: flex; flex-wrap: wrap; gap: 10px;"></div>
+      <div id="keywords-section">
+        <h3>🔍 Related Topics</h3>
+        <div id="keywords-list"></div>
       </div>
       
       <!-- Try Another Button -->
-      <button 
-        onclick="resetSearch()"
-        style="margin-top: 24px; padding: 12px 24px; background: #3b82f6; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 1em; transition: background 0.3s;"
-        onmouseover="this.style.background='#2563eb'"
-        onmouseout="this.style.background='#3b82f6'">
+      <button class="btn-primary" onclick="resetSearch()">
         ← Explore Another Topic
       </button>
     </div>
     
     <!-- Error Message -->
-    <div id="error-message" style="display: none; text-align: center; padding: 40px;">
-      <div style="font-size: 3em; margin-bottom: 16px;">😔</div>
-      <p id="error-text" style="font-size: 1.1em; color: #ef4444; line-height: 1.6;"></p>
-      <button 
-        onclick="resetSearch()"
-        style="margin-top: 20px; padding: 12px 24px; background: #64748b; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600;"
-        onmouseover="this.style.background='#475569'"
-        onmouseout="this.style.background='#64748b'">
+    <div id="error-message">
+      <div class="error-icon">😔</div>
+      <p id="error-text"></p>
+      <button class="btn-secondary" onclick="resetSearch()">
         Try Again
       </button>
     </div>
@@ -212,8 +558,8 @@
           const keywords = data.keywords.split(',').map(k => k.trim());
           keywords.forEach(keyword => {
             const badge = document.createElement('span');
+            badge.className = 'keyword-badge';
             badge.textContent = keyword;
-            badge.style.cssText = 'background: #dbeafe; color: #1e40af; padding: 6px 12px; border-radius: 6px; font-size: 0.9em; font-weight: 500;';
             keywordsList.appendChild(badge);
           });
         }
