@@ -10,10 +10,12 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 from pathlib import Path
-import dj_database_url
 import os
-from dotenv import load_dotenv
 import sys
+
+import dj_database_url
+from dotenv import load_dotenv
+
 
 load_dotenv()
 
@@ -112,7 +114,7 @@ WSGI_APPLICATION = 'orbitstream.wsgi.application'
 # Check if we're in GitHub Actions or CI environment
 if 'GITHUB_ACTIONS' in os.environ or 'CI' in os.environ:
     # Use SQLite for CI/testing
-    DATABASES = {
+    DATABASES = {  # pylint: disable=invalid-name
         'default': {
             'ENGINE': 'django.db.backends.sqlite3',
             'NAME': ':memory:',  # In-memory database for fast tests
