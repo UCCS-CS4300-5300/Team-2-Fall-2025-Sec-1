@@ -2,6 +2,7 @@
 from django import forms
 from datetime import datetime, timedelta
 from .models import FilterPreset
+from space_news.config import EXCLUDED_TOPICS_ALL, INAPPROPRIATE_KEYWORDS
 
 class NewsFilterForm(forms.Form):
     search_query = forms.CharField(
@@ -92,3 +93,32 @@ class FilterPresetForm(forms.ModelForm):
             'sort_by': 'Sort By',
             'source': 'Source',
         }
+
+    def clean_search_query(self):
+        """Validate search query against banned keywords."""
+        search_query = self.cleaned_data.get('search_query', '').strip()
+
+        if not search_query:
+            return search_query
+
+        # Convert to lowercase for case-insensitive matching
+        search_lower = search_query.lower()
+
+        # Check against inappropriate keywords
+        for keyword in INAPPROPRIATE_KEYWORDS:
+            if keyword.lower() in search_lower:
+                raise forms.ValidationError(
+                    f'Search query contains inappropriate keyword: "{keyword}". '
+                    f'Please use space-related keywords only.'
+                )
+
+        # Check against excluded topics
+        for keyword in EXCLUDED_TOPICS_ALL:
+            if keyword.lower() in search_lower:
+                raise forms.ValidationError(
+                    f'Search query contains banned keyword: "{keyword}". '
+                    f'This keyword is not related to space topics. '
+                    f'Please use space-related keywords such as NASA, SpaceX, satellite, rocket, etc.'
+                )
+
+        return search_query

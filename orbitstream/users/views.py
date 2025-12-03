@@ -77,7 +77,14 @@ def create_preset(request):
                 messages.error(request, f'Error creating preset: A preset with this name already exists.')
             return redirect('users:settings')
         else:
-            messages.error(request, 'Please correct the errors in the form.')
+            # Display specific validation errors
+            for field, errors in form.errors.items():
+                for error in errors:
+                    if field == '__all__':
+                        messages.error(request, f'{error}')
+                    else:
+                        field_name = form.fields[field].label if field in form.fields else field
+                        messages.error(request, f'{field_name}: {error}')
             return redirect('users:settings')
     return redirect('users:settings')
 
@@ -97,7 +104,14 @@ def edit_preset(request, preset_id):
                 messages.error(request, f'Error updating preset: A preset with this name already exists.')
             return redirect('users:settings')
         else:
-            messages.error(request, 'Please correct the errors in the form.')
+            # Display specific validation errors
+            for field, errors in form.errors.items():
+                for error in errors:
+                    if field == '__all__':
+                        messages.error(request, f'{error}')
+                    else:
+                        field_name = form.fields[field].label if field in form.fields else field
+                        messages.error(request, f'{field_name}: {error}')
 
     return redirect('users:settings')
 
