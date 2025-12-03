@@ -25,6 +25,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 NASA_API_KEY = os.getenv("NASA_API_KEY")
 NEWS_API_KEY = os.getenv("NEWS_API_KEY")
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+N2YO_API_KEY = os.getenv("N2YO_API_KEY")
 
 
 # Quick-start development settings - unsuitable for production
@@ -74,6 +75,7 @@ INSTALLED_APPS = [
     'space_imagery',
     'learn_page',
     'launches',
+    'satellite_tracking',
 ]
 
 MIDDLEWARE = [
@@ -174,6 +176,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
 STATIC_URL = '/static/'
+STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 if not DEBUG:
     STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
