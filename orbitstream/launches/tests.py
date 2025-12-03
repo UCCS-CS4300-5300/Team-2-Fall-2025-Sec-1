@@ -24,7 +24,8 @@ class SpaceDevAPITests(TestCase):
             "results": [{
                 "id": "test-123",
                 "name": "Falcon 9 | Starlink",
-                "net": "2025-11-20T10:30:00Z"
+                # far in the future so it always counts as 'upcoming'
+                "net": "2050-11-20T10:30:00Z"
             }]
         }
         mock_response.raise_for_status = MagicMock()
@@ -55,7 +56,7 @@ class SpaceDevAPITests(TestCase):
             "results": [{
                 "id": "hero-123",
                 "name": "Mission Name",
-                "net": "2025-11-20T10:00:00Z",
+                "net": "2050-11-20T10:00:00Z",
                 "image": "https://example.com/img.jpg",
                 "rocket": {"configuration": {"full_name": "Falcon 9"}},
                 "pad": {"name": "Launch Pad", "location": {"name": "Location"}}
@@ -72,10 +73,19 @@ class SpaceDevAPITests(TestCase):
 
     @patch('launches.api.spacedev_api.requests.get')
     def test_get_upcoming_launches(self, mock_get):
-        """Test fetching multiple upcoming launches."""
+        """
+        Test fetching multiple upcoming launches.
+
+        get_upcoming_launches(limit=3) should return 3 *future* launches,
+        skipping the hero (handled via the shared upcoming helper).
+        """
         launches = [
-            {"id": f"up-{i}", "net": f"2025-11-{20+i}T10:00:00Z"}
-            for i in range(5)
+            {
+                "id": f"up-{i}",
+                # all future dates
+                "net": f"2050-11-{10 + i:02d}T10:00:00Z"
+            }
+            for i in range(6)
         ]
         mock_response = MagicMock()
         mock_response.json.return_value = {"results": launches}
@@ -84,15 +94,20 @@ class SpaceDevAPITests(TestCase):
 
         result = spacedev_api.get_upcoming_launches(limit=3)
 
-        # Expects 2 because the function pops the first launch (hero launch)
-        self.assertEqual(len(result), 2)
+        # Now we expect exactly 'limit' results
+        self.assertEqual(len(result), 3)
+        # And they should be the ones after the hero candidate
+        self.assertEqual([r["id"] for r in result], ["up-1", "up-2", "up-3"])
 
     @patch('launches.api.spacedev_api.requests.get')
     def test_get_recent_and_completed(self, mock_get):
         """Test fetching recent and completed launches."""
         launches = [
-            {"id": f"launch-{i}", "net": f"2025-11-{15-i}T10:00:00Z",
-             "status": {"name": "Success"}}
+            {
+                "id": f"launch-{i}",
+                "net": f"2025-11-{15 - i:02d}T10:00:00Z",
+                "status": {"name": "Success"}
+            }
             for i in range(10)
         ]
         mock_response = MagicMock()
