@@ -122,7 +122,7 @@ if 'GITHUB_ACTIONS' in os.environ or 'CI' in os.environ:
     }
 elif os.environ.get("DATABASE_URL"):
     # Production (Render) - use PostgreSQL
-    DATABASES = {
+    DATABASES = { # pylint: disable=invalid-name
         "default": dj_database_url.config(
             default=os.environ.get("DATABASE_URL"),
             conn_max_age=600,     # keep connections open
@@ -131,7 +131,7 @@ elif os.environ.get("DATABASE_URL"):
     }
 else:
     # Local development fallback - use SQLite
-    DATABASES = {
+    DATABASES = { # pylint: disable=invalid-name
         'default': {
             'ENGINE': 'django.db.backends.sqlite3',
             'NAME': BASE_DIR / 'db.sqlite3',
@@ -189,7 +189,7 @@ SESSION_COOKIE_SECURE = True
 
 # Use SQLite for testing to avoid connecting to production PostgreSQL database
 if 'test' in sys.argv or 'test_coverage' in sys.argv:
-    DATABASES = {
+    DATABASES = { # pylint: disable=invalid-name
         'default': {
             'ENGINE': 'django.db.backends.sqlite3',
             'NAME': ':memory:',  # Use in-memory database for faster tests
