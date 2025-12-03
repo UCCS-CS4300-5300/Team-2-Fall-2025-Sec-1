@@ -59,6 +59,45 @@ def _parse_net_to_dt(net_str):
     except ValueError:
         return None
 
+def _get_future_upcoming(total_needed: int = 10):
+    """
+    Internal helper:
+    - Calls /launch/upcoming/ ONCE
+    - Filters to future launches (net >= now, with parsed net_dt)
+    - Returns a list of launches sorted by net
+    """
+    cache_key = f"future_upcoming_{total_needed}"
+    cached = _get_cached(cache_key)
+    if cached is not None:
+        return cached
+
+    params = {
+        "limit": total_needed * 2,   # over-fetch a bit in case some are in the past
+        "ordering": "net",
+        "hide_recent_previous": "true",
+    }
+
+    try:
+        data = _do_spacedevs_get("/launch/upcoming/", params=params)
+    except requests.RequestException as e:
+        print("SpaceDevs upcoming error:", e)
+        return []
+
+    results = data.get("results") or []
+    now = datetime.datetime.now(datetime.timezone.utc)
+
+    future = []
+    for launch in results:
+        dt = _parse_net_to_dt(launch.get("net"))
+        if dt and dt >= now:
+            launch["net_dt"] = dt
+            future.append(launch)
+            if len(future) >= total_needed:
+                break
+
+    _set_cache(cache_key, future)
+    return future
+
 
 def extract_youtube_id(url):
     """
@@ -143,62 +182,11 @@ def get_mission_patches(mission_id):
 
 def get_next_launch():
     """
-    Fetch the next *truly upcoming* launch by:
-      1. Asking Launch Library 2 for several upcoming launches.
-      2. Filtering in Python to pick the earliest launch whose NET is >= now.
-    Uses in-memory caching so we don't hammer the API.
-    Returns the full launch object with all details.
+    Next upcoming launch (earliest net >= now).
     """
-    cache_key = "next_launch"
-    cached = _get_cached(cache_key)
-    if cached is not None:
-        return cached
+    future = _get_future_upcoming(total_needed=10)
+    return future[0] if future else None
 
-    params = {
-        "limit": 10,                   # grab a few so we can filter
-        "ordering": "net",             # earliest first
-        "hide_recent_previous": "true"
-    }
-
-    try:
-        data = _do_spacedevs_get("/launch/upcoming/", params=params)
-    except requests.RequestException as e:
-        print("SpaceDevs API error:", e)
-        return None
-
-    results = data.get("results") or []
-    if not results:
-        return None
-
-    now = datetime.datetime.now(datetime.timezone.utc)
-
-    def parse_net(net_str: str) -> datetime.datetime | None:
-        if not net_str:
-            return None
-        if net_str.endswith("Z"):
-            net_str = net_str.replace("Z", "+00:00")
-        try:
-            return datetime.datetime.fromisoformat(net_str)
-        except ValueError:
-            return None
-
-    future_launches = []
-    for launch in results:
-        net_str = launch.get("net")
-        net_dt = parse_net(net_str)
-        if net_dt is None:
-            continue
-        if net_dt >= now:
-            future_launches.append((net_dt, launch))
-
-    if future_launches:
-        future_launches.sort(key=lambda pair: pair[0])
-        chosen = future_launches[0][1]
-    else:
-        chosen = results[0]
-
-    _set_cache(cache_key, chosen)
-    return chosen
 
 
 def spacedev_hero():
@@ -291,53 +279,27 @@ def get_upcoming_launches(limit):
     """
     Return a list of upcoming launches (dicts from Launch Library 2).
     Used for the 'Upcoming Launches' feature card area.
-    Only returns launches that haven't happened yet.
+
+    We share the same /launch/upcoming/ data as get_next_launch, and
+    skip the very next launch (which is used in the hero).
     """
-    cache_key = f"upcoming_{limit}"
+    # we need "hero + limit" items
+    total_needed = limit + 1
+    cache_key = f"upcoming_{total_needed}"
     cached = _get_cached(cache_key)
     if cached is not None:
         return cached
 
-    # Request more than needed since we'll filter out past launches
-    params = {
-        "limit": limit * 3,  # Request 3x to account for filtering
-        "ordering": "net",
-        "hide_recent_previous": "true",
-    }
+    future = _get_future_upcoming(total_needed=total_needed)
+    if not future:
+        return []
 
-    try:
-        data = _do_spacedevs_get("/launch/upcoming/", params=params)
-    except requests.RequestException as e:
-        print("SpaceDevs upcoming error:", e)
-        return cached or []
+    # skip the first item (hero)
+    upcoming_only = future[1:total_needed] if len(future) > 1 else []
 
-    results = data.get("results") or []
+    _set_cache(cache_key, upcoming_only)
+    return upcoming_only
 
-    now = datetime.datetime.now(datetime.timezone.utc)
-
-    def parse_net(net_str):
-        if not net_str:
-            return None
-        if net_str.endswith("Z"):
-            net_str = net_str.replace("Z", "+00:00")
-        try:
-            return datetime.datetime.fromisoformat(net_str)
-        except ValueError:
-            return None
-
-    # Filter to only truly future launches
-    future = []
-    for launch in results:
-        net_dt = parse_net(launch.get("net"))
-        if net_dt and net_dt >= now:
-            launch["net_dt"] = net_dt
-            future.append(launch)
-            if len(future) >= limit:
-                break
-    future.pop(0)
-    
-    _set_cache(cache_key, future)
-    return future
 
 
 def get_recent_and_completed(recent_limit, completed_limit):
