@@ -132,6 +132,43 @@ h1::after {
     text-shadow: 0 0 10px rgba(167, 139, 250, 0.8);
 }
 
+/* Collapsible Section Styles */
+.section-header {
+    cursor: pointer;
+    user-select: none;
+    justify-content: space-between;
+    transition: all 0.3s ease;
+    margin-bottom: 0 !important;
+    padding-bottom: 1rem;
+}
+
+.section-header:hover {
+    color: #a78bfa;
+}
+
+.collapse-icon {
+    transition: transform 0.3s ease;
+    flex-shrink: 0;
+}
+
+.settings-section.collapsed .collapse-icon {
+    transform: rotate(-90deg);
+}
+
+.section-content {
+    max-height: 5000px;
+    overflow: hidden;
+    transition: max-height 0.4s ease, opacity 0.3s ease, padding 0.3s ease;
+    opacity: 1;
+    padding-top: 0.5rem;
+}
+
+.settings-section.collapsed .section-content {
+    max-height: 0;
+    opacity: 0;
+    padding-top: 0;
+}
+
 .settings-section h3 {
     font-family: 'Rajdhani', sans-serif;
     font-weight: 600;
@@ -366,11 +403,33 @@ button[type="submit"]:hover::before {
     margin: 0 0 0.75rem 0 !important;
 }
 
+.preset-details {
+    font-size: 0.9rem;
+    color: #a8c5d9;
+}
+
+.preset-details p {
+    margin: 0.25rem 0;
+}
+
+.preset-details strong {
+    color: #c4b5fd;
+}
+
 /* Create Preset Form */
-.settings-section > div[style*="background: #f8f9fa"] {
-    background: linear-gradient(135deg, rgba(60, 40, 80, 0.3) 0%, rgba(40, 30, 60, 0.3) 100%) !important;
-    border: 1px solid rgba(139, 92, 246, 0.3) !important;
-    border-top: 2px solid #8b5cf6 !important;
+.create-preset-form {
+    background: linear-gradient(135deg, rgba(60, 40, 80, 0.3) 0%, rgba(40, 30, 60, 0.3) 100%);
+    border: 1px solid rgba(139, 92, 246, 0.3);
+    border-top: 2px solid #8b5cf6;
+    padding: 1.5rem;
+    border-radius: 8px;
+    margin-bottom: 1.5rem;
+}
+
+.create-preset-form h3 {
+    font-size: 1.2rem;
+    margin-bottom: 1rem;
+    color: #c4b5fd;
 }
 
 /* Modal Styling */
@@ -439,9 +498,15 @@ button[type="submit"]:hover::before {
     </div>
 
     <!-- Change Password Section -->
-    <div class="settings-section">
-        <h2>Change Password</h2>
-        <form method="post" novalidate>
+    <div class="settings-section collapsed">
+        <h2 class="section-header">
+            Change Password
+            <svg class="collapse-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="6 9 12 15 18 9"></polyline>
+            </svg>
+        </h2>
+        <div class="section-content">
+            <form method="post" novalidate>
             {% csrf_token %}
 
             {% for field in password_form %}
@@ -462,17 +527,24 @@ button[type="submit"]:hover::before {
             {% endfor %}
 
             <button type="submit" class="submit-button">Update Password</button>
-        </form>
+            </form>
+        </div>
     </div>
 
     <!-- News Filter Presets Section -->
-    <div class="settings-section">
-        <h2>News Filter Presets</h2>
-        <p style="color: #666; margin-bottom: 1.5rem;">Create custom filter presets to quickly access your favorite news filters on the News page.</p>
+    <div class="settings-section collapsed">
+        <h2 class="section-header">
+            News Filter Presets
+            <svg class="collapse-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="6 9 12 15 18 9"></polyline>
+            </svg>
+        </h2>
+        <div class="section-content">
+            <p style="color: #a8c5d9; margin-bottom: 1.5rem;">Create custom filter presets to quickly access your favorite news filters on the News page.</p>
 
         <!-- Create New Preset Form -->
-        <div style="background: #f8f9fa; padding: 1.5rem; border-radius: 8px; margin-bottom: 1.5rem;">
-            <h3 style="font-size: 1.2rem; margin-bottom: 1rem; color: #333;">Create New Preset</h3>
+        <div class="create-preset-form">
+            <h3>Create New Preset</h3>
             <form method="post" action="{% url 'users:create_preset' %}" id="create-preset-form">
                 {% csrf_token %}
                 <div style="margin-bottom: 1rem;">
@@ -508,15 +580,15 @@ button[type="submit"]:hover::before {
         </div>
 
         <!-- Existing Presets List -->
-        <h3 style="font-size: 1.2rem; margin-bottom: 1rem; color: #333;">Your Presets</h3>
+        <h3>Your Presets</h3>
         {% if filter_presets %}
             <div id="presets-list">
                 {% for preset in filter_presets %}
-                    <div class="preset-item" style="background: #fff; border: 1px solid #ddd; border-radius: 8px; padding: 1rem; margin-bottom: 1rem;">
+                    <div class="preset-item">
                         <div style="display: flex; justify-content: space-between; align-items: start;">
                             <div style="flex: 1;">
-                                <h4 style="margin: 0 0 0.5rem 0; color: #0066cc; font-size: 1.1rem;">{{ preset.name }}</h4>
-                                <div style="font-size: 0.9rem; color: #666;">
+                                <h4>{{ preset.name }}</h4>
+                                <div class="preset-details">
                                     {% if preset.search_query %}
                                         <p style="margin: 0.25rem 0;"><strong>Search:</strong> {{ preset.search_query }}</p>
                                     {% endif %}
@@ -544,8 +616,9 @@ button[type="submit"]:hover::before {
                 {% endfor %}
             </div>
         {% else %}
-            <p style="color: #999; font-style: italic;">You haven't created any filter presets yet. Create one above to get started!</p>
+            <p style="color: #a8c5d9; font-style: italic;">You haven't created any filter presets yet. Create one above to get started!</p>
         {% endif %}
+        </div>
     </div>
 
     <!-- Edit Preset Modal -->
@@ -601,6 +674,14 @@ button[type="submit"]:hover::before {
     </div>
 
     <script>
+        // Collapsible sections
+        document.querySelectorAll('.section-header').forEach(function(header) {
+            header.addEventListener('click', function() {
+                var section = this.parentElement;
+                section.classList.toggle('collapsed');
+            });
+        });
+
         // Edit preset buttons
         document.querySelectorAll('.edit-preset-btn').forEach(function(button) {
             button.addEventListener('click', function() {

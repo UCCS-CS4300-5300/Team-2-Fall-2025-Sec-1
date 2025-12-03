@@ -4783,3 +4783,25 @@ body.full-media-page .site-footer {
     gap: 1.5rem;
   }
 }
+
+/* ==========================================================================
+   CUSTOM SCROLLBAR - Purple Theme
+   ========================================================================== */
+
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(10, 20, 35, 0.8);
+  border: 1px solid rgba(139, 92, 246, 0.3);
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #8b5cf6 0%, #6d28d9 100%);
+  box-shadow: 0 0 10px rgba(139, 92, 246, 0.5);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, #a78bfa 0%, #8b5cf6 100%);
+}
