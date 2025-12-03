@@ -8,6 +8,7 @@ from django.utils.text import slugify
 from newsapi import NewsApiClient
 from news_filter.forms import NewsFilterForm
 from news_filter.filters import NewsFilterService
+from news_filter.models import FilterPreset
 from .utils import fetch_full_html  # if you use it elsewhere
 from .config import (
     SPACE_KEYWORDS_ALL,
@@ -204,7 +205,27 @@ def nasa_news(request):
     Fetch and display NASA/SpaceX news with filtering.
     Optimized with source prioritization and domain blacklisting.
     """
-    filter_form = NewsFilterForm(request.GET or None)
+    # Load user's filter presets if logged in
+    user_presets = []
+    if request.user.is_authenticated:
+        user_presets = FilterPreset.objects.filter(user=request.user)
+
+    # Check if a preset is being applied
+    preset_id = request.GET.get('preset')
+    initial_data = {}
+
+    if preset_id and request.user.is_authenticated:
+        try:
+            preset = FilterPreset.objects.get(id=preset_id, user=request.user)
+            initial_data = preset.to_filter_dict()
+        except FilterPreset.DoesNotExist:
+            pass
+
+    # Merge preset data with any explicit query parameters (explicit params override preset)
+    merged_data = initial_data.copy()
+    merged_data.update(request.GET.dict())
+
+    filter_form = NewsFilterForm(merged_data or None)
 
     filter_params = {}
     if filter_form.is_valid():
@@ -327,6 +348,8 @@ def nasa_news(request):
                 "apod": apod,
                 "apod_error": apod_error,
                 "images_only": images_only,
+                "user_presets": user_presets,
+                "selected_preset_id": preset_id,
             }
         else:
             context = {
@@ -338,6 +361,8 @@ def nasa_news(request):
                 "apod": apod,
                 "apod_error": apod_error,
                 "images_only": images_only,
+                "user_presets": user_presets,
+                "selected_preset_id": preset_id,
             }
 
     except Exception as e:
@@ -350,6 +375,8 @@ def nasa_news(request):
             "apod": apod,
             "apod_error": apod_error,
             "images_only": images_only,
+            "user_presets": user_presets,
+            "selected_preset_id": preset_id,
         }
 
     return render(request, "space_news/nasa_news.html", context)
