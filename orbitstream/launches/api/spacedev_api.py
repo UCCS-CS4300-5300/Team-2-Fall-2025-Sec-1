@@ -357,8 +357,6 @@ def get_launch_by_id(launch_id):
     return data
 
 
-
-
 def get_upcoming_launches(limit):
     """
     Return a list of upcoming launches (dicts from Launch Library 2).

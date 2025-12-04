@@ -5,6 +5,7 @@ from unittest.mock import patch, MagicMock
 from django.test import TestCase
 from django.urls import reverse
 from django.core.cache import cache
+import requests
 
 from launches.api import spacedev_api
 
@@ -280,3 +281,149 @@ class LaunchViewsTests(TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertIn('launch', response.context)
+        # ---------- helpers / low-level ----------
+
+    @patch('launches.api.spacedev_api.requests.get')
+    def test_do_spacedevs_get_includes_auth_header(self, mock_get):
+        """_do_spacedevs_get should send Authorization header when key is set."""
+        original_key = spacedev_api.SPACEDEVS_API_KEY
+        spacedev_api.SPACEDEVS_API_KEY = "secret-token"
+
+        mock_response = MagicMock()
+        mock_response.json.return_value = {}
+        mock_response.raise_for_status = MagicMock()
+        mock_get.return_value = mock_response
+
+        spacedev_api._do_spacedevs_get("/launch/test/")
+
+        _, kwargs = mock_get.call_args
+        self.assertIn("headers", kwargs)
+        self.assertEqual(kwargs["headers"]["Authorization"], "Token secret-token")
+
+        spacedev_api.SPACEDEVS_API_KEY = original_key  # restore
+
+    def test_parse_net_to_dt_variants(self):
+        """_parse_net_to_dt covers valid, Z-suffixed, invalid, and None."""
+        dt = spacedev_api._parse_net_to_dt("2025-12-05T10:00:00+00:00")
+        self.assertIsNotNone(dt)
+
+        dt_z = spacedev_api._parse_net_to_dt("2025-12-05T10:00:00Z")
+        self.assertIsNotNone(dt_z)
+
+        self.assertIsNone(spacedev_api._parse_net_to_dt("not-a-date"))
+        self.assertIsNone(spacedev_api._parse_net_to_dt(None))
+
+    def test_extract_youtube_id_variants_and_invalid(self):
+        """Hit multiple URL formats + invalid cases."""
+        self.assertEqual(
+            spacedev_api.extract_youtube_id("https://youtu.be/abc123defgh"),
+            "abc123defgh",
+        )
+        self.assertEqual(
+            spacedev_api.extract_youtube_id("https://www.youtube.com/embed/abc123defgh"),
+            "abc123defgh",
+        )
+        self.assertEqual(
+            spacedev_api.extract_youtube_id("https://www.youtube.com/live/abc123defgh"),
+            "abc123defgh",
+        )
+        self.assertIsNone(
+            spacedev_api.extract_youtube_id("https://example.com/notyoutube")
+        )
+        self.assertIsNone(spacedev_api.extract_youtube_id(None))
+
+    # ---------- get_next_launch / upcoming ----------
+
+    @patch('launches.api.spacedev_api._do_spacedevs_get')
+    def test_get_next_launch_api_error(self, mock_do):
+        """If SpaceDevs errors, get_next_launch should return None."""
+        mock_do.side_effect = requests.RequestException("boom")
+        result = spacedev_api.get_next_launch()
+        self.assertIsNone(result)
+
+    @patch('launches.api.spacedev_api._get_future_upcoming')
+    def test_get_upcoming_launches_no_future(self, mock_future):
+        """If no future launches, upcoming list should be empty."""
+        mock_future.return_value = []
+        result = spacedev_api.get_upcoming_launches(limit=3)
+        self.assertEqual(result, [])
+
+    # ---------- get_best_video_url edge cases ----------
+
+    def test_get_best_video_url_no_launch_or_vidurls(self):
+        self.assertIsNone(spacedev_api.get_best_video_url(None))
+        self.assertIsNone(spacedev_api.get_best_video_url({}))
+        self.assertIsNone(spacedev_api.get_best_video_url({"vidURLs": []}))
+
+    # ---------- get_mission_patches edge/error paths ----------
+
+    def test_get_mission_patches_no_launch_or_name(self):
+        """Early returns when launch or mission name missing."""
+        self.assertEqual(spacedev_api.get_mission_patches(None), [])
+        self.assertEqual(spacedev_api.get_mission_patches({"id": "x"}), [])
+        self.assertEqual(
+            spacedev_api.get_mission_patches({"id": "x", "mission": {}}),
+            [],
+        )
+
+    @patch('launches.api.spacedev_api._do_spacedevs_get')
+    def test_get_mission_patches_api_error(self, mock_do):
+        """If mission_patch API keeps erroring, we eventually return []."""
+        launch = {
+            "id": "l1",
+            "mission": {"name": "Raise and Shine (RAISE-4)", "agencies": []},
+        }
+        mock_do.side_effect = requests.RequestException("boom")
+        result = spacedev_api.get_mission_patches(launch)
+        self.assertEqual(result, [])
+
+    # ---------- get_full_launch_data branches ----------
+
+    @patch('launches.api.spacedev_api.get_next_launch')
+    def test_get_full_launch_data_none_launch(self, mock_next):
+        """If there is no next launch, we should return None."""
+        mock_next.return_value = None
+        result = spacedev_api.get_full_launch_data()
+        self.assertIsNone(result)
+
+    # ---------- get_launch_by_id error path ----------
+
+    @patch('launches.api.spacedev_api._do_spacedevs_get')
+    def test_get_launch_by_id_api_error(self, mock_do):
+        """If SpaceDevs errors, get_launch_by_id should return None."""
+        mock_do.side_effect = requests.RequestException("boom")
+        result = spacedev_api.get_launch_by_id("bad-id")
+        self.assertIsNone(result)
+
+    # ---------- recent/completed + caching ----------
+
+    @patch('launches.api.spacedev_api._do_spacedevs_get')
+    def test_get_recent_and_completed_api_error(self, mock_do):
+        """On API error and no cache, return empty lists."""
+        mock_do.side_effect = requests.RequestException("boom")
+        result = spacedev_api.get_recent_and_completed(3, 2)
+        self.assertEqual(result["recent"], [])
+        self.assertEqual(result["completed"], [])
+
+    @patch('launches.api.spacedev_api._do_spacedevs_get')
+    def test_get_recent_and_completed_uses_cache_on_second_call(self, mock_do):
+        """Second call with same limits should hit cache, not API."""
+        launches = [
+            {
+                "id": f"launch-{i}",
+                "net": f"2025-11-{15 - i:02d}T10:00:00Z",
+                "status": {"name": "Success"},
+            }
+            for i in range(4)
+        ]
+        mock_do.return_value = {"results": launches}
+
+        first = spacedev_api.get_recent_and_completed(2, 1)
+
+        # Now make API break – cache should hide this.
+        mock_do.side_effect = requests.RequestException("boom")
+        second = spacedev_api.get_recent_and_completed(2, 1)
+
+        self.assertEqual(first, second)
+        self.assertEqual(mock_do.call_count, 1)
+
