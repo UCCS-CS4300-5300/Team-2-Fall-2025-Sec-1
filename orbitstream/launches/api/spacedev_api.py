@@ -4,8 +4,9 @@ import os
 import time
 import re
 import requests
+from django.core.cache import cache
 
-SPACEDEVS_BASE = "https://ll.thespacedevs.com/2.0.0"
+SPACEDEVS_BASE = "https://ll.thespacedevs.com/2.2.0"
 
 # --- API key (from env) ---
 SPACEDEVS_API_KEY = os.environ.get("SPACEDEV_API_KEY")
@@ -16,17 +17,10 @@ _cache = {}  # {key: (timestamp, data)}
 
 
 def _get_cached(key):
-    entry = _cache.get(key)
-    if not entry:
-        return None
-    ts, data = entry
-    if time.time() - ts > CACHE_TTL_SECONDS:
-        return None
-    return data
-
+    return cache.get(key)
 
 def _set_cache(key, data):
-    _cache[key] = (time.time(), data)
+    cache.set(key, data, CACHE_TTL_SECONDS)
 
 
 def _do_spacedevs_get(path, params=None):
@@ -154,30 +148,121 @@ def get_best_video_url(launch):
 
     return official or fallback
 
+def get_mission_patches(launch):
+    """
+    Find mission patches.
+    FIXED: 
+    1. Uses 'name__contains' (double underscore) so the API actually filters.
+    2. Uses 'limit': 100 to ensure we see all candidates.
+    """
+    if not launch:
+        return []
 
-def get_mission_patches(mission_id):
-    """
-    Fetch mission patches for a specific mission ID.
-    Returns a list of mission patch objects with image_url.
-    """
-    cache_key = f"mission_patches_{mission_id}"
+    mission = launch.get("mission") or {}
+    raw_name = mission.get("name")
+    
+    if not raw_name:
+        return []
+
+    # mission agency ids (for filtering)
+    mission_agencies = mission.get("agencies") or []
+    mission_agency_ids = {
+        a.get("id") for a in mission_agencies if isinstance(a, dict)
+    }
+
+    # Cache key
+    safe_key = re.sub(r"\s+", "_", raw_name)
+    cache_key = f"mission_patches_{safe_key}"
     cached = _get_cached(cache_key)
     if cached is not None:
         return cached
 
-    params = {
-        "mission": mission_id,
-    }
+    # 1) strip anything in parentheses
+    base_name = re.sub(r"\s*\(.*?\)", "", raw_name).strip()
+    if not base_name:
+        base_name = raw_name.strip()
 
-    try:
-        data = _do_spacedevs_get("/mission_patches/", params=params)
-    except requests.RequestException as e:
-        print(f"SpaceDevs API error fetching mission patches for {mission_id}:", e)
+    # 2) split into words
+    words = base_name.split()
+    if not words:
+        _set_cache(cache_key, [])
         return []
 
-    results = data.get("results") or []
-    _set_cache(cache_key, results)
-    return results
+    def pick_best_patch(results, mission_name):
+        mission_lower = mission_name.lower()
+        mission_tokens = set(re.findall(r"\w+", mission_lower))
+
+        # Filter by agency if possible
+        if mission_agency_ids:
+            agency_filtered = []
+            for p in results:
+                agency = p.get("agency") or {}
+                if agency.get("id") in mission_agency_ids:
+                    agency_filtered.append(p)
+            if agency_filtered:
+                results = agency_filtered
+
+        # Starlink special case
+        if "starlink" in mission_lower:
+            starlink_candidates = [
+                p for p in results
+                if "starlink" in (p.get("name") or "").lower()
+            ]
+            if starlink_candidates:
+                results = starlink_candidates
+
+        # Scoring
+        best = None
+        best_score = -1
+        
+        for p in results:
+            pname = (p.get("name") or "").lower()
+            p_tokens = set(re.findall(r"\w+", pname))
+            overlap = len(mission_tokens & p_tokens)
+            
+            if overlap > best_score:
+                best_score = overlap
+                best = p
+            elif overlap == best_score:
+                if best and len(pname) < len((best.get("name") or "").lower()):
+                    best = p
+                     
+        return best
+
+    patches = []
+
+    # 3) progressively shorten
+    for i in range(len(words)):
+        search_term = " ".join(words[:len(words) - i])
+        if not search_term:
+            break
+
+        params = {
+            # --- THE FIX IS HERE ---
+            "name__contains": search_term,  # Double Underscore!
+            "limit": 100 
+        }
+
+        try:
+            data = _do_spacedevs_get("/mission_patch/", params=params)
+        except requests.RequestException as e:
+            print(f"[mission_patches] error for '{search_term}': {e}")
+            continue
+
+        results = data.get("results") or []
+        
+        if not results:
+            continue
+
+        best_patch = pick_best_patch(results, raw_name)
+        
+        if best_patch:
+            patches = [best_patch]
+            break 
+
+    _set_cache(cache_key, patches)
+    return patches
+
 
 
 def get_next_launch():
@@ -241,10 +326,11 @@ def get_full_launch_data():
     return launch
 
 
+
 def get_launch_by_id(launch_id):
     """
     Fetch a specific launch by its ID.
-    Now also fetches mission patches if available.
+    Also fetches mission patches if available.
     """
     cache_key = f"launch_{launch_id}"
     cached = _get_cached(cache_key)
@@ -263,16 +349,14 @@ def get_launch_by_id(launch_id):
     data["video_url"] = video_url
     data["youtube_id"] = youtube_id
 
-    # Fetch mission patches if mission exists
-    mission = data.get("mission")
-    if mission and mission.get("id"):
-        mission_patches = get_mission_patches(mission["id"])
-        data["mission_patches"] = mission_patches
-    else:
-        data["mission_patches"] = []
+    # ✅ get the best patch for THIS launch
+    mission_patches = get_mission_patches(data)
+    data["mission_patches"] = mission_patches
 
     _set_cache(cache_key, data)
     return data
+
+
 
 
 def get_upcoming_launches(limit):
@@ -319,12 +403,15 @@ def get_recent_and_completed(recent_limit, completed_limit):
     total_limit = recent_limit + completed_limit * 2
 
     params = {
-        "limit": total_limit,
-        "ordering": "-net",
-    }
+    "limit": total_limit,
+    "ordering": "-net",
+    "net__lte": datetime.datetime.now(datetime.timezone.utc).isoformat(),
+}
+
 
     try:
-        data = _do_spacedevs_get("/launch/previous/", params=params)
+        data = _do_spacedevs_get("/launch/", params=params)
+
     except requests.RequestException as e:
         print("SpaceDevs recent+completed error:", e)
         return cached or {"recent": [], "completed": []}
@@ -345,7 +432,7 @@ def get_recent_and_completed(recent_limit, completed_limit):
     for launch in older:
         status = launch.get("status") or {}
         status_name = status.get("name")
-        if status_name == "Success":
+        if status_name in ("Launch Successful", "Success"):
             completed_success.append(launch)
             if len(completed_success) >= completed_limit:
                 break

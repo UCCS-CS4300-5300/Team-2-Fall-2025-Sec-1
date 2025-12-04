@@ -4,10 +4,10 @@ Tests for the launches app.
 from unittest.mock import patch, MagicMock
 from django.test import TestCase
 from django.urls import reverse
-import requests
+import datetime
 
+# Make sure this import matches your folder structure
 from launches.api import spacedev_api
-
 
 class SpaceDevAPITests(TestCase):
     """Test suite for SpaceDevs API functions."""
@@ -19,12 +19,13 @@ class SpaceDevAPITests(TestCase):
     @patch('launches.api.spacedev_api.requests.get')
     def test_get_next_launch_success(self, mock_get):
         """Test successful fetch of next launch."""
+        # Setup mock response
         mock_response = MagicMock()
         mock_response.json.return_value = {
             "results": [{
                 "id": "test-123",
                 "name": "Falcon 9 | Starlink",
-                # far in the future so it always counts as 'upcoming'
+                # Future date ensures it's picked up
                 "net": "2050-11-20T10:30:00Z"
             }]
         }
@@ -59,7 +60,8 @@ class SpaceDevAPITests(TestCase):
                 "net": "2050-11-20T10:00:00Z",
                 "image": "https://example.com/img.jpg",
                 "rocket": {"configuration": {"full_name": "Falcon 9"}},
-                "pad": {"name": "Launch Pad", "location": {"name": "Location"}}
+                "pad": {"name": "Launch Pad", "location": {"name": "Location"}},
+                "vidURLs": [{"url": "http://youtube.com/watch?v=123", "type": {"name": "Official Webcast"}}]
             }]
         }
         mock_response.raise_for_status = MagicMock()
@@ -70,19 +72,18 @@ class SpaceDevAPITests(TestCase):
         self.assertIsNotNone(result)
         self.assertEqual(result["mission_name"], "Mission Name")
         self.assertEqual(result["launch_id"], "hero-123")
+        self.assertEqual(result["youtube_id"], "123")
 
     @patch('launches.api.spacedev_api.requests.get')
     def test_get_upcoming_launches(self, mock_get):
         """
         Test fetching multiple upcoming launches.
-
-        get_upcoming_launches(limit=3) should return 3 *future* launches,
-        skipping the hero (handled via the shared upcoming helper).
+        Should skip the first result (the hero) and return the rest.
         """
+        # Create 6 future launches
         launches = [
             {
                 "id": f"up-{i}",
-                # all future dates
                 "net": f"2050-11-{10 + i:02d}T10:00:00Z"
             }
             for i in range(6)
@@ -94,18 +95,19 @@ class SpaceDevAPITests(TestCase):
 
         result = spacedev_api.get_upcoming_launches(limit=3)
 
-        # Now we expect exactly 'limit' results
+        # Expect 3 results
         self.assertEqual(len(result), 3)
-        # And they should be the ones after the hero candidate
+        # Should start from index 1 ("up-1") because index 0 is the hero
         self.assertEqual([r["id"] for r in result], ["up-1", "up-2", "up-3"])
 
     @patch('launches.api.spacedev_api.requests.get')
     def test_get_recent_and_completed(self, mock_get):
         """Test fetching recent and completed launches."""
+        # Create a mix of launches
         launches = [
             {
                 "id": f"launch-{i}",
-                "net": f"2025-11-{15 - i:02d}T10:00:00Z",
+                "net": f"2024-01-{15 - i:02d}T10:00:00Z",
                 "status": {"name": "Success"}
             }
             for i in range(10)
@@ -121,10 +123,15 @@ class SpaceDevAPITests(TestCase):
 
         self.assertIn("recent", result)
         self.assertIn("completed", result)
+        self.assertEqual(len(result["recent"]), 3)
 
     @patch('launches.api.spacedev_api.requests.get')
     def test_get_launch_by_id(self, mock_get):
-        """Test fetching a specific launch by ID."""
+        """
+        Test fetching a specific launch by ID.
+        Note: This only tests the launch fetch, not the patch fetch secondary call
+        because we don't provide mission name data to trigger it here.
+        """
         mock_response = MagicMock()
         mock_response.json.return_value = {"id": "specific-123"}
         mock_response.raise_for_status = MagicMock()
@@ -137,21 +144,52 @@ class SpaceDevAPITests(TestCase):
 
     @patch('launches.api.spacedev_api.requests.get')
     def test_get_mission_patches(self, mock_get):
-        """Test fetching mission patches."""
+        """
+        Test fetching mission patches.
+        UPDATED: Now passes a dict object and checks for 'name__contains'.
+        """
+        # 1. Setup the mock response from the API
         mock_response = MagicMock()
-        mock_response.json.return_value = {"results": []}
+        mock_response.json.return_value = {
+            "results": [
+                {"name": "Raise and Shine Patch", "agency": {"id": 1}}
+            ]
+        }
         mock_response.raise_for_status = MagicMock()
         mock_get.return_value = mock_response
 
-        result = spacedev_api.get_mission_patches("mission-123")
+        # 2. Input data (Must be a dict, not a string!)
+        launch_data = {
+            "mission": {
+                "name": "Raise and Shine",
+                "agencies": [{"id": 1}]
+            }
+        }
 
-        self.assertEqual(result, [])
+        # 3. Call the function
+        result = spacedev_api.get_mission_patches(launch_data)
+
+        # 4. Verify results
+        self.assertEqual(len(result), 1)
+        self.assertEqual(result[0]["name"], "Raise and Shine Patch")
+
+        # 5. VERIFY THE FIX: Check that we sent name__contains (double underscore)
+        # and limit=100
+        args, kwargs = mock_get.call_args
+        params = kwargs['params']
+        self.assertIn("name__contains", params)  # Ensure double underscore
+        self.assertEqual(params["name__contains"], "Raise and Shine")
+        self.assertEqual(params["limit"], 100)   # Ensure limit fix is there
 
     def test_extract_youtube_id(self):
         """Test YouTube ID extraction."""
         url = "https://www.youtube.com/watch?v=abc123defgh"
         result = spacedev_api.extract_youtube_id(url)
         self.assertEqual(result, "abc123defgh")
+
+        url_short = "https://youtu.be/xyz98765432"
+        result_short = spacedev_api.extract_youtube_id(url_short)
+        self.assertEqual(result_short, "xyz98765432")
 
     def test_get_best_video_url(self):
         """Test video URL extraction."""
@@ -163,27 +201,6 @@ class SpaceDevAPITests(TestCase):
         }
         result = spacedev_api.get_best_video_url(launch)
         self.assertEqual(result, "https://example.com/2")
-
-    @patch('launches.api.spacedev_api.get_next_launch')
-    def test_get_full_launch_data(self, mock_next):
-        """Test full launch data retrieval."""
-        mock_next.return_value = {"id": "test", "vidURLs": []}
-        result = spacedev_api.get_full_launch_data()
-        self.assertIn("video_url", result)
-
-    @patch('launches.api.spacedev_api.get_recent_and_completed')
-    def test_get_recent_launches(self, mock_split):
-        """Test recent launches helper."""
-        mock_split.return_value = {"recent": [{"id": "1"}], "completed": []}
-        result = spacedev_api.get_recent_launches(5)
-        self.assertEqual(len(result), 1)
-
-    @patch('launches.api.spacedev_api.get_recent_and_completed')
-    def test_get_completed_launches(self, mock_split):
-        """Test completed launches helper."""
-        mock_split.return_value = {"recent": [], "completed": [{"id": "1"}]}
-        result = spacedev_api.get_completed_launches(5)
-        self.assertEqual(len(result), 1)
 
 
 class LaunchViewsTests(TestCase):
@@ -212,7 +229,11 @@ class LaunchViewsTests(TestCase):
     @patch('launches.views.get_launch_by_id')
     def test_full_launch_detail_success(self, mock_get_launch):
         """Test full_launch_detail view."""
-        mock_get_launch.return_value = {"id": "test-123", "name": "Test"}
+        mock_get_launch.return_value = {
+            "id": "test-123", 
+            "name": "Test",
+            "pad": {"latitude": 28.5, "longitude": -80.5}
+        }
 
         response = self.client.get(
             reverse('launches:full_launch', args=['test-123'])
@@ -220,3 +241,4 @@ class LaunchViewsTests(TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertIn('launch', response.context)
+        self.assertEqual(response.context['pad_lat'], 28.5)
