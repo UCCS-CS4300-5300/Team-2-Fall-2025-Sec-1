@@ -17,23 +17,24 @@
   <link rel="stylesheet" href="{% static 'home/styles.css' %}">
 
   <style>
-    /* Custom Purple Scrollbar - Sitewide */
+    /* Custom Scrollbar - Sitewide */
     ::-webkit-scrollbar {
       width: 10px;
     }
 
     ::-webkit-scrollbar-track {
-      background: rgba(10, 20, 35, 0.8);
-      border: 1px solid rgba(139, 92, 246, 0.3);
+      background: var(--scrollbar-track);
+      border: 1px solid var(--input-border);
     }
 
     ::-webkit-scrollbar-thumb {
-      background: linear-gradient(180deg, #8b5cf6 0%, #6d28d9 100%);
-      box-shadow: 0 0 10px rgba(139, 92, 246, 0.5);
+      background: linear-gradient(180deg, var(--scrollbar-thumb-start) 0%, var(--scrollbar-thumb-end) 100%);
+      box-shadow: 0 0 10px var(--text-shadow);
+      border-radius: 5px;
     }
 
     ::-webkit-scrollbar-thumb:hover {
-      background: linear-gradient(180deg, #a78bfa 0%, #8b5cf6 100%);
+      background: linear-gradient(180deg, var(--accent-purple-light) 0%, var(--scrollbar-thumb-start) 100%);
     }
   </style>
 
@@ -57,6 +58,62 @@
 </html>
 
 <script>
+  // Theme initialization - must run before DOMContentLoaded to avoid flash
+  (function() {
+    function getSystemTheme() {
+      return window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+    }
+
+    function getStoredTheme() {
+      return localStorage.getItem('theme');
+    }
+
+    function setTheme(theme) {
+      // If theme is 'auto', use system preference
+      const actualTheme = theme === 'auto' ? getSystemTheme() : theme;
+
+      if (actualTheme === 'light') {
+        document.documentElement.setAttribute('data-theme', 'light');
+      } else {
+        document.documentElement.removeAttribute('data-theme');
+      }
+
+      // Update meta theme-color for mobile browsers
+      const metaThemeColor = document.querySelector('meta[name="theme-color"]');
+      if (metaThemeColor) {
+        metaThemeColor.setAttribute('content', actualTheme === 'light' ? '#ffffff' : '#000000');
+      }
+    }
+
+    // Initialize theme on page load
+    const storedTheme = getStoredTheme();
+    const initialTheme = storedTheme || 'auto';
+    setTheme(initialTheme);
+
+    // Listen for system theme changes if user preference is 'auto'
+    window.matchMedia('(prefers-color-scheme: light)').addEventListener('change', function(e) {
+      const storedTheme = getStoredTheme();
+      if (!storedTheme || storedTheme === 'auto') {
+        setTheme('auto');
+      }
+    });
+
+    // Expose theme functions globally for use in event listeners
+    window.themeManager = {
+      setTheme: setTheme,
+      getSystemTheme: getSystemTheme,
+      getCurrentTheme: function() {
+        return document.documentElement.hasAttribute('data-theme') ? 'light' : 'dark';
+      },
+      toggleTheme: function() {
+        const currentTheme = this.getCurrentTheme();
+        const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+        localStorage.setItem('theme', newTheme);
+        setTheme(newTheme);
+      }
+    };
+  })();
+
   document.addEventListener('DOMContentLoaded', function() {
     // Back to Top Button
     const backToTopBtn = document.querySelector('.back-to-top');
@@ -173,5 +230,15 @@
         });
       }
     }
+
+    // Theme Toggle Buttons
+    const themeToggleButtons = document.querySelectorAll('.theme-toggle');
+    themeToggleButtons.forEach(button => {
+      button.addEventListener('click', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        window.themeManager.toggleTheme();
+      });
+    });
   });
 </script>

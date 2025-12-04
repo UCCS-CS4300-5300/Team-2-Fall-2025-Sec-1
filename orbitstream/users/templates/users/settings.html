@@ -10,19 +10,18 @@
 @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&family=Rajdhani:wght@300;400;500;600;700&display=swap');
 
 body {
-    background: #0a0e1a;
-    color: #c0d4e8;
+    background: var(--bg);
+    color: var(--text-secondary);
 }
 
 .auth-page-wrapper {
-    background: radial-gradient(ellipse at center, rgba(16, 32, 64, 0.8) 0%, rgba(10, 14, 26, 0.95) 100%),
-                url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="400" height="400"><defs><filter id="noise"><feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="4" seed="0"/></filter></defs><rect width="400" height="400" filter="url(%23noise)" opacity="0.05"/></svg>');
+    background: var(--bg);
     position: relative;
     min-height: 100vh;
     padding: 2rem;
 }
 
-/* Starfield Background Effect - animations removed */
+/* Starfield Background Effect - only visible in dark mode */
 .auth-page-wrapper::before {
     content: '';
     position: fixed;
@@ -44,17 +43,19 @@ body {
     pointer-events: none;
 }
 
+[data-theme="light"] .auth-page-wrapper::before {
+    opacity: 0.05;
+}
+
 .register-container {
     position: relative;
     z-index: 1;
     max-width: 900px !important;
-    background: linear-gradient(135deg, rgba(14, 26, 46, 0.9) 0%, rgba(18, 35, 60, 0.85) 100%);
-    border: none;
-    border-radius: 0;
-    box-shadow: none;
+    background: var(--bg-tertiary);
+    border: 1px solid var(--input-border);
+    border-radius: 12px;
+    box-shadow: var(--shadow);
     padding: 2.5rem;
-    clip-path: none;
-    position: relative;
 }
 
 /* Corner decorations removed */
@@ -66,11 +67,8 @@ h1 {
     text-align: center;
     text-transform: uppercase;
     letter-spacing: 3px;
-    color: #fff !important;
-    text-shadow:
-        0 0 10px rgba(139, 92, 246, 0.8),
-        0 0 20px rgba(139, 92, 246, 0.6),
-        0 0 30px rgba(139, 92, 246, 0.4);
+    color: var(--text) !important;
+    text-shadow: 0 0 10px var(--text-shadow);
     margin-bottom: 2rem;
     position: relative;
     padding-bottom: 1rem;
@@ -84,20 +82,19 @@ h1::after {
     transform: translateX(-50%);
     width: 60%;
     height: 2px;
-    background: linear-gradient(90deg, transparent, #8b5cf6, transparent);
-    box-shadow: 0 0 10px rgba(139, 92, 246, 0.5);
+    background: linear-gradient(90deg, transparent, var(--accent-purple), transparent);
+    box-shadow: 0 0 10px var(--text-shadow);
 }
 
 .settings-section {
     margin-bottom: 2.5rem;
     padding: 1.5rem;
-    background: rgba(10, 20, 35, 0.6);
-    border: 1px solid rgba(139, 92, 246, 0.3);
-    border-left: 3px solid #8b5cf6;
-    box-shadow:
-        inset 0 0 20px rgba(139, 92, 246, 0.05),
-        0 4px 6px rgba(0, 0, 0, 0.3);
+    background: var(--bg-secondary);
+    border: 1px solid var(--input-border);
+    border-left: 3px solid var(--accent-purple);
+    box-shadow: var(--shadow);
     position: relative;
+    border-radius: 8px;
 }
 
 .settings-section::before {
@@ -107,19 +104,19 @@ h1::after {
     left: 0;
     right: 0;
     height: 1px;
-    background: linear-gradient(90deg, rgba(139, 92, 246, 0.5), transparent);
+    background: linear-gradient(90deg, var(--accent-purple), transparent);
     opacity: 0.5;
 }
 
 .settings-section h2 {
     font-family: 'Orbitron', sans-serif;
     font-weight: 700;
-    color: #8b5cf6;
+    color: var(--accent-purple);
     font-size: 1.5rem;
     margin-bottom: 1.5rem;
     text-transform: uppercase;
     letter-spacing: 2px;
-    text-shadow: 0 0 10px rgba(139, 92, 246, 0.5);
+    text-shadow: 0 0 10px var(--text-shadow);
     display: flex;
     align-items: center;
     gap: 0.75rem;
@@ -127,9 +124,9 @@ h1::after {
 
 .settings-section h2::before {
     content: '▸';
-    color: #a78bfa;
+    color: var(--accent-purple-light);
     font-size: 1.2em;
-    text-shadow: 0 0 10px rgba(167, 139, 250, 0.8);
+    text-shadow: 0 0 10px var(--text-shadow);
 }
 
 /* Collapsible Section Styles */
@@ -143,7 +140,7 @@ h1::after {
 }
 
 .section-header:hover {
-    color: #a78bfa;
+    color: var(--accent-purple-light);
 }
 
 .collapse-icon {
@@ -172,7 +169,7 @@ h1::after {
 .settings-section h3 {
     font-family: 'Rajdhani', sans-serif;
     font-weight: 600;
-    color: #c4b5fd;
+    color: var(--accent-purple-light);
     font-size: 1.2rem;
     margin-bottom: 1rem;
     text-transform: uppercase;
@@ -180,18 +177,19 @@ h1::after {
 }
 
 .user-info {
-    background: linear-gradient(135deg, rgba(60, 40, 80, 0.3) 0%, rgba(40, 30, 60, 0.3) 100%);
+    background: var(--button-bg);
     padding: 1.5rem;
-    border: 1px solid rgba(139, 92, 246, 0.3);
-    border-left: 3px solid #8b5cf6;
+    border: 1px solid var(--input-border);
+    border-left: 3px solid var(--accent-purple);
     margin-bottom: 1rem;
     position: relative;
     overflow: hidden;
+    border-radius: 8px;
 }
 
 .user-info p {
     margin: 0.75rem 0;
-    color: #a8c5d9;
+    color: var(--text-secondary);
     font-family: 'Rajdhani', sans-serif;
     font-size: 1.1rem;
     position: relative;
@@ -199,22 +197,21 @@ h1::after {
 }
 
 .user-info strong {
-    color: #8b5cf6;
+    color: var(--accent-purple);
     font-weight: 600;
-    text-shadow: 0 0 5px rgba(139, 92, 246, 0.3);
+    text-shadow: 0 0 5px var(--text-shadow);
 }
 
 /* Form Styling */
 label {
     font-family: 'Rajdhani', sans-serif;
     font-weight: 600;
-    color: #c4b5fd;
+    color: var(--accent-purple-light);
     font-size: 1rem;
     text-transform: uppercase;
     letter-spacing: 1px;
     display: block;
     margin-bottom: 0.5rem;
-    text-shadow: 0 0 5px rgba(196, 181, 253, 0.3);
 }
 
 input[type="text"],
@@ -226,13 +223,14 @@ select,
 .filter-select {
     width: 100%;
     padding: 0.75rem 1rem;
-    background: rgba(10, 25, 40, 0.8) !important;
-    border: 1px solid rgba(139, 92, 246, 0.3) !important;
-    color: #c0d4e8 !important;
+    background: var(--input-bg) !important;
+    border: 1px solid var(--input-border) !important;
+    color: var(--text) !important;
     font-family: 'Rajdhani', sans-serif;
     font-size: 1rem;
     transition: all 0.3s ease;
-    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.4);
+    box-shadow: var(--shadow);
+    border-radius: 8px;
 }
 
 input[type="text"]:focus,
@@ -241,10 +239,8 @@ input[type="date"]:focus,
 select:focus,
 .form-control:focus {
     outline: none;
-    border-color: #8b5cf6 !important;
-    box-shadow:
-        inset 0 2px 4px rgba(0, 0, 0, 0.4),
-        0 0 15px rgba(139, 92, 246, 0.4);
+    border-color: var(--accent-purple) !important;
+    box-shadow: 0 0 15px var(--text-shadow);
     background: rgba(20, 15, 40, 0.9) !important;
 }
 
