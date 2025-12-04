@@ -161,16 +161,16 @@
         <h2 class="info-card-title">{{ launch.mission.name }}</h2>
         <div class="info-card-container">
             <div class="info-card-left mission-patch-container">
-                {% if launch.mission_patches and launch.mission_patches|length > 0 %}
-                <div class="mission-patch-bg" style="background-image: url('{{ launch.mission_patches.0.image_url }}');"></div>
-                {% elif launch.mission.mission_patches and launch.mission.mission_patches|length > 0 %}
-                <div class="mission-patch-bg" style="background-image: url('{{ launch.mission.mission_patches.0.image_url }}');"></div>
+                {% if launch.mission_patches and launch.mission_patches.0.image_url %}
+                    <div class="mission-patch-bg"
+                         style="background-image: url('{{ launch.mission_patches.0.image_url }}');">
+                    </div>
                 {% else %}
-                <div class="mission-patch-placeholder">
-                    <span class="patch-icon">🛰️</span>
-                </div>
+                    <div class="mission-patch-placeholder">
+                        <span class="patch-icon">🛰️</span>
+                    </div>
                 {% endif %}
-            </div>
+            </div>            
             <div class="info-card-right">
                 <p class="info-card-description">{{ launch.mission.description|default:"No mission description available" }}</p>
                 <div class="info-card-buttons">

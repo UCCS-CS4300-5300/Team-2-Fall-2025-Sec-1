@@ -18,6 +18,8 @@
 
    ========================================================================== */
 
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&display=swap');
+
 :root {
   --text: #e9e7e4;
   --muted: #cfcac3;
@@ -663,12 +665,53 @@ html, body {
 }
 
 .dropdown-item--logout {
-  color: #fca5a5;
+  font-family: 'Orbitron', sans-serif;
+  font-weight: 700;
+  padding: 0.75rem 1rem;
+  border: 2px solid #8b5cf6;
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.2) 0%, rgba(139, 92, 246, 0.3) 100%);
+  color: #8b5cf6;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 0 10px rgba(139, 92, 246, 0.3);
+  border-radius: 8px;
+}
+
+.dropdown-item--logout::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: rgba(139, 92, 246, 0.3);
+  transform: translate(-50%, -50%);
+  transition: width 0.5s, height 0.5s;
+  z-index: 0;
 }
 
 .dropdown-item--logout:hover {
-  background: rgba(239, 68, 68, 0.15);
-  color: #fee2e2;
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.4) 0%, rgba(139, 92, 246, 0.5) 100%);
+  color: #fff;
+  box-shadow:
+    0 0 20px rgba(139, 92, 246, 0.6),
+    0 0 30px rgba(139, 92, 246, 0.4);
+  border-color: #a78bfa;
+}
+
+.dropdown-item--logout:hover::before {
+  width: 300px;
+  height: 300px;
+}
+
+.dropdown-item--logout svg {
+  position: relative;
+  z-index: 1;
 }
 
 /* Mobile User Info */
@@ -937,18 +980,53 @@ html, body {
 }
 
 .mobile-auth-btn--logout {
-  background: rgba(239, 68, 68, 0.1);
-  border-color: rgba(239, 68, 68, 0.3);
-  color: #fca5a5;
-  border: 1px solid;
+  font-family: 'Orbitron', sans-serif;
+  font-weight: 700;
+  padding: 0.75rem 1rem;
+  border: 2px solid #8b5cf6;
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.2) 0%, rgba(139, 92, 246, 0.3) 100%);
+  color: #8b5cf6;
+  text-transform: uppercase;
+  letter-spacing: 2px;
   cursor: pointer;
-  font-family: inherit;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 0 10px rgba(139, 92, 246, 0.3);
+  border-radius: 8px;
+}
+
+.mobile-auth-btn--logout::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: rgba(139, 92, 246, 0.3);
+  transform: translate(-50%, -50%);
+  transition: width 0.5s, height 0.5s;
+  z-index: 0;
 }
 
 .mobile-auth-btn--logout:hover {
-  background: rgba(239, 68, 68, 0.2);
-  border-color: rgba(239, 68, 68, 0.6);
-  color: #fee2e2;
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.4) 0%, rgba(139, 92, 246, 0.5) 100%);
+  color: #fff;
+  box-shadow:
+    0 0 20px rgba(139, 92, 246, 0.6),
+    0 0 30px rgba(139, 92, 246, 0.4);
+  border-color: #a78bfa;
+}
+
+.mobile-auth-btn--logout:hover::before {
+  width: 300px;
+  height: 300px;
+}
+
+.mobile-auth-btn--logout svg {
+  position: relative;
+  z-index: 1;
 }
 
 .mobile-nav__search {
@@ -1337,8 +1415,19 @@ html, body {
     gap: 2rem;
   }
 
+  .footer__col {
+    text-align: center;
+    align-items: center;
+  }
+
   .footer__brand {
     max-width: 100%;
+    text-align: center;
+    align-items: center;
+  }
+
+  .footer__about {
+    text-align: center;
   }
 
   .footer__brand .brand__logo {
@@ -4704,4 +4793,26 @@ body.full-media-page .site-footer {
     padding: 0.6rem 1.5rem;
     gap: 1.5rem;
   }
+}
+
+/* ==========================================================================
+   CUSTOM SCROLLBAR - Purple Theme
+   ========================================================================== */
+
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(10, 20, 35, 0.8);
+  border: 1px solid rgba(139, 92, 246, 0.3);
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #8b5cf6 0%, #6d28d9 100%);
+  box-shadow: 0 0 10px rgba(139, 92, 246, 0.5);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, #a78bfa 0%, #8b5cf6 100%);
 }

@@ -5,7 +5,410 @@
 {% block body_class %}satellite-tracking-page{% endblock %}
 
 {% block extra_css %}
-<link rel="stylesheet" href="{% static 'satellite_tracking/closest_satellite.css' %}">
+<style>
+  /* ========================================
+     Closest Satellite Page - Space Theme
+     ======================================== */
+
+  /* Layout */
+  .satellite-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 40px 20px;
+    min-height: 100vh;
+    background: #000000;
+  }
+
+  /* Header */
+  .satellite-header {
+    text-align: center;
+    margin-bottom: 50px;
+  }
+
+  .satellite-title {
+    font-size: 2.5em;
+    font-weight: 700;
+    background: linear-gradient(135deg, #60a5fa 0%, #a78bfa 50%, #f472b6 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 12px;
+    text-shadow: 0 0 30px rgba(96, 165, 250, 0.3);
+  }
+
+  .satellite-subtitle {
+    font-size: 1.1em;
+    color: #cbd5e1;
+    line-height: 1.6;
+  }
+
+  /* Location Buttons */
+  .location-buttons {
+    display: flex;
+    gap: 16px;
+    justify-content: center;
+    margin-bottom: 40px;
+    flex-wrap: wrap;
+  }
+
+  .location-btn {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 28px;
+    font-size: 1em;
+    font-weight: 600;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+
+  .location-btn-primary {
+    background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+    color: white;
+    box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4);
+  }
+
+  .location-btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 25px rgba(59, 130, 246, 0.6);
+  }
+
+  .location-btn-secondary {
+    background: rgba(30, 41, 59, 0.6);
+    color: #e2e8f0;
+    border: 2px solid rgba(96, 165, 250, 0.3);
+    backdrop-filter: blur(10px);
+  }
+
+  .location-btn-secondary:hover {
+    border-color: #60a5fa;
+    background: rgba(30, 41, 59, 0.8);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(96, 165, 250, 0.3);
+  }
+
+  .location-btn:active {
+    transform: translateY(0);
+  }
+
+  .location-btn svg {
+    flex-shrink: 0;
+  }
+
+  /* Dialog */
+  .dialog-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.85);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    backdrop-filter: blur(5px);
+    animation: fadeIn 0.3s ease;
+  }
+
+  .dialog-box {
+    background: rgba(30, 41, 59, 0.95);
+    border: 2px solid rgba(96, 165, 250, 0.3);
+    border-radius: 16px;
+    padding: 32px;
+    max-width: 500px;
+    width: 90%;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(20px);
+    animation: slideUp 0.3s ease;
+  }
+
+  .dialog-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+  }
+
+  .dialog-header h2 {
+    font-size: 1.5em;
+    font-weight: 700;
+    color: #f1f5f9;
+    margin: 0;
+  }
+
+  .dialog-close {
+    background: transparent;
+    border: none;
+    color: #cbd5e1;
+    cursor: pointer;
+    padding: 4px;
+    transition: all 0.3s ease;
+    border-radius: 6px;
+  }
+
+  .dialog-close:hover {
+    color: #f1f5f9;
+    background: rgba(96, 165, 250, 0.2);
+  }
+
+  /* Form */
+  .coordinates-form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .form-group label {
+    font-size: 0.95em;
+    font-weight: 600;
+    color: #f1f5f9;
+  }
+
+  .form-group input {
+    padding: 12px 16px;
+    font-size: 1em;
+    background: rgba(15, 23, 42, 0.6);
+    border: 2px solid rgba(96, 165, 250, 0.3);
+    border-radius: 8px;
+    color: #e2e8f0;
+    outline: none;
+    transition: all 0.3s ease;
+  }
+
+  .form-group input:focus {
+    border-color: #60a5fa;
+    box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.2);
+    background: rgba(15, 23, 42, 0.8);
+  }
+
+  .form-group input::placeholder {
+    color: #64748b;
+  }
+
+  .form-hint {
+    font-size: 0.85em;
+    color: #94a3b8;
+  }
+
+  .submit-btn {
+    padding: 14px 24px;
+    font-size: 1em;
+    font-weight: 600;
+    background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4);
+    margin-top: 8px;
+  }
+
+  .submit-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 25px rgba(59, 130, 246, 0.6);
+  }
+
+  .submit-btn:active {
+    transform: translateY(0);
+  }
+
+  /* Loading Indicator */
+  .loading-indicator {
+    text-align: center;
+    padding: 60px 20px;
+    animation: fadeIn 0.3s ease;
+  }
+
+  .spinner {
+    display: inline-block;
+    width: 50px;
+    height: 50px;
+    border: 4px solid rgba(96, 165, 250, 0.2);
+    border-top-color: #60a5fa;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    box-shadow: 0 0 20px rgba(96, 165, 250, 0.5);
+    margin-bottom: 16px;
+  }
+
+  .loading-indicator p {
+    color: #cbd5e1;
+    font-size: 1.1em;
+  }
+
+  /* Error Message */
+  .error-message {
+    background: rgba(239, 68, 68, 0.1);
+    border: 2px solid rgba(239, 68, 68, 0.4);
+    border-radius: 12px;
+    padding: 20px;
+    margin: 20px auto;
+    max-width: 600px;
+    color: #fca5a5;
+    text-align: center;
+    animation: fadeIn 0.3s ease;
+  }
+
+  /* Satellite Info */
+  .satellite-info {
+    animation: fadeIn 0.5s ease;
+  }
+
+  .info-title {
+    font-size: 2em;
+    font-weight: 700;
+    background: linear-gradient(135deg, #60a5fa 0%, #a78bfa 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    text-align: center;
+    margin-bottom: 32px;
+  }
+
+  .info-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 20px;
+  }
+
+  .info-card {
+    background: rgba(30, 41, 59, 0.6);
+    border: 2px solid rgba(96, 165, 250, 0.2);
+    border-radius: 12px;
+    padding: 24px;
+    backdrop-filter: blur(10px);
+    transition: all 0.3s ease;
+  }
+
+  .info-card:hover {
+    border-color: rgba(96, 165, 250, 0.4);
+    box-shadow: 0 8px 30px rgba(96, 165, 250, 0.2);
+    transform: translateY(-2px);
+  }
+
+  .info-card-primary {
+    border-color: rgba(96, 165, 250, 0.5);
+    background: rgba(30, 41, 59, 0.8);
+  }
+
+  .info-card h3 {
+    font-size: 1.2em;
+    font-weight: 600;
+    color: #f1f5f9;
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+    border-bottom: 2px solid rgba(96, 165, 250, 0.3);
+  }
+
+  .info-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px solid rgba(100, 116, 139, 0.2);
+  }
+
+  .info-row:last-child {
+    border-bottom: none;
+  }
+
+  .info-label {
+    font-size: 0.95em;
+    color: #94a3b8;
+    font-weight: 500;
+  }
+
+  .info-value {
+    font-size: 1em;
+    color: #e2e8f0;
+    font-weight: 600;
+    text-align: right;
+  }
+
+  /* Animations */
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  @keyframes slideUp {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  /* Responsive Design */
+  @media (max-width: 768px) {
+    .satellite-container {
+      padding: 30px 15px;
+    }
+
+    .satellite-title {
+      font-size: 2em;
+    }
+
+    .satellite-subtitle {
+      font-size: 1em;
+    }
+
+    .location-buttons {
+      flex-direction: column;
+    }
+
+    .location-btn {
+      width: 100%;
+      justify-content: center;
+    }
+
+    .dialog-box {
+      padding: 24px;
+    }
+
+    .info-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .satellite-title {
+      font-size: 1.75em;
+    }
+
+    .location-btn {
+      padding: 12px 20px;
+      font-size: 0.95em;
+    }
+
+    .info-card {
+      padding: 20px;
+    }
+  }
+</style>
 {% endblock %}
 
 {% block content %}
