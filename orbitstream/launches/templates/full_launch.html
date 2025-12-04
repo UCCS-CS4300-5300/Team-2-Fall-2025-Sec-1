@@ -43,7 +43,17 @@
                 <div class="detail-grid">
                     <div class="detail-item">
                         <span class="detail-label">Status</span>
-                        <span class="detail-value status-{{ launch.status.abbrev|lower }}">{{ launch.status.name }}</span>
+                        <span class="detail-value 
+                            {% if 'GO' in launch.status.name|upper %}
+                                launch-status-go
+                            {% elif 'IN FLIGHT' in launch.status.name|upper or 'INFLIGHT' in launch.status.name|upper %}
+                                launch-status-inflight
+                            {% elif 'SUCCESS' in launch.status.name|upper %}
+                                launch-status-success
+                            {% else %}
+                                launch-status-tbd
+                            {% endif %}
+                        ">{{ launch.status.name }}</span>
                     </div>
                     
                     <div class="detail-item">
