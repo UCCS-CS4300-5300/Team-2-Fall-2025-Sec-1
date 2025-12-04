@@ -6,38 +6,327 @@
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'users/forms.css' %}">
 <style>
-.settings-section {
-    margin-bottom: 2rem;
-    padding-bottom: 2rem;
-    border-bottom: 1px solid #ddd;
+/* KOTOR Space Aesthetic */
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&family=Rajdhani:wght@300;400;500;600;700&display=swap');
+
+body {
+    background: #0a0e1a;
+    color: #c0d4e8;
 }
 
-.settings-section:last-child {
-    border-bottom: none;
+.auth-page-wrapper {
+    background: radial-gradient(ellipse at center, rgba(16, 32, 64, 0.8) 0%, rgba(10, 14, 26, 0.95) 100%),
+                url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="400" height="400"><defs><filter id="noise"><feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="4" seed="0"/></filter></defs><rect width="400" height="400" filter="url(%23noise)" opacity="0.05"/></svg>');
+    position: relative;
+    min-height: 100vh;
+    padding: 2rem;
+}
+
+/* Starfield Background Effect - animations removed */
+.auth-page-wrapper::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image:
+        radial-gradient(2px 2px at 20% 30%, white, transparent),
+        radial-gradient(2px 2px at 60% 70%, white, transparent),
+        radial-gradient(1px 1px at 50% 50%, white, transparent),
+        radial-gradient(1px 1px at 80% 10%, white, transparent),
+        radial-gradient(2px 2px at 90% 60%, white, transparent),
+        radial-gradient(1px 1px at 33% 80%, white, transparent);
+    background-size: 200% 200%;
+    background-position: 0% 0%;
+    opacity: 0.4;
+    z-index: 0;
+    pointer-events: none;
+}
+
+.register-container {
+    position: relative;
+    z-index: 1;
+    max-width: 900px !important;
+    background: linear-gradient(135deg, rgba(14, 26, 46, 0.9) 0%, rgba(18, 35, 60, 0.85) 100%);
+    border: none;
+    border-radius: 0;
+    box-shadow: none;
+    padding: 2.5rem;
+    clip-path: none;
+    position: relative;
+}
+
+/* Corner decorations removed */
+
+h1 {
+    font-family: 'Orbitron', sans-serif;
+    font-weight: 900;
+    font-size: 2.5rem;
+    text-align: center;
+    text-transform: uppercase;
+    letter-spacing: 3px;
+    color: #fff !important;
+    text-shadow:
+        0 0 10px rgba(139, 92, 246, 0.8),
+        0 0 20px rgba(139, 92, 246, 0.6),
+        0 0 30px rgba(139, 92, 246, 0.4);
+    margin-bottom: 2rem;
+    position: relative;
+    padding-bottom: 1rem;
+}
+
+h1::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 60%;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, #8b5cf6, transparent);
+    box-shadow: 0 0 10px rgba(139, 92, 246, 0.5);
+}
+
+.settings-section {
+    margin-bottom: 2.5rem;
+    padding: 1.5rem;
+    background: rgba(10, 20, 35, 0.6);
+    border: 1px solid rgba(139, 92, 246, 0.3);
+    border-left: 3px solid #8b5cf6;
+    box-shadow:
+        inset 0 0 20px rgba(139, 92, 246, 0.05),
+        0 4px 6px rgba(0, 0, 0, 0.3);
+    position: relative;
+}
+
+.settings-section::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, rgba(139, 92, 246, 0.5), transparent);
+    opacity: 0.5;
 }
 
 .settings-section h2 {
-    color: #333;
+    font-family: 'Orbitron', sans-serif;
+    font-weight: 700;
+    color: #8b5cf6;
     font-size: 1.5rem;
+    margin-bottom: 1.5rem;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    text-shadow: 0 0 10px rgba(139, 92, 246, 0.5);
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.settings-section h2::before {
+    content: '▸';
+    color: #a78bfa;
+    font-size: 1.2em;
+    text-shadow: 0 0 10px rgba(167, 139, 250, 0.8);
+}
+
+/* Collapsible Section Styles */
+.section-header {
+    cursor: pointer;
+    user-select: none;
+    justify-content: space-between;
+    transition: all 0.3s ease;
+    margin-bottom: 0 !important;
+    padding-bottom: 1rem;
+}
+
+.section-header:hover {
+    color: #a78bfa;
+}
+
+.collapse-icon {
+    transition: transform 0.3s ease;
+    flex-shrink: 0;
+}
+
+.settings-section.collapsed .collapse-icon {
+    transform: rotate(-90deg);
+}
+
+.section-content {
+    max-height: 5000px;
+    overflow: hidden;
+    transition: max-height 0.4s ease, opacity 0.3s ease, padding 0.3s ease;
+    opacity: 1;
+    padding-top: 0.5rem;
+}
+
+.settings-section.collapsed .section-content {
+    max-height: 0;
+    opacity: 0;
+    padding-top: 0;
+}
+
+.settings-section h3 {
+    font-family: 'Rajdhani', sans-serif;
+    font-weight: 600;
+    color: #c4b5fd;
+    font-size: 1.2rem;
     margin-bottom: 1rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
 }
 
 .user-info {
-    background: #f5f5f5;
-    padding: 1rem;
-    border-radius: 8px;
+    background: linear-gradient(135deg, rgba(60, 40, 80, 0.3) 0%, rgba(40, 30, 60, 0.3) 100%);
+    padding: 1.5rem;
+    border: 1px solid rgba(139, 92, 246, 0.3);
+    border-left: 3px solid #8b5cf6;
     margin-bottom: 1rem;
+    position: relative;
+    overflow: hidden;
 }
 
 .user-info p {
-    margin: 0.5rem 0;
-    color: #555;
+    margin: 0.75rem 0;
+    color: #a8c5d9;
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 1.1rem;
+    position: relative;
+    z-index: 1;
 }
 
 .user-info strong {
-    color: #333;
+    color: #8b5cf6;
+    font-weight: 600;
+    text-shadow: 0 0 5px rgba(139, 92, 246, 0.3);
 }
 
+/* Form Styling */
+label {
+    font-family: 'Rajdhani', sans-serif;
+    font-weight: 600;
+    color: #c4b5fd;
+    font-size: 1rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    display: block;
+    margin-bottom: 0.5rem;
+    text-shadow: 0 0 5px rgba(196, 181, 253, 0.3);
+}
+
+input[type="text"],
+input[type="password"],
+input[type="date"],
+select,
+.form-control,
+.filter-input,
+.filter-select {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    background: rgba(10, 25, 40, 0.8) !important;
+    border: 1px solid rgba(139, 92, 246, 0.3) !important;
+    color: #c0d4e8 !important;
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.4);
+}
+
+input[type="text"]:focus,
+input[type="password"]:focus,
+input[type="date"]:focus,
+select:focus,
+.form-control:focus {
+    outline: none;
+    border-color: #8b5cf6 !important;
+    box-shadow:
+        inset 0 2px 4px rgba(0, 0, 0, 0.4),
+        0 0 15px rgba(139, 92, 246, 0.4);
+    background: rgba(20, 15, 40, 0.9) !important;
+}
+
+/* Buttons */
+.submit-button,
+button[type="submit"],
+.edit-btn,
+.delete-btn {
+    font-family: 'Orbitron', sans-serif;
+    font-weight: 700;
+    padding: 0.75rem 2rem;
+    border: 2px solid #8b5cf6;
+    background: linear-gradient(135deg, rgba(139, 92, 246, 0.2) 0%, rgba(139, 92, 246, 0.3) 100%);
+    color: #8b5cf6;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 0 10px rgba(139, 92, 246, 0.3);
+}
+
+.submit-button::before,
+button[type="submit"]::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: rgba(139, 92, 246, 0.3);
+    transform: translate(-50%, -50%);
+    transition: width 0.5s, height 0.5s;
+}
+
+.submit-button:hover,
+button[type="submit"]:hover {
+    background: linear-gradient(135deg, rgba(139, 92, 246, 0.4) 0%, rgba(139, 92, 246, 0.5) 100%);
+    color: #fff;
+    box-shadow:
+        0 0 20px rgba(139, 92, 246, 0.6),
+        0 0 30px rgba(139, 92, 246, 0.4);
+    border-color: #a78bfa;
+}
+
+.submit-button:hover::before,
+button[type="submit"]:hover::before {
+    width: 300px;
+    height: 300px;
+}
+
+.edit-btn {
+    background: linear-gradient(135deg, rgba(139, 92, 246, 0.2) 0%, rgba(139, 92, 246, 0.3) 100%);
+    border-color: #8b5cf6;
+    color: #8b5cf6;
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
+}
+
+.edit-btn:hover {
+    background: linear-gradient(135deg, rgba(139, 92, 246, 0.4) 0%, rgba(139, 92, 246, 0.5) 100%);
+    color: #fff;
+    box-shadow: 0 0 15px rgba(139, 92, 246, 0.6);
+}
+
+.delete-btn {
+    background: linear-gradient(135deg, rgba(220, 53, 69, 0.2) 0%, rgba(180, 40, 50, 0.3) 100%);
+    border-color: #dc3545;
+    color: #ff6b7a;
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
+}
+
+.delete-btn:hover {
+    background: linear-gradient(135deg, rgba(220, 53, 69, 0.4) 0%, rgba(180, 40, 50, 0.5) 100%);
+    color: #fff;
+    box-shadow: 0 0 15px rgba(220, 53, 69, 0.6);
+}
+
+/* Messages */
 .messages {
     list-style: none;
     padding: 0;
@@ -45,28 +334,56 @@
 }
 
 .messages li {
-    padding: 1rem;
-    border-radius: 8px;
-    margin-bottom: 0.5rem;
+    padding: 1rem 1.5rem;
+    margin-bottom: 0.75rem;
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 1.1rem;
+    font-weight: 500;
+    position: relative;
+    border-left: 4px solid;
 }
 
 .messages .success {
-    background-color: #d4edda;
-    border: 1px solid #c3e6cb;
-    color: #155724;
+    background: linear-gradient(135deg, rgba(40, 167, 69, 0.2) 0%, rgba(30, 140, 50, 0.15) 100%);
+    border-color: #28a745;
+    color: #7ef59d;
+    box-shadow: 0 0 15px rgba(40, 167, 69, 0.3);
 }
 
 .messages .error {
-    background-color: #f8d7da;
-    border: 1px solid #f5c6cb;
-    color: #721c24;
+    background: linear-gradient(135deg, rgba(220, 53, 69, 0.2) 0%, rgba(180, 40, 50, 0.15) 100%);
+    border-color: #dc3545;
+    color: #ff8b99;
+    box-shadow: 0 0 15px rgba(220, 53, 69, 0.3);
+}
+
+/* Form Error Messages */
+.errorlist {
+    list-style: none;
+    padding: 0.5rem 1rem;
+    margin: 0.5rem 0 0 0;
+    background: linear-gradient(135deg, rgba(220, 53, 69, 0.2) 0%, rgba(180, 40, 50, 0.15) 100%);
+    border-left: 3px solid #dc3545;
+    border-radius: 4px;
+    box-shadow: 0 0 10px rgba(220, 53, 69, 0.2);
+}
+
+.errorlist li {
+    color: #ff8b99;
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 0.95rem;
+    font-weight: 500;
+    margin: 0.25rem 0;
 }
 
 .help-text {
     font-size: 0.875rem;
-    color: #666;
-    margin-top: 0.25rem;
-    line-height: 1.4;
+    color: #7a9fb8;
+    margin-top: 0.5rem;
+    line-height: 1.5;
+    font-family: 'Rajdhani', sans-serif;
+    padding-left: 0.5rem;
+    border-left: 2px solid rgba(139, 92, 246, 0.3);
 }
 
 .help-text ul {
@@ -77,6 +394,100 @@
 .help-text li {
     margin: 0.25rem 0;
 }
+
+/* Preset Item Styling */
+.preset-item {
+    background: linear-gradient(135deg, rgba(40, 30, 60, 0.4) 0%, rgba(30, 20, 50, 0.4) 100%) !important;
+    border: 1px solid rgba(139, 92, 246, 0.3) !important;
+    border-left: 3px solid #8b5cf6 !important;
+    padding: 1.5rem !important;
+    margin-bottom: 1rem !important;
+    box-shadow:
+        0 4px 6px rgba(0, 0, 0, 0.3),
+        inset 0 0 20px rgba(139, 92, 246, 0.05) !important;
+}
+
+.preset-item:hover {
+    border-left-width: 3px !important;
+    box-shadow:
+        0 4px 6px rgba(0, 0, 0, 0.3),
+        inset 0 0 20px rgba(139, 92, 246, 0.05) !important;
+}
+
+.preset-item h4 {
+    font-family: 'Orbitron', sans-serif;
+    color: #8b5cf6 !important;
+    font-size: 1.2rem !important;
+    text-shadow: 0 0 10px rgba(139, 92, 246, 0.5);
+    margin: 0 0 0.75rem 0 !important;
+}
+
+.preset-details {
+    font-size: 0.9rem;
+    color: #a8c5d9;
+}
+
+.preset-details p {
+    margin: 0.25rem 0;
+}
+
+.preset-details strong {
+    color: #c4b5fd;
+}
+
+/* Create Preset Form */
+.create-preset-form {
+    background: linear-gradient(135deg, rgba(60, 40, 80, 0.3) 0%, rgba(40, 30, 60, 0.3) 100%);
+    border: 1px solid rgba(139, 92, 246, 0.3);
+    border-top: 2px solid #8b5cf6;
+    padding: 1.5rem;
+    border-radius: 8px;
+    margin-bottom: 1.5rem;
+}
+
+.create-preset-form h3 {
+    font-size: 1.2rem;
+    margin-bottom: 1rem;
+    color: #c4b5fd;
+}
+
+/* Modal Styling */
+#edit-modal > div {
+    background: linear-gradient(135deg, rgba(14, 26, 46, 0.98) 0%, rgba(18, 35, 60, 0.98) 100%) !important;
+    border: 2px solid #8b5cf6 !important;
+    box-shadow:
+        0 0 40px rgba(139, 92, 246, 0.4),
+        0 0 80px rgba(139, 92, 246, 0.2) !important;
+}
+
+#edit-modal h3 {
+    font-family: 'Orbitron', sans-serif !important;
+    color: #8b5cf6 !important;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    text-shadow: 0 0 10px rgba(139, 92, 246, 0.5);
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+    width: 10px;
+}
+
+::-webkit-scrollbar-track {
+    background: rgba(10, 20, 35, 0.8);
+    border: 1px solid rgba(139, 92, 246, 0.3);
+}
+
+::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, #8b5cf6 0%, #6d28d9 100%);
+    box-shadow: 0 0 10px rgba(139, 92, 246, 0.5);
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(180deg, #a78bfa 0%, #8b5cf6 100%);
+}
+
+/* Glitch effect removed */
 </style>
 {% endblock %}
 
@@ -106,9 +517,15 @@
     </div>
 
     <!-- Change Password Section -->
-    <div class="settings-section">
-        <h2>Change Password</h2>
-        <form method="post" novalidate>
+    <div class="settings-section collapsed">
+        <h2 class="section-header">
+            Change Password
+            <svg class="collapse-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="6 9 12 15 18 9"></polyline>
+            </svg>
+        </h2>
+        <div class="section-content">
+            <form method="post" novalidate>
             {% csrf_token %}
 
             {% for field in password_form %}
@@ -129,14 +546,233 @@
             {% endfor %}
 
             <button type="submit" class="submit-button">Update Password</button>
-        </form>
+            </form>
+        </div>
     </div>
 
-    <!-- Future Settings Placeholder -->
-    <div class="settings-section">
-        <h2>Preferences</h2>
-        <p style="color: #666;">Additional user preferences will be available here in the future.</p>
+    <!-- News Filter Presets Section -->
+    <div class="settings-section collapsed">
+        <h2 class="section-header">
+            News Filter Presets
+            <svg class="collapse-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="6 9 12 15 18 9"></polyline>
+            </svg>
+        </h2>
+        <div class="section-content">
+            <p style="color: #a8c5d9; margin-bottom: 1.5rem;">Create custom filter presets to quickly access your favorite news filters on the News page.</p>
+
+        <!-- Create New Preset Form -->
+        <div class="create-preset-form">
+            <h3>Create New Preset</h3>
+            <form method="post" action="{% url 'users:create_preset' %}" id="create-preset-form">
+                {% csrf_token %}
+
+                {% if preset_form.non_field_errors %}
+                    <ul class="errorlist">
+                        {% for error in preset_form.non_field_errors %}
+                            <li>{{ error }}</li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+
+                <div style="margin-bottom: 1rem;">
+                    {{ preset_form.name.label_tag }}
+                    {{ preset_form.name }}
+                    {% if preset_form.name.errors %}
+                        <ul class="errorlist">
+                            {% for error in preset_form.name.errors %}
+                                <li>{{ error }}</li>
+                            {% endfor %}
+                        </ul>
+                    {% endif %}
+                </div>
+                <div style="margin-bottom: 1rem;">
+                    {{ preset_form.search_query.label_tag }}
+                    {{ preset_form.search_query }}
+                    {% if preset_form.search_query.errors %}
+                        <ul class="errorlist">
+                            {% for error in preset_form.search_query.errors %}
+                                <li>{{ error }}</li>
+                            {% endfor %}
+                        </ul>
+                    {% endif %}
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+                    <div>
+                        {{ preset_form.date_from.label_tag }}
+                        {{ preset_form.date_from }}
+                    </div>
+                    <div>
+                        {{ preset_form.date_to.label_tag }}
+                        {{ preset_form.date_to }}
+                    </div>
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+                    <div>
+                        {{ preset_form.sort_by.label_tag }}
+                        {{ preset_form.sort_by }}
+                    </div>
+                    <div>
+                        {{ preset_form.source.label_tag }}
+                        {{ preset_form.source }}
+                    </div>
+                </div>
+                <button type="submit" class="submit-button" style="margin-top: 0.5rem;">Create Preset</button>
+            </form>
+        </div>
+
+        <!-- Existing Presets List -->
+        <h3>Your Presets</h3>
+        {% if filter_presets %}
+            <div id="presets-list">
+                {% for preset in filter_presets %}
+                    <div class="preset-item">
+                        <div style="display: flex; justify-content: space-between; align-items: start;">
+                            <div style="flex: 1;">
+                                <h4>{{ preset.name }}</h4>
+                                <div class="preset-details">
+                                    {% if preset.search_query %}
+                                        <p style="margin: 0.25rem 0;"><strong>Search:</strong> {{ preset.search_query }}</p>
+                                    {% endif %}
+                                    {% if preset.date_from or preset.date_to %}
+                                        <p style="margin: 0.25rem 0;">
+                                            <strong>Date Range:</strong>
+                                            {% if preset.date_from %}{{ preset.date_from|date:"M d, Y" }}{% else %}Any{% endif %}
+                                            -
+                                            {% if preset.date_to %}{{ preset.date_to|date:"M d, Y" }}{% else %}Any{% endif %}
+                                        </p>
+                                    {% endif %}
+                                    <p style="margin: 0.25rem 0;"><strong>Sort By:</strong> {{ preset.get_sort_by_display }}</p>
+                                    <p style="margin: 0.25rem 0;"><strong>Source:</strong> {{ preset.get_source_display|default:"All Sources" }}</p>
+                                </div>
+                            </div>
+                            <div style="display: flex; gap: 0.5rem; margin-left: 1rem;">
+                                <button type="button" data-preset-id="{{ preset.id }}" class="edit-btn edit-preset-btn">Edit</button>
+                                <form method="post" action="{% url 'users:delete_preset' preset.id %}" style="display: inline;" class="delete-preset-form">
+                                    {% csrf_token %}
+                                    <button type="submit" class="delete-btn">Delete</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p style="color: #a8c5d9; font-style: italic;">You haven't created any filter presets yet. Create one above to get started!</p>
+        {% endif %}
+        </div>
     </div>
+
+    <!-- Edit Preset Modal -->
+    <div id="edit-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; overflow-y: auto;">
+        <div style="background: white; max-width: 600px; margin: 2rem auto; padding: 2rem; border-radius: 8px; position: relative;">
+            <button id="close-modal-btn" style="position: absolute; top: 1rem; right: 1rem; background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #666;">&times;</button>
+            <h3 style="margin-top: 0;">Edit Preset</h3>
+            <form method="post" id="edit-preset-form" action="">
+                {% csrf_token %}
+                <div style="margin-bottom: 1rem;">
+                    <label for="edit-name">Preset Name</label>
+                    <input type="text" id="edit-name" name="name" class="form-control" required maxlength="100">
+                </div>
+                <div style="margin-bottom: 1rem;">
+                    <label for="edit-search-query">Search Keywords</label>
+                    <input type="text" id="edit-search-query" name="search_query" class="form-control">
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+                    <div>
+                        <label for="edit-date-from">From Date</label>
+                        <input type="date" id="edit-date-from" name="date_from" class="form-control">
+                    </div>
+                    <div>
+                        <label for="edit-date-to">To Date</label>
+                        <input type="date" id="edit-date-to" name="date_to" class="form-control">
+                    </div>
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+                    <div>
+                        <label for="edit-sort-by">Sort By</label>
+                        <select id="edit-sort-by" name="sort_by" class="form-control">
+                            <option value="publishedAt">Latest</option>
+                            <option value="relevancy">Relevancy</option>
+                            <option value="popularity">Popularity</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="edit-source">Source</label>
+                        <select id="edit-source" name="source" class="form-control">
+                            <option value="">All Sources</option>
+                            <option value="nasa">NASA</option>
+                            <option value="spacex">SpaceX</option>
+                            <option value="space">General Space</option>
+                        </select>
+                    </div>
+                </div>
+                <div style="display: flex; gap: 1rem; justify-content: flex-end;">
+                    <button type="button" id="cancel-edit-btn" style="padding: 0.5rem 1rem; background: #6c757d; color: white; border: none; border-radius: 4px; cursor: pointer;">Cancel</button>
+                    <button type="submit" class="submit-button" style="margin: 0;">Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Collapsible sections
+        document.querySelectorAll('.section-header').forEach(function(header) {
+            header.addEventListener('click', function() {
+                var section = this.parentElement;
+                section.classList.toggle('collapsed');
+            });
+        });
+
+        // Edit preset buttons
+        document.querySelectorAll('.edit-preset-btn').forEach(function(button) {
+            button.addEventListener('click', function() {
+                var presetId = this.getAttribute('data-preset-id');
+                editPreset(presetId);
+            });
+        });
+
+        // Delete preset forms
+        document.querySelectorAll('.delete-preset-form').forEach(function(form) {
+            form.addEventListener('submit', function(e) {
+                if (!confirm('Are you sure you want to delete this preset?')) {
+                    e.preventDefault();
+                }
+            });
+        });
+
+        function editPreset(presetId) {
+            fetch('/presets/' + presetId + '/get/')
+                .then(function(response) { return response.json(); })
+                .then(function(data) {
+                    document.getElementById('edit-name').value = data.name;
+                    document.getElementById('edit-search-query').value = data.search_query;
+                    document.getElementById('edit-date-from').value = data.date_from;
+                    document.getElementById('edit-date-to').value = data.date_to;
+                    document.getElementById('edit-sort-by').value = data.sort_by;
+                    document.getElementById('edit-source').value = data.source;
+                    document.getElementById('edit-preset-form').action = '/presets/' + presetId + '/edit/';
+                    document.getElementById('edit-modal').style.display = 'block';
+                });
+        }
+
+        function closeEditModal() {
+            document.getElementById('edit-modal').style.display = 'none';
+        }
+
+        // Close button (X)
+        document.getElementById('close-modal-btn').addEventListener('click', closeEditModal);
+
+        // Cancel button
+        document.getElementById('cancel-edit-btn').addEventListener('click', closeEditModal);
+
+        // Close modal on outside click
+        document.getElementById('edit-modal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeEditModal();
+            }
+        });
+    </script>
 </div>
 </div>
 {% endblock %}

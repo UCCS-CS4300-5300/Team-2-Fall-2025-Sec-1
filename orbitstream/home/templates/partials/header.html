@@ -13,13 +13,12 @@
 
     <!-- Desktop Navigation -->
     <ul class="nav__links nav__links--desktop">
-      <li><a href="{% url 'space_news:nasa_news' %}" class="nav-link"><span>News</span></a></li>
       <li><a href="{% url 'satellite_tracking:closest_satellite' %}" class="nav-link"><span>Closest Satellite</span></a></li>
-      <li><a href="{% url 'launches:launch' %}" class="nav-link"><span>Launches</span></a></li>
-      <li><a href="#" class="nav-link"><span>Preferences</span></a></li>
       <li><a href="{% url 'space_imagery:gallery' %}" class="nav-link"><span>Gallery</span></a></li>
+      <li><a href="{% url 'launches:launch' %}" class="nav-link"><span>Launches</span></a></li>
       <li><a href="{% url 'learn_page:learn_page' %}" class="nav-link">Learn</a></li>
-      
+      <li><a href="{% url 'space_news:nasa_news' %}" class="nav-link"><span>News</span></a></li>
+
     </ul>
 
     <!-- User Auth Links -->
@@ -100,19 +99,19 @@
       </div>
 
       <ul class="mobile-nav__links">
-        <li><a href="{% url 'space_news:nasa_news' %}" class="mobile-link">
-          <span class="link-orb"></span>News
-        </a></li>
         <li><a href="{% url 'satellite_tracking:closest_satellite' %}" class="mobile-link">
           <span class="link-orb"></span>Closest Satellite
-        </a></li>
-        <li><a href="#" class="mobile-link">
-          <span class="link-orb"></span>Launches
         </a></li>
         <li><a href="{% url 'space_imagery:gallery' %}" class="mobile-link">
           <span class="link-orb"></span>Gallery
         </a></li>
+        <li><a href="{% url 'launches:launch' %}" class="mobile-link">
+          <span class="link-orb"></span>Launches
+        </a></li>
         <li><a href="{% url 'learn_page:learn_page' %}" class="mobile-link"><span class="link-orb"></span>Learn</a></li>
+        <li><a href="{% url 'space_news:nasa_news' %}" class="mobile-link">
+          <span class="link-orb"></span>News
+        </a></li>
       </ul>
 
       <div class="mobile-nav__auth">
