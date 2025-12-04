@@ -3,8 +3,223 @@
 
 {% block title %}Register a New User{% endblock %}
 {% block body_class %}auth-page{% endblock %}
+
 {% block extra_css %}
-<link rel="stylesheet" href="{% static 'users/forms.css' %}">
+<style>
+/* KOTOR Space Aesthetic */
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&family=Rajdhani:wght@300;400;500;600;700&display=swap');
+
+body {
+    background: #0a0e1a;
+    color: #c0d4e8;
+}
+
+.auth-page-wrapper {
+    background: radial-gradient(ellipse at center, rgba(16, 32, 64, 0.8) 0%, rgba(10, 14, 26, 0.95) 100%),
+                url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="400" height="400"><defs><filter id="noise"><feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="4" seed="0"/></filter></defs><rect width="400" height="400" filter="url(%23noise)" opacity="0.05"/></svg>');
+    position: relative;
+    min-height: 100vh;
+    padding: 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Starfield Background Effect */
+.auth-page-wrapper::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image:
+        radial-gradient(2px 2px at 20% 30%, white, transparent),
+        radial-gradient(2px 2px at 60% 70%, white, transparent),
+        radial-gradient(1px 1px at 50% 50%, white, transparent),
+        radial-gradient(1px 1px at 80% 10%, white, transparent),
+        radial-gradient(2px 2px at 90% 60%, white, transparent),
+        radial-gradient(1px 1px at 33% 80%, white, transparent);
+    background-size: 200% 200%;
+    background-position: 0% 0%;
+    opacity: 0.4;
+    z-index: 0;
+    pointer-events: none;
+}
+
+.register-container {
+    position: relative;
+    z-index: 1;
+    max-width: 500px;
+    width: 100%;
+    background: linear-gradient(135deg, rgba(14, 26, 46, 0.9) 0%, rgba(18, 35, 60, 0.85) 100%);
+    border: none;
+    border-radius: 0;
+    box-shadow: none;
+    padding: 2.5rem;
+}
+
+h1 {
+    font-family: 'Orbitron', sans-serif;
+    font-weight: 900;
+    font-size: 2.5rem;
+    text-align: center;
+    text-transform: uppercase;
+    letter-spacing: 3px;
+    color: #fff !important;
+    text-shadow:
+        0 0 10px rgba(139, 92, 246, 0.8),
+        0 0 20px rgba(139, 92, 246, 0.6),
+        0 0 30px rgba(139, 92, 246, 0.4);
+    margin-bottom: 2rem;
+    position: relative;
+    padding-bottom: 1rem;
+}
+
+h1::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 60%;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, #8b5cf6, transparent);
+    box-shadow: 0 0 10px rgba(139, 92, 246, 0.5);
+}
+
+/* Form Styling */
+label {
+    font-family: 'Rajdhani', sans-serif;
+    font-weight: 600;
+    color: #c4b5fd;
+    font-size: 1rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    display: block;
+    margin-bottom: 0.5rem;
+    margin-top: 1rem;
+    text-shadow: 0 0 5px rgba(196, 181, 253, 0.3);
+}
+
+input[type="text"],
+input[type="password"],
+input[type="email"],
+input[type="date"] {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    background: rgba(10, 25, 40, 0.8) !important;
+    border: 1px solid rgba(139, 92, 246, 0.3) !important;
+    color: #c0d4e8 !important;
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.4);
+}
+
+input[type="text"]:focus,
+input[type="password"]:focus,
+input[type="email"]:focus,
+input[type="date"]:focus {
+    outline: none;
+    border-color: #8b5cf6 !important;
+    box-shadow:
+        inset 0 2px 4px rgba(0, 0, 0, 0.4),
+        0 0 15px rgba(139, 92, 246, 0.4);
+    background: rgba(20, 15, 40, 0.9) !important;
+}
+
+/* Buttons */
+.submit-button,
+button[type="submit"] {
+    font-family: 'Orbitron', sans-serif;
+    font-weight: 700;
+    padding: 0.75rem 2rem;
+    border: 2px solid #8b5cf6;
+    background: linear-gradient(135deg, rgba(139, 92, 246, 0.2) 0%, rgba(139, 92, 246, 0.3) 100%);
+    color: #8b5cf6;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 0 10px rgba(139, 92, 246, 0.3);
+    margin-top: 1.5rem;
+    width: 100%;
+}
+
+.submit-button::before,
+button[type="submit"]::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: rgba(139, 92, 246, 0.3);
+    transform: translate(-50%, -50%);
+    transition: width 0.5s, height 0.5s;
+    z-index: 0;
+}
+
+.submit-button:hover,
+button[type="submit"]:hover {
+    background: linear-gradient(135deg, rgba(139, 92, 246, 0.4) 0%, rgba(139, 92, 246, 0.5) 100%);
+    color: #fff;
+    box-shadow:
+        0 0 20px rgba(139, 92, 246, 0.6),
+        0 0 30px rgba(139, 92, 246, 0.4);
+    border-color: #a78bfa;
+}
+
+.submit-button:hover::before,
+button[type="submit"]:hover::before {
+    width: 300px;
+    height: 300px;
+}
+
+/* Form Error Messages */
+.errorlist {
+    list-style: none;
+    padding: 0.5rem 1rem;
+    margin: 0.5rem 0 0 0;
+    background: linear-gradient(135deg, rgba(220, 53, 69, 0.2) 0%, rgba(180, 40, 50, 0.15) 100%);
+    border-left: 3px solid #dc3545;
+    border-radius: 4px;
+    box-shadow: 0 0 10px rgba(220, 53, 69, 0.2);
+}
+
+.errorlist li {
+    color: #ff8b99;
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 0.95rem;
+    font-weight: 500;
+    margin: 0.25rem 0;
+}
+
+/* Help text styling */
+.helptext {
+    font-size: 0.875rem;
+    color: #7a9fb8;
+    margin-top: 0.5rem;
+    line-height: 1.5;
+    font-family: 'Rajdhani', sans-serif;
+    padding-left: 0.5rem;
+    border-left: 2px solid rgba(139, 92, 246, 0.3);
+    display: block;
+}
+
+.helptext ul {
+    margin: 0.5rem 0 0 1.25rem;
+    padding: 0;
+}
+
+.helptext li {
+    margin: 0.25rem 0;
+}
+</style>
 {% endblock %}
 
 {% block content %}
@@ -13,11 +228,14 @@
     <h1>Create Account</h1>
     <form action="/register/" method="post" novalidate>
         {% csrf_token %}
-        
+
         {# Render form fields manually to add labels and errors nicely #}
         {% for field in form %}
             <label for="{{ field.id_for_label }}">{{ field.label }}</label>
             {{ field }}
+            {% if field.help_text %}
+                <span class="helptext">{{ field.help_text|safe }}</span>
+            {% endif %}
             {% if field.errors %}
                 <ul class="errorlist">
                     {% for error in field.errors %}
@@ -26,7 +244,7 @@
                 </ul>
             {% endif %}
         {% endfor %}
-        
+
         <button type="submit" class="submit-button">Register</button>
     </form>
 </div>

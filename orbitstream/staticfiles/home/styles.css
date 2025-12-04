@@ -1415,8 +1415,19 @@ html, body {
     gap: 2rem;
   }
 
+  .footer__col {
+    text-align: center;
+    align-items: center;
+  }
+
   .footer__brand {
     max-width: 100%;
+    text-align: center;
+    align-items: center;
+  }
+
+  .footer__about {
+    text-align: center;
   }
 
   .footer__brand .brand__logo {
