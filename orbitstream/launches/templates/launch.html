@@ -28,7 +28,7 @@
             aria-label="Previous upcoming launch">
             &#10094;
         </button>
-    
+
         <!-- Slider track -->
         <div class="launch-feature" id="launch-slider">
             {% if upcoming_list %}
@@ -48,11 +48,11 @@
                              {{ launch.status.name }}
                          </span>
                     </div>
-    
+
                     <div class="launch-feature-text">
                         <h1>{{ launch.name }}</h1>
                         <h2>{{ launch.launch_service_provider.name }}</h2>
-    
+
                         <div class="launch-info-grid">
                             <div class="info-row">
                                 <span class="info-label">Status:</span>
@@ -73,13 +73,13 @@
                             </div>
                             {% endif %}
                         </div>
-    
+
                         {% if launch.mission %}
                         <p class="mission-description">
                             {{ launch.mission.description|truncatewords:30 }}
                         </p>
                         {% endif %}
-    
+
                         <div class="launch-actions">
                             <a href="{% url 'launches:full_launch' launch.id %}" class="btn-primary">View Details</a>
                         </div>
@@ -90,7 +90,7 @@
                 <p style="text-align: center; opacity: 0.7;">No upcoming launch found.</p>
             {% endif %}
         </div>
-    
+
         <!-- Right arrow -->
         <button
             class="launch-slider-arrow launch-slider-arrow-next"
@@ -98,7 +98,7 @@
             aria-label="Next upcoming launch">
             &#10095;
         </button>
-    
+
         <!-- Dots -->
         {% if upcoming_list %}
         <div class="launch-slider-dots">
@@ -112,7 +112,7 @@
         </div>
         {% endif %}
     </div>
-    
+
 
     <h1 class="recent-launches">Recent Launches</h1>
     <table class="recent-launch-tabel">
@@ -137,7 +137,7 @@
                     {{ launch.net_dt|date:"M d, Y H:i" }} UTC
                 {% else %}
                     {{ launch.net }}
-                {% endif %}    
+                {% endif %}
                 </td>
             </tr>
             {% empty %}
@@ -147,7 +147,7 @@
             {% endfor %}
         </tbody>
     </table>
-    
+
 
     <h1 class="completed-launches">Completed Missions</h1>
     <table class="completed-launch-tabel">
@@ -189,39 +189,39 @@
     (function() {
       const info = document.querySelector('.launch-hero-info');
       if (!info) return;
-    
+
       const launchIso = info.dataset.launchTime;
       if (!launchIso) return;
-    
+
       const countdownEl = document.getElementById('hero-countdown');
       if (!countdownEl) return;
-    
+
       const launchTime = new Date(launchIso);
-    
+
       function updateCountdown() {
         const now = new Date();
         const diffMs = launchTime - now;
-    
+
         if (diffMs <= 0) {
           countdownEl.textContent = 'Launched';
           clearInterval(timer);
           return;
         }
-    
+
         const totalSeconds = Math.floor(diffMs / 1000);
         const days = Math.floor(totalSeconds / 86400);
         const hours = Math.floor((totalSeconds % 86400) / 3600);
         const minutes = Math.floor((totalSeconds % 3600) / 60);
         const seconds = totalSeconds % 60;
-    
+
         const dayPart = days ? `T-${days}d ` : 'T-';
         const hh = String(hours).padStart(2, '0');
         const mm = String(minutes).padStart(2, '0');
         const ss = String(seconds).padStart(2, '0');
-    
+
         countdownEl.textContent = `${dayPart}${hh}:${mm}:${ss}`;
       }
-    
+
       updateCountdown();
       const timer = setInterval(updateCountdown, 1000);
     })();
@@ -232,38 +232,38 @@
   (function() {
     const slider = document.getElementById('launch-slider');
     if (!slider) return;
-  
+
     const cards = slider.querySelectorAll('.launch-feature-card');
     const prevBtn = document.querySelector('.launch-slider-arrow-prev');
     const nextBtn = document.querySelector('.launch-slider-arrow-next');
     const dots = document.querySelectorAll('.launch-slider-dot');
-    
+
     if (cards.length === 0) return;
-    
+
     let currentIndex = 0;
 
     // ----- AUTO-SCROLL SETTINGS -----
-    const AUTO_SCROLL_INTERVAL = 3000; 
+    const AUTO_SCROLL_INTERVAL = 3000;
     let autoScrollId = null;
     let isHovered = false;  // NEW: track hover state
-  
+
     function goToSlide(index) {
       // Ensure index is within bounds
       if (index < 0) index = cards.length - 1;
       if (index >= cards.length) index = 0;
-      
+
       currentIndex = index;
-      
+
       // Get exact card width including any gaps
       const sliderRect = slider.getBoundingClientRect();
       const cardWidth = sliderRect.width;
-      
+
       // Scroll to exact position
       slider.scrollTo({
         left: cardWidth * currentIndex,
         behavior: 'smooth'
       });
-      
+
       // Update dots
       dots.forEach((dot, i) => {
         if (i === currentIndex) {
@@ -294,7 +294,7 @@
     function restartAutoScroll() {
       startAutoScroll();
     }
-  
+
     // Arrow button handlers
     if (prevBtn) {
       prevBtn.addEventListener('click', function() {
@@ -302,14 +302,14 @@
         restartAutoScroll(); // reset timer after manual navigation
       });
     }
-  
+
     if (nextBtn) {
       nextBtn.addEventListener('click', function() {
         goToSlide(currentIndex + 1);
         restartAutoScroll(); // reset timer after manual navigation
       });
     }
-  
+
     // Dot button handlers
     dots.forEach((dot, index) => {
       dot.addEventListener('click', function() {
@@ -317,7 +317,7 @@
         restartAutoScroll(); // reset timer after manual navigation
       });
     });
-  
+
     // Detect manual scrolling and update dots
     let scrollTimeout;
     slider.addEventListener('scroll', function() {
@@ -326,7 +326,7 @@
         const scrollLeft = slider.scrollLeft;
         const cardWidth = slider.getBoundingClientRect().width;
         const newIndex = Math.round(scrollLeft / cardWidth);
-        
+
         if (newIndex !== currentIndex) {
           currentIndex = newIndex;
           dots.forEach((dot, i) => {
