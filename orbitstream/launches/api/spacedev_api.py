@@ -181,6 +181,8 @@ def get_mission_patches(launch):
     base_name = re.sub(r"\s*\(.*?\)", "", raw_name).strip()
     if not base_name:
         base_name = raw_name.strip()
+    
+    base_name = base_name.replace("-", " ")
 
     # 2) split into words
     words = base_name.split()
@@ -189,7 +191,7 @@ def get_mission_patches(launch):
         return []
 
     def pick_best_patch(results, mission_name):
-        mission_lower = mission_name.lower()
+        mission_lower = mission_name.lower().replace("-", " ")
         mission_tokens = set(re.findall(r"\w+", mission_lower))
 
         # Filter by agency if possible
@@ -216,7 +218,7 @@ def get_mission_patches(launch):
         best_score = -1
         
         for p in results:
-            pname = (p.get("name") or "").lower()
+            pname = (p.get("name") or "").lower().replace("-", " ")
             p_tokens = set(re.findall(r"\w+", pname))
             overlap = len(mission_tokens & p_tokens)
             
