@@ -14,13 +14,16 @@ class SpaceDevAPITests(TestCase):
 
     def setUp(self):
         """Clear cache before each test."""
-        spacedev_api._cache.clear()
+        # Ensure _cache exists in your api module, otherwise this line might error
+        if hasattr(spacedev_api, '_cache'):
+            spacedev_api._cache.clear()
 
     @patch('launches.api.spacedev_api.requests.get')
     def test_get_next_launch_success(self, mock_get):
         """Test successful fetch of next launch."""
         # Setup mock response
         mock_response = MagicMock()
+        mock_response.status_code = 200  # <--- CRITICAL FIX: Ensure status is 200
         mock_response.json.return_value = {
             "results": [{
                 "id": "test-123",
@@ -41,6 +44,7 @@ class SpaceDevAPITests(TestCase):
     def test_get_next_launch_empty_results(self, mock_get):
         """Test handling of empty results."""
         mock_response = MagicMock()
+        mock_response.status_code = 200
         mock_response.json.return_value = {"results": []}
         mock_response.raise_for_status = MagicMock()
         mock_get.return_value = mock_response
@@ -53,6 +57,7 @@ class SpaceDevAPITests(TestCase):
     def test_spacedev_hero_success(self, mock_get):
         """Test hero data extraction."""
         mock_response = MagicMock()
+        mock_response.status_code = 200
         mock_response.json.return_value = {
             "results": [{
                 "id": "hero-123",
@@ -89,6 +94,7 @@ class SpaceDevAPITests(TestCase):
             for i in range(6)
         ]
         mock_response = MagicMock()
+        mock_response.status_code = 200
         mock_response.json.return_value = {"results": launches}
         mock_response.raise_for_status = MagicMock()
         mock_get.return_value = mock_response
@@ -113,6 +119,7 @@ class SpaceDevAPITests(TestCase):
             for i in range(10)
         ]
         mock_response = MagicMock()
+        mock_response.status_code = 200
         mock_response.json.return_value = {"results": launches}
         mock_response.raise_for_status = MagicMock()
         mock_get.return_value = mock_response
@@ -129,10 +136,9 @@ class SpaceDevAPITests(TestCase):
     def test_get_launch_by_id(self, mock_get):
         """
         Test fetching a specific launch by ID.
-        Note: This only tests the launch fetch, not the patch fetch secondary call
-        because we don't provide mission name data to trigger it here.
         """
         mock_response = MagicMock()
+        mock_response.status_code = 200
         mock_response.json.return_value = {"id": "specific-123"}
         mock_response.raise_for_status = MagicMock()
         mock_get.return_value = mock_response
@@ -146,10 +152,10 @@ class SpaceDevAPITests(TestCase):
     def test_get_mission_patches(self, mock_get):
         """
         Test fetching mission patches.
-        UPDATED: Now passes a dict object and checks for 'name__contains'.
         """
         # 1. Setup the mock response from the API
         mock_response = MagicMock()
+        mock_response.status_code = 200
         mock_response.json.return_value = {
             "results": [
                 {"name": "Raise and Shine Patch", "agency": {"id": 1}}
@@ -158,7 +164,7 @@ class SpaceDevAPITests(TestCase):
         mock_response.raise_for_status = MagicMock()
         mock_get.return_value = mock_response
 
-        # 2. Input data (Must be a dict, not a string!)
+        # 2. Input data
         launch_data = {
             "mission": {
                 "name": "Raise and Shine",
@@ -173,13 +179,12 @@ class SpaceDevAPITests(TestCase):
         self.assertEqual(len(result), 1)
         self.assertEqual(result[0]["name"], "Raise and Shine Patch")
 
-        # 5. VERIFY THE FIX: Check that we sent name__contains (double underscore)
-        # and limit=100
+        # 5. Verify parameters
         args, kwargs = mock_get.call_args
         params = kwargs['params']
-        self.assertIn("name__contains", params)  # Ensure double underscore
+        self.assertIn("name__contains", params)
         self.assertEqual(params["name__contains"], "Raise and Shine")
-        self.assertEqual(params["limit"], 100)   # Ensure limit fix is there
+        self.assertEqual(params["limit"], 100)
 
     def test_extract_youtube_id(self):
         """Test YouTube ID extraction."""
@@ -210,9 +215,18 @@ class LaunchViewsTests(TestCase):
     @patch('launches.views.get_recent_launches')
     @patch('launches.views.get_completed_launches')
     @patch('launches.views.spacedev_hero')
-    def test_show_launches_view(self, mock_hero, mock_completed,
+    def test_show_launches_view(self, mock_hero, mock_completed, 
                                 mock_recent, mock_upcoming):
-        """Test show_launches view."""
+        """
+        Test show_launches_view.
+        
+        NOTE: Arguments must match decorator order (Top-Down).
+        1. @patch(...upcoming)  -> mock_upcoming
+        2. @patch(...recent)    -> mock_recent
+        3. @patch(...completed) -> mock_completed
+        4. @patch(...hero)      -> mock_hero
+        """
+        # Set return values for the correct mocks
         mock_hero.return_value = {
             "mission_name": "Test",
             "launch_id": "test-123"
