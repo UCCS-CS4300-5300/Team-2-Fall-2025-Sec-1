@@ -10,13 +10,12 @@
 @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&family=Rajdhani:wght@300;400;500;600;700&display=swap');
 
 body {
-    background: #0a0e1a;
-    color: #c0d4e8;
+    background: var(--bg);
+    color: var(--text-secondary);
 }
 
 .auth-page-wrapper {
-    background: radial-gradient(ellipse at center, rgba(16, 32, 64, 0.8) 0%, rgba(10, 14, 26, 0.95) 100%),
-                url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="400" height="400"><defs><filter id="noise"><feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="4" seed="0"/></filter></defs><rect width="400" height="400" filter="url(%23noise)" opacity="0.05"/></svg>');
+    background: var(--bg);
     position: relative;
     min-height: 100vh;
     padding: 2rem;
@@ -25,7 +24,7 @@ body {
     justify-content: center;
 }
 
-/* Starfield Background Effect */
+/* Starfield Background Effect - only visible in dark mode */
 .auth-page-wrapper::before {
     content: '';
     position: fixed;
@@ -47,15 +46,19 @@ body {
     pointer-events: none;
 }
 
+[data-theme="light"] .auth-page-wrapper::before {
+    opacity: 0.05;
+}
+
 .register-container {
     position: relative;
     z-index: 1;
     max-width: 500px;
     width: 100%;
-    background: linear-gradient(135deg, rgba(14, 26, 46, 0.9) 0%, rgba(18, 35, 60, 0.85) 100%);
-    border: none;
-    border-radius: 0;
-    box-shadow: none;
+    background: var(--bg-tertiary);
+    border: 1px solid var(--input-border);
+    border-radius: 12px;
+    box-shadow: var(--shadow);
     padding: 2.5rem;
 }
 
@@ -66,11 +69,8 @@ h1 {
     text-align: center;
     text-transform: uppercase;
     letter-spacing: 3px;
-    color: #fff !important;
-    text-shadow:
-        0 0 10px rgba(139, 92, 246, 0.8),
-        0 0 20px rgba(139, 92, 246, 0.6),
-        0 0 30px rgba(139, 92, 246, 0.4);
+    color: var(--text) !important;
+    text-shadow: 0 0 10px var(--text-shadow);
     margin-bottom: 2rem;
     position: relative;
     padding-bottom: 1rem;
@@ -84,22 +84,21 @@ h1::after {
     transform: translateX(-50%);
     width: 60%;
     height: 2px;
-    background: linear-gradient(90deg, transparent, #8b5cf6, transparent);
-    box-shadow: 0 0 10px rgba(139, 92, 246, 0.5);
+    background: linear-gradient(90deg, transparent, var(--accent-purple), transparent);
+    box-shadow: 0 0 10px var(--text-shadow);
 }
 
 /* Form Styling */
 label {
     font-family: 'Rajdhani', sans-serif;
     font-weight: 600;
-    color: #c4b5fd;
+    color: var(--accent-purple-light);
     font-size: 1rem;
     text-transform: uppercase;
     letter-spacing: 1px;
     display: block;
     margin-bottom: 0.5rem;
     margin-top: 1rem;
-    text-shadow: 0 0 5px rgba(196, 181, 253, 0.3);
 }
 
 input[type="text"],
@@ -108,13 +107,14 @@ input[type="email"],
 input[type="date"] {
     width: 100%;
     padding: 0.75rem 1rem;
-    background: rgba(10, 25, 40, 0.8) !important;
-    border: 1px solid rgba(139, 92, 246, 0.3) !important;
-    color: #c0d4e8 !important;
+    background: var(--input-bg) !important;
+    border: 1px solid var(--input-border) !important;
+    color: var(--text) !important;
     font-family: 'Rajdhani', sans-serif;
     font-size: 1rem;
     transition: all 0.3s ease;
-    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.4);
+    box-shadow: var(--shadow);
+    border-radius: 8px;
 }
 
 input[type="text"]:focus,
@@ -122,11 +122,8 @@ input[type="password"]:focus,
 input[type="email"]:focus,
 input[type="date"]:focus {
     outline: none;
-    border-color: #8b5cf6 !important;
-    box-shadow:
-        inset 0 2px 4px rgba(0, 0, 0, 0.4),
-        0 0 15px rgba(139, 92, 246, 0.4);
-    background: rgba(20, 15, 40, 0.9) !important;
+    border-color: var(--accent-purple) !important;
+    box-shadow: 0 0 15px var(--text-shadow);
 }
 
 /* Buttons */
@@ -135,18 +132,19 @@ button[type="submit"] {
     font-family: 'Orbitron', sans-serif;
     font-weight: 700;
     padding: 0.75rem 2rem;
-    border: 2px solid #8b5cf6;
-    background: linear-gradient(135deg, rgba(139, 92, 246, 0.2) 0%, rgba(139, 92, 246, 0.3) 100%);
-    color: #8b5cf6;
+    border: 2px solid var(--accent-purple);
+    background: linear-gradient(135deg, var(--button-bg) 0%, var(--button-bg-hover) 100%);
+    color: var(--accent-purple);
     text-transform: uppercase;
     letter-spacing: 2px;
     cursor: pointer;
     transition: all 0.3s ease;
     position: relative;
     overflow: hidden;
-    box-shadow: 0 0 10px rgba(139, 92, 246, 0.3);
+    box-shadow: 0 0 10px var(--text-shadow);
     margin-top: 1.5rem;
     width: 100%;
+    border-radius: 8px;
 }
 
 .submit-button::before,
@@ -158,7 +156,7 @@ button[type="submit"]::before {
     width: 0;
     height: 0;
     border-radius: 50%;
-    background: rgba(139, 92, 246, 0.3);
+    background: var(--button-bg-hover);
     transform: translate(-50%, -50%);
     transition: width 0.5s, height 0.5s;
     z-index: 0;
@@ -166,12 +164,10 @@ button[type="submit"]::before {
 
 .submit-button:hover,
 button[type="submit"]:hover {
-    background: linear-gradient(135deg, rgba(139, 92, 246, 0.4) 0%, rgba(139, 92, 246, 0.5) 100%);
-    color: #fff;
-    box-shadow:
-        0 0 20px rgba(139, 92, 246, 0.6),
-        0 0 30px rgba(139, 92, 246, 0.4);
-    border-color: #a78bfa;
+    background: var(--accent-purple);
+    color: var(--bg);
+    box-shadow: 0 0 20px var(--text-shadow);
+    border-color: var(--accent-purple-light);
 }
 
 .submit-button:hover::before,
@@ -202,12 +198,12 @@ button[type="submit"]:hover::before {
 /* Help text styling */
 .helptext {
     font-size: 0.875rem;
-    color: #7a9fb8;
+    color: var(--muted);
     margin-top: 0.5rem;
     line-height: 1.5;
     font-family: 'Rajdhani', sans-serif;
     padding-left: 0.5rem;
-    border-left: 2px solid rgba(139, 92, 246, 0.3);
+    border-left: 2px solid var(--input-border);
     display: block;
 }
 

@@ -44,6 +44,26 @@ html, body {
 
 }
 
+/* Apply Orbitron font to all headings site-wide */
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Orbitron', sans-serif;
+}
+
+/* Apply Orbitron font to header and footer elements */
+.nav-link,
+.footer-link,
+.footer__title,
+.footer__bottom small,
+.mobile-link,
+.mobile-nav__title {
+  font-family: 'Orbitron', sans-serif;
+}
+
+/* Exclude username dropdown from Orbitron font */
+.user-dropdown-toggle {
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
 /* FIX: Anchor links (like #top) being obscured by a fixed header */
 /* Use a value slightly larger than your fixed header's height (e.g., 120px + margin) */
 #top {
@@ -1607,7 +1627,7 @@ html, body {
 }
 
 body.nasa-page {
-  overflow-y: scroll !important;
+  overflow-y: visible !important;
   overflow-x: hidden !important;
   background: #f6f7fb;
   color: #0f172a;
@@ -2315,8 +2335,138 @@ body.nasa-page .nasa-f-meta {
   }
 }
 
+/* Dark mode overrides for NASA page */
+:root:not([data-theme="light"]) .nasa-feed-title {
+  color: #ffffff;
+}
+
+:root:not([data-theme="light"]) .nasa-feed-title a {
+  color: #ffffff;
+}
+
+:root:not([data-theme="light"]) body.nasa-page .nasa-f-title {
+  color: #ffffff;
+}
+
 /* ============================================
-   Article page 
+   Universal Button Styling (Settings Style)
+   Applied to buttons across multiple pages
+   ============================================ */
+.location-btn-primary,
+.location-btn-secondary,
+.submit-btn,
+.search-submit-btn,
+.filter-btn,
+.load-more-btn,
+.btn-primary,
+.search-button,
+.btn-secondary,
+.nasa-filter-btn-primary,
+.nasa-filter-btn-secondary {
+  font-family: 'Orbitron', sans-serif !important;
+  font-weight: 700 !important;
+  padding: 0.75rem 2rem !important;
+  border: 2px solid #8b5cf6 !important;
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.2) 0%, rgba(139, 92, 246, 0.3) 100%) !important;
+  color: #8b5cf6 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 2px !important;
+  cursor: pointer !important;
+  transition: all 0.3s ease !important;
+  position: relative !important;
+  overflow: hidden !important;
+  box-shadow: 0 0 10px rgba(139, 92, 246, 0.3) !important;
+  border-radius: 8px !important;
+}
+
+.location-btn-primary::before,
+.location-btn-secondary::before,
+.submit-btn::before,
+.search-submit-btn::before,
+.filter-btn::before,
+.load-more-btn::before,
+.btn-primary::before,
+.search-button::before,
+.btn-secondary::before,
+.nasa-filter-btn-primary::before,
+.nasa-filter-btn-secondary::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: rgba(139, 92, 246, 0.3);
+  transform: translate(-50%, -50%);
+  transition: width 0.5s, height 0.5s;
+}
+
+.location-btn-primary:hover,
+.location-btn-secondary:hover,
+.submit-btn:hover,
+.search-submit-btn:hover,
+.filter-btn:hover,
+.load-more-btn:not(:disabled):hover,
+.btn-primary:hover,
+.search-button:hover,
+.btn-secondary:hover,
+.nasa-filter-btn-primary:hover,
+.nasa-filter-btn-secondary:hover {
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.4) 0%, rgba(139, 92, 246, 0.5) 100%) !important;
+  color: #fff !important;
+  box-shadow:
+    0 0 20px rgba(139, 92, 246, 0.6),
+    0 0 30px rgba(139, 92, 246, 0.4) !important;
+  border-color: #a78bfa !important;
+  transform: translateY(-2px) !important;
+}
+
+.location-btn-primary:hover::before,
+.location-btn-secondary:hover::before,
+.submit-btn:hover::before,
+.search-submit-btn:hover::before,
+.filter-btn:hover::before,
+.load-more-btn:not(:disabled):hover::before,
+.btn-primary:hover::before,
+.search-button:hover::before,
+.btn-secondary:hover::before,
+.nasa-filter-btn-primary:hover::before,
+.nasa-filter-btn-secondary:hover::before {
+  width: 300px;
+  height: 300px;
+}
+
+.location-btn-primary:active,
+.location-btn-secondary:active,
+.submit-btn:active,
+.search-submit-btn:active,
+.filter-btn:active,
+.load-more-btn:active,
+.btn-primary:active,
+.search-button:active,
+.btn-secondary:active,
+.nasa-filter-btn-primary:active,
+.nasa-filter-btn-secondary:active {
+  transform: translateY(0) !important;
+}
+
+/* Disabled state */
+.load-more-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  border-color: rgba(139, 92, 246, 0.3) !important;
+}
+
+/* Active filter button state */
+.filter-btn.active {
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.5) 0%, rgba(139, 92, 246, 0.6) 100%) !important;
+  color: #fff !important;
+  border-color: #a78bfa !important;
+}
+
+/* ============================================
+   Article page
    ============================================ */
    .article-page {
     /* page tokens */
@@ -4793,26 +4943,4 @@ body.full-media-page .site-footer {
     padding: 0.6rem 1.5rem;
     gap: 1.5rem;
   }
-}
-
-/* ==========================================================================
-   CUSTOM SCROLLBAR - Purple Theme
-   ========================================================================== */
-
-::-webkit-scrollbar {
-  width: 10px;
-}
-
-::-webkit-scrollbar-track {
-  background: rgba(10, 20, 35, 0.8);
-  border: 1px solid rgba(139, 92, 246, 0.3);
-}
-
-::-webkit-scrollbar-thumb {
-  background: linear-gradient(180deg, #8b5cf6 0%, #6d28d9 100%);
-  box-shadow: 0 0 10px rgba(139, 92, 246, 0.5);
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(180deg, #a78bfa 0%, #8b5cf6 100%);
 }
