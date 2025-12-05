@@ -9,6 +9,12 @@
      Learn Page Styles - Space Theme
      ======================================== */
   
+  /*Background color for learn page*/
+  .learn-container-background{
+    max-width: 100%;
+    background: var(--bg);
+  }
+
   /* Layout */
   .learn-container {
     max-width: 1200px;
@@ -424,76 +430,78 @@
 {% endblock %}
 
 {% block content %}
-<div class="learn-container">
+<div class="learn-container-background">
+  <div class="learn-container">
 
-  <!-- Header -->
-  <header class="learn-header">
-    <h1>Learn About Space</h1>
-    <p>Explore space topics with AI-powered summaries. Select a topic below or search for anything space-related!</p>
-  </header>
-
-  <!-- Search Bar -->
-  <div class="search-wrapper">
-    <input
-      type="text"
-      id="custom-topic-input"
-      placeholder="Ask about any space topic..."
-      onkeypress="if(event.key === 'Enter') searchCustomTopic()">
-    <button class="search-button" onclick="searchCustomTopic()">Search</button>
-  </div>
-
-  <!-- Predefined Topics Grid -->
-  <section class="topics-section">
-    <h2>Popular Topics</h2>
-    <div class="topics-grid">
-      {% for topic in topics %}
-        <div class="topic-card" onclick="loadTopic('{{ topic.title }}')">
-          <div class="topic-card-icon">{{ topic.icon }}</div>
-          <h3>{{ topic.title }}</h3>
-          <p>{{ topic.description }}</p>
-        </div>
-      {% endfor %}
+    <!-- Header -->
+    <header class="learn-header">
+      <h1>Learn About Space</h1>
+      <p>Explore space topics with AI-powered summaries. Select a topic below or search for anything space-related!</p>
+    </header>
+  
+    <!-- Search Bar -->
+    <div class="search-wrapper">
+      <input
+        type="text"
+        id="custom-topic-input"
+        placeholder="Ask about any space topic..."
+        onkeypress="if(event.key === 'Enter') searchCustomTopic()">
+      <button class="search-button" onclick="searchCustomTopic()">Search</button>
     </div>
-  </section>
-
-  <!-- Summary Display Section -->
-  <section id="summary-section">
-
-    <!-- Topic Title -->
-    <h2 id="summary-title"></h2>
-
-    <!-- Loading Spinner -->
-    <div id="loading-spinner">
-      <div class="spinner"></div>
-      <p>Generating summary...</p>
-    </div>
-
-    <!-- Summary Content -->
-    <div id="summary-content">
-      <div id="summary-text"></div>
-
-      <!-- Keywords Section -->
-      <div id="keywords-section">
-        <h3>🔍 Related Topics</h3>
-        <div id="keywords-list"></div>
+  
+    <!-- Predefined Topics Grid -->
+    <section class="topics-section">
+      <h2>Popular Topics</h2>
+      <div class="topics-grid">
+        {% for topic in topics %}
+          <div class="topic-card" onclick="loadTopic('{{ topic.title }}')">
+            <div class="topic-card-icon">{{ topic.icon }}</div>
+            <h3>{{ topic.title }}</h3>
+            <p>{{ topic.description }}</p>
+          </div>
+        {% endfor %}
       </div>
-
-      <!-- Try Another Button -->
-      <button class="btn-primary" onclick="resetSearch()">
-        ← Explore Another Topic
-      </button>
-    </div>
-
-    <!-- Error Message -->
-    <div id="error-message">
-      <div class="error-icon">😔</div>
-      <p id="error-text"></p>
-      <button class="btn-secondary" onclick="resetSearch()">
-        Try Again
-      </button>
-    </div>
-  </section>
-
+    </section>
+  
+    <!-- Summary Display Section -->
+    <section id="summary-section">
+  
+      <!-- Topic Title -->
+      <h2 id="summary-title"></h2>
+  
+      <!-- Loading Spinner -->
+      <div id="loading-spinner">
+        <div class="spinner"></div>
+        <p>Generating summary...</p>
+      </div>
+  
+      <!-- Summary Content -->
+      <div id="summary-content">
+        <div id="summary-text"></div>
+  
+        <!-- Keywords Section -->
+        <div id="keywords-section">
+          <h3>🔍 Related Topics</h3>
+          <div id="keywords-list"></div>
+        </div>
+  
+        <!-- Try Another Button -->
+        <button class="btn-primary" onclick="resetSearch()">
+          ← Explore Another Topic
+        </button>
+      </div>
+  
+      <!-- Error Message -->
+      <div id="error-message">
+        <div class="error-icon">😔</div>
+        <p id="error-text"></p>
+        <button class="btn-secondary" onclick="resetSearch()">
+          Try Again
+        </button>
+      </div>
+    </section>
+  
+  </div>
 </div>
 
 <script>
