@@ -2,17 +2,85 @@
 <style>
   /* NASA Filter Bar Styling */
   .nasa-filter-bar {
-    background: #000000;
-    border: 2px solid rgba(96, 165, 250, 0.3);
-    border-radius: 12px;
-    padding: 24px;
+    background: var(--bg-secondary);
+    border: 1px solid var(--stroke);
+    border-radius: var(--radius);
+    padding: 0;
     margin-bottom: 32px;
+    box-shadow: var(--shadow);
+    overflow: hidden;
+  }
+
+  .nasa-filter-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 24px;
+    background: var(--bg-tertiary);
+    border-bottom: 1px solid var(--stroke);
+    cursor: pointer;
+    user-select: none;
+    transition: background 0.2s ease;
+  }
+
+  .nasa-filter-header:hover {
+    background: var(--button-bg-hover);
+  }
+
+  .nasa-filter-header-content {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .nasa-filter-header h3 {
+    margin: 0;
+    font-size: 1.1em;
+    font-weight: 600;
+    color: var(--text);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .nasa-filter-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 6px;
+    background: var(--button-bg);
+    border: 1px solid var(--input-border);
+    color: var(--accent-purple);
+    transition: all 0.3s ease;
+  }
+
+  .nasa-filter-toggle svg {
+    transition: transform 0.3s ease;
+  }
+
+  .nasa-filter-bar.collapsed .nasa-filter-toggle svg {
+    transform: rotate(-90deg);
+  }
+
+  .nasa-filter-content {
+    max-height: 2000px;
+    overflow: hidden;
+    transition: max-height 0.4s ease, opacity 0.3s ease;
+    opacity: 1;
+  }
+
+  .nasa-filter-bar.collapsed .nasa-filter-content {
+    max-height: 0;
+    opacity: 0;
   }
 
   .nasa-filter-form {
     display: flex;
     flex-direction: column;
     gap: 20px;
+    padding: 24px;
   }
 
   .nasa-filter-grid {
@@ -28,37 +96,42 @@
   }
 
   .nasa-filter-field label {
-    font-size: 0.9em;
+    font-size: 0.85em;
     font-weight: 600;
-    color: #f1f5f9;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
   }
 
   .nasa-filter-field input,
   .nasa-filter-field select {
     padding: 12px 16px;
     font-size: 1em;
-    background: rgba(15, 23, 42, 0.6);
-    border: 2px solid rgba(96, 165, 250, 0.3);
+    background: var(--input-bg);
+    border: 1px solid var(--input-border);
     border-radius: 8px;
-    color: #e2e8f0;
+    color: var(--text);
     outline: none;
     transition: all 0.3s ease;
   }
 
   .nasa-filter-field input:focus,
   .nasa-filter-field select:focus {
-    border-color: #60a5fa;
-    box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.2);
-    background: rgba(15, 23, 42, 0.8);
+    border-color: var(--accent-purple);
+    box-shadow: 0 0 0 3px var(--button-bg);
   }
 
   .nasa-filter-field input::placeholder {
-    color: #64748b;
+    color: var(--muted);
   }
 
   /* Date inputs specific styling */
   .nasa-filter-field input[type="date"] {
     color-scheme: dark;
+  }
+
+  [data-theme="light"] .nasa-filter-field input[type="date"] {
+    color-scheme: light;
   }
 
   .nasa-filter-actions {
@@ -82,14 +155,14 @@
   }
 
   .nasa-filter-btn-primary {
-    background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+    background: linear-gradient(135deg, var(--accent-purple) 0%, var(--accent-purple-dark) 100%);
     color: white;
-    box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4);
+    box-shadow: 0 4px 15px var(--text-shadow);
   }
 
   .nasa-filter-btn-primary:hover {
     transform: translateY(-2px);
-    box-shadow: 0 6px 25px rgba(59, 130, 246, 0.6);
+    box-shadow: 0 6px 25px var(--text-shadow);
   }
 
   .nasa-filter-btn-primary:active {
@@ -97,16 +170,15 @@
   }
 
   .nasa-filter-btn-secondary {
-    background: rgba(100, 116, 139, 0.6);
-    color: #e2e8f0;
-    border: 2px solid rgba(148, 163, 184, 0.5);
-    backdrop-filter: blur(5px);
+    background: transparent;
+    color: var(--text-secondary);
+    border: 1px solid var(--input-border);
   }
 
   .nasa-filter-btn-secondary:hover {
-    background: rgba(100, 116, 139, 0.8);
-    transform: translateY(-2px);
-    box-shadow: 0 4px 15px rgba(100, 116, 139, 0.5);
+    background: var(--button-bg-hover);
+    border-color: var(--accent-purple);
+    transform: translateY(-1px);
   }
 
   .nasa-filter-btn-secondary:active {
@@ -118,26 +190,63 @@
     align-items: center;
     gap: 8px;
     padding-top: 16px;
-    border-top: 1px solid rgba(96, 165, 250, 0.2);
+    border-top: 1px solid var(--stroke);
   }
 
   .nasa-filter-badge {
     display: inline-flex;
     align-items: center;
     gap: 6px;
-    background: linear-gradient(135deg, rgba(59, 130, 246, 0.3) 0%, rgba(139, 92, 246, 0.3) 100%);
-    border: 1px solid rgba(96, 165, 250, 0.5);
-    color: #bfdbfe;
+    background: var(--button-bg);
+    border: 1px solid var(--accent-purple);
+    color: var(--accent-purple-light);
     padding: 6px 12px;
-    border-radius: 6px;
-    font-size: 0.9em;
-    font-weight: 500;
+    border-radius: 16px;
+    font-size: 0.85em;
+    font-weight: 600;
+  }
+
+  .nasa-preset-selector {
+    margin-bottom: 1rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--stroke);
+  }
+
+  .nasa-preset-selector label {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: var(--text-secondary);
+    font-weight: 600;
+    font-size: 0.85em;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .nasa-preset-selector select {
+    width: 100%;
+    padding: 12px 16px;
+    background: var(--input-bg);
+    border: 1px solid var(--input-border);
+    border-radius: 8px;
+    color: var(--text);
+    font-size: 1em;
+    transition: all 0.3s ease;
+  }
+
+  .nasa-preset-selector select:focus {
+    border-color: var(--accent-purple);
+    box-shadow: 0 0 0 3px var(--button-bg);
+    outline: none;
   }
 
   /* Responsive Design */
   @media (max-width: 768px) {
-    .nasa-filter-bar {
-      padding: 20px;
+    .nasa-filter-header {
+      padding: 12px 16px;
+    }
+
+    .nasa-filter-form {
+      padding: 16px;
     }
 
     .nasa-filter-grid {
@@ -155,81 +264,128 @@
   }
 </style>
 
-<div class="nasa-filter-bar">
-  <form method="get" class="nasa-filter-form" id="filterForm">
-    {% if user.is_authenticated and user_presets %}
-    <div class="nasa-preset-selector" style="margin-bottom: 1rem; padding-bottom: 1rem; border-bottom: 1px solid rgba(255, 255, 255, 0.1);">
-      <label for="preset-select" style="display: block; margin-bottom: 0.5rem; color: #e0e0e0; font-weight: 500;">
-        <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16" style="vertical-align: middle; margin-right: 0.5rem;">
-          <path d="M9.828 3h3.982a2 2 0 0 1 1.992 2.181l-.637 7A2 2 0 0 1 13.174 14H2.825a2 2 0 0 1-1.991-1.819l-.637-7a1.99 1.99 0 0 1 .342-1.31L.5 3a2 2 0 0 1 2-2h3.672a2 2 0 0 1 1.414.586l.828.828A2 2 0 0 0 9.828 3zm-8.322.12C1.72 3.042 1.95 3 2.19 3h5.396l-.707-.707A1 1 0 0 0 6.172 2H2.5a1 1 0 0 0-1 .981l.006.139z"/>
+<div class="nasa-filter-bar" id="nasaFilterBar">
+  <div class="nasa-filter-header" onclick="toggleFilterBar()">
+    <div class="nasa-filter-header-content">
+      <h3>
+        <svg width="20" height="20" fill="currentColor" viewBox="0 0 16 16">
+          <path d="M6 10.5a.5.5 0 0 1 .5-.5h3a.5.5 0 0 1 0 1h-3a.5.5 0 0 1-.5-.5zm-2-3a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 0 1h-7a.5.5 0 0 1-.5-.5zm-2-3a.5.5 0 0 1 .5-.5h11a.5.5 0 0 1 0 1h-11a.5.5 0 0 1-.5-.5z"/>
         </svg>
-        Filter Presets
-      </label>
-      <select id="preset-select" class="filter-select" style="width: 100%;" onchange="applyPreset(this.value)">
-        <option value="">-- Select a preset --</option>
-        {% for preset in user_presets %}
-          <option value="{{ preset.id }}" {% if selected_preset_id == preset.id|stringformat:"s" %}selected{% endif %}>
-            {{ preset.name }}
-          </option>
-        {% endfor %}
-      </select>
-    </div>
-    {% endif %}
-
-    <div class="nasa-filter-grid">
-      <div class="nasa-filter-field">
-        <label for="{{ filter_form.search_query.id_for_label }}">Search</label>
-        {{ filter_form.search_query }}
-      </div>
-      
-      <div class="nasa-filter-field">
-        <label for="{{ filter_form.source.id_for_label }}">Source</label>
-        {{ filter_form.source }}
-      </div>
-      
-      <div class="nasa-filter-field">
-        <label for="{{ filter_form.date_from.id_for_label }}">From Date</label>
-        {{ filter_form.date_from }}
-      </div>
-      
-      <div class="nasa-filter-field">
-        <label for="{{ filter_form.date_to.id_for_label }}">To Date</label>
-        {{ filter_form.date_to }}
-      </div>
-      
-      <div class="nasa-filter-field">
-        <label for="{{ filter_form.sort_by.id_for_label }}">Sort By</label>
-        {{ filter_form.sort_by }}
-      </div>
-    </div>
-    
-    <div class="nasa-filter-actions">
-      <button type="submit" class="nasa-filter-btn nasa-filter-btn-primary">
-        <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-          <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z"/>
-        </svg>
-        Apply Filters
-      </button>
-      <a href="{% url 'space_news:nasa_news' %}" class="nasa-filter-btn nasa-filter-btn-secondary">
-        Clear All
-      </a>
-    </div>
-    
-    {% if has_active_filters %}
-      <div class="nasa-active-filters">
-        <span class="nasa-filter-badge">
-          <svg width="12" height="12" fill="currentColor" viewBox="0 0 16 16">
-            <path d="M6 10.5a.5.5 0 0 1 .5-.5h3a.5.5 0 0 1 0 1h-3a.5.5 0 0 1-.5-.5zm-2-3a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 0 1h-7a.5.5 0 0 1-.5-.5zm-2-3a.5.5 0 0 1 .5-.5h11a.5.5 0 0 1 0 1h-11a.5.5 0 0 1-.5-.5z"/>
-          </svg>
-          Filters Active
+        Filter News
+      </h3>
+      {% if has_active_filters %}
+        <span class="nasa-filter-badge" style="border: none; padding: 4px 10px; font-size: 0.75em;">
+          Active
         </span>
+      {% endif %}
+    </div>
+    <div class="nasa-filter-toggle">
+      <svg width="20" height="20" fill="currentColor" viewBox="0 0 16 16">
+        <path fill-rule="evenodd" d="M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z"/>
+      </svg>
+    </div>
+  </div>
+
+  <div class="nasa-filter-content">
+    <form method="get" class="nasa-filter-form" id="filterForm">
+      {% if user.is_authenticated and user_presets %}
+      <div class="nasa-preset-selector">
+        <label for="preset-select">
+          <svg width="14" height="14" fill="currentColor" viewBox="0 0 16 16" style="vertical-align: middle; margin-right: 0.5rem;">
+            <path d="M9.828 3h3.982a2 2 0 0 1 1.992 2.181l-.637 7A2 2 0 0 1 13.174 14H2.825a2 2 0 0 1-1.991-1.819l-.637-7a1.99 1.99 0 0 1 .342-1.31L.5 3a2 2 0 0 1 2-2h3.672a2 2 0 0 1 1.414.586l.828.828A2 2 0 0 0 9.828 3zm-8.322.12C1.72 3.042 1.95 3 2.19 3h5.396l-.707-.707A1 1 0 0 0 6.172 2H2.5a1 1 0 0 0-1 .981l.006.139z"/>
+          </svg>
+          Filter Presets
+        </label>
+        <select id="preset-select" onchange="applyPreset(this.value)">
+          <option value="">-- Select a preset --</option>
+          {% for preset in user_presets %}
+            <option value="{{ preset.id }}" {% if selected_preset_id == preset.id|stringformat:"s" %}selected{% endif %}>
+              {{ preset.name }}
+            </option>
+          {% endfor %}
+        </select>
       </div>
-    {% endif %}
-  </form>
+      {% endif %}
+
+      <div class="nasa-filter-grid">
+        <div class="nasa-filter-field">
+          <label for="{{ filter_form.search_query.id_for_label }}">Search</label>
+          {{ filter_form.search_query }}
+        </div>
+
+        <div class="nasa-filter-field">
+          <label for="{{ filter_form.source.id_for_label }}">Source</label>
+          {{ filter_form.source }}
+        </div>
+
+        <div class="nasa-filter-field">
+          <label for="{{ filter_form.date_from.id_for_label }}">From Date</label>
+          {{ filter_form.date_from }}
+        </div>
+
+        <div class="nasa-filter-field">
+          <label for="{{ filter_form.date_to.id_for_label }}">To Date</label>
+          {{ filter_form.date_to }}
+        </div>
+
+        <div class="nasa-filter-field">
+          <label for="{{ filter_form.sort_by.id_for_label }}">Sort By</label>
+          {{ filter_form.sort_by }}
+        </div>
+      </div>
+
+      <div class="nasa-filter-actions">
+        <button type="submit" class="nasa-filter-btn nasa-filter-btn-primary">
+          <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+            <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z"/>
+          </svg>
+          Apply Filters
+        </button>
+        <a href="{% url 'space_news:nasa_news' %}" class="nasa-filter-btn nasa-filter-btn-secondary">
+          Clear All
+        </a>
+      </div>
+
+      {% if has_active_filters %}
+        <div class="nasa-active-filters">
+          <span class="nasa-filter-badge">
+            <svg width="12" height="12" fill="currentColor" viewBox="0 0 16 16">
+              <path d="M6 10.5a.5.5 0 0 1 .5-.5h3a.5.5 0 0 1 0 1h-3a.5.5 0 0 1-.5-.5zm-2-3a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 0 1h-7a.5.5 0 0 1-.5-.5zm-2-3a.5.5 0 0 1 .5-.5h11a.5.5 0 0 1 0 1h-11a.5.5 0 0 1-.5-.5z"/>
+            </svg>
+            Filters Active
+          </span>
+        </div>
+      {% endif %}
+    </form>
+  </div>
 </div>
 
-{% if user.is_authenticated and user_presets %}
 <script>
+  // Toggle filter bar collapse
+  function toggleFilterBar() {
+    const filterBar = document.getElementById('nasaFilterBar');
+    const isCollapsed = filterBar.classList.contains('collapsed');
+
+    if (isCollapsed) {
+      filterBar.classList.remove('collapsed');
+      localStorage.setItem('newsFilterCollapsed', 'false');
+    } else {
+      filterBar.classList.add('collapsed');
+      localStorage.setItem('newsFilterCollapsed', 'true');
+    }
+  }
+
+  // Restore collapsed state from localStorage on page load
+  document.addEventListener('DOMContentLoaded', function() {
+    const filterBar = document.getElementById('nasaFilterBar');
+    const isCollapsed = localStorage.getItem('newsFilterCollapsed') === 'true';
+
+    if (isCollapsed) {
+      filterBar.classList.add('collapsed');
+    }
+  });
+
+  {% if user.is_authenticated and user_presets %}
   function applyPreset(presetId) {
     if (presetId) {
       // Redirect to news page with preset parameter
@@ -239,5 +395,5 @@
       window.location.href = '{% url "space_news:nasa_news" %}';
     }
   }
+  {% endif %}
 </script>
-{% endif %}
