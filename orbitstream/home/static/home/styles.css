@@ -933,10 +933,6 @@ h1, h2, h3, h4, h5, h6 {
   cursor: pointer;
 }
 
-.dropdown-item.theme-toggle .theme-label {
-  /* Left-aligned to match other dropdown items */
-}
-
 /* Mobile theme toggle */
 .mobile-auth-btn--theme {
   background: rgba(11, 13, 24, 0.6);
@@ -4669,11 +4665,7 @@ body.full-media-page .site-footer {
   font-weight: 500;
   margin: 0;
   opacity: 0.85;
-<<<<<<< HEAD
-  color: #6366f1;;
-=======
   color: var(--accent-blue);
->>>>>>> feature/user_setting/dark_mode
 }
 
 /* Info Grid */
