@@ -31,7 +31,7 @@
   --nasa-blue: #0b3d91;
   --bg-footer: #0b0d18;
   --panel: #ffffff;
-  --stroke: #d6d7db;
+  --stroke: rgba(148, 163, 184, 0.2);
   --ink: #0e1320;
   --accent: #274b9f;
   --accent-purple: #8b5cf6;
@@ -2701,33 +2701,15 @@ body.nasa-page .nasa-f-meta {
    Article page
    ============================================ */
    .article-page {
-    /* page tokens */
-    --page-bg: #f5f7fb;      /* light gray like the mock */
-    --ink: #0e1320;          /* body text */
-    --muted: #64748b;        /* secondary text */
-    --link: #274b9f;         /* links/buttons */
-    --card: #ffffff;         /* card surface */
-    --stroke: #d6d7db;
-    --radius: 12px;
-    --shadow: 0 1px 2px rgba(0,0,0,.06), 0 6px 18px rgba(0,0,0,.06);
-  
-    /* flip the dark-site defaults just for this page */
-    background: var(--page-bg);
-    color: var(--ink);
+    /* Use theme variables for article page */
+    background: var(--bg);
+    color: var(--text);
     min-height: 100svh;
   }
-  
 
-/* ✅ REPLACE WITH THIS: */
 .article-page .article-container,
-.article-page .article-container * { 
-  color: inherit; 
-}
-
-/* ✅ ADD THESE 3 LINES at the bottom of your article CSS: */
-.article-page .site-footer,
-.article-page .site-footer * {
-  color: #cbd5e1 !important;
+.article-page .article-container * {
+  color: inherit;
 }
 
   
@@ -2741,24 +2723,25 @@ body.nasa-page .nasa-f-meta {
   /* breadcrumb */
   .article-page .article-breadcrumb{ margin-bottom: 1rem; }
   .article-page .article-back{
-    color: var(--link);
+    color: var(--accent-purple);
     text-decoration: none;
     font-weight: 600;
   }
   .article-page .article-back:hover{ text-decoration: underline; }
-  
+
   /* header */
   .article-page .article-header{ margin-bottom: .5rem; }
   .article-page .article-title{
     margin: 0 0 .25rem;
     font-size: clamp(1.6rem, 2.8vw, 2.4rem);
     line-height: 1.2;
+    color: var(--text);
   }
   .article-page .article-meta{
     display: flex;
     gap: .5rem;
     flex-wrap: wrap;
-    color: var(--muted);
+    color: var(--text-secondary);
     font-size: .95rem;
   }
   
@@ -2767,33 +2750,121 @@ body.nasa-page .nasa-f-meta {
     margin: 1rem 0 1.25rem;
     border-radius: var(--radius);
     overflow: hidden;
-    border: 1px solid rgba(0,0,0,.06);
+    border: 1px solid var(--stroke);
     box-shadow: var(--shadow);
-    background: #e5e7eb; /* light placeholder if image absent */
+    background: var(--bg-secondary);
   }
   .article-page .article-hero img{
     display: block;
     width: 100%;
     height: auto;
   }
-  
+
   /* body card */
   .article-page .article-body{
     background: transparent;
     border: none;
     box-shadow: none;
     padding: 0;
-    color: #0e1320;
+    color: var(--text);
     font-size: 1.05rem;
     line-height: 1.7;
   }
   .article-page .article-body p {
     margin: 1rem 0;
-  }  
+  }
   .article-page .article-lede{
     margin-top: 0;
     font-weight: 600;
-    color: #111827;
+    color: var(--text);
+  }
+  .article-page .article-body a,
+  .article-page .article-content a,
+  .article-page .article-fallback-link {
+    color: var(--accent-purple);
+    text-decoration: none;
+    font-weight: 600;
+  }
+  .article-page .article-body a:hover,
+  .article-page .article-content a:hover,
+  .article-page .article-fallback-link:hover {
+    text-decoration: underline;
+  }
+
+  /* Article content nested elements - ensure theme colors */
+  .article-page .article-content {
+    color: var(--text);
+  }
+  .article-page .article-content p,
+  .article-page .article-content h2,
+  .article-page .article-content h3,
+  .article-page .article-content h4,
+  .article-page .article-content ul,
+  .article-page .article-content ol,
+  .article-page .article-content li,
+  .article-page .article-content blockquote,
+  .article-page .article-content figcaption,
+  .article-page .article-content code,
+  .article-page .article-content pre {
+    color: var(--text);
+  }
+  .article-page .article-content h2,
+  .article-page .article-content h3,
+  .article-page .article-content h4 {
+    margin-top: 1.5rem;
+    margin-bottom: 0.75rem;
+    font-weight: 700;
+    color: var(--text);
+  }
+  .article-page .article-content blockquote {
+    border-left: 4px solid var(--accent-purple);
+    padding-left: 1rem;
+    margin: 1rem 0;
+    font-style: italic;
+    color: var(--text-secondary);
+  }
+  .article-page .article-content code {
+    background: var(--bg-secondary);
+    padding: 0.2rem 0.4rem;
+    border-radius: 4px;
+    font-family: monospace;
+    font-size: 0.9em;
+    color: var(--accent-purple-light);
+  }
+  .article-page .article-content pre {
+    background: var(--bg-secondary);
+    padding: 1rem;
+    border-radius: 8px;
+    overflow-x: auto;
+    border: 1px solid var(--stroke);
+  }
+  .article-page .article-content pre code {
+    background: transparent;
+    padding: 0;
+    color: var(--text);
+  }
+  .article-page .article-content ul,
+  .article-page .article-content ol {
+    margin: 1rem 0;
+    padding-left: 1.5rem;
+  }
+  .article-page .article-content li {
+    margin: 0.5rem 0;
+  }
+  .article-page .article-content img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 8px;
+    margin: 1rem 0;
+  }
+  .article-page .article-content figure {
+    margin: 1.5rem 0;
+  }
+  .article-page .article-content figcaption {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    text-align: center;
+    margin-top: 0.5rem;
   }
   
   /* CTA button */
@@ -2805,27 +2876,28 @@ body.nasa-page .nasa-f-meta {
     height: 40px;
     padding: 0 1rem;
     border-radius: 999px;
-    border: 1px solid #cbd3ea;
-    background: #fff;
-    color: #111827;
+    border: 1px solid var(--input-border);
+    background: var(--button-bg);
+    color: var(--text);
     text-decoration: none;
     font-weight: 600;
   }
   .article-page .article-primary-btn:hover{
-    border-color: #a6b8ff;
+    border-color: var(--accent-purple);
+    background: var(--button-bg-hover);
   }
-  
+
   /* footer/share row */
   .article-page .article-footer{
     margin-top: 1rem;
     display: flex;
     align-items: center;
     gap: .75rem;
-    color: var(--muted);
+    color: var(--text-secondary);
   }
   .article-page .share-row a{
     margin-left: .5rem;
-    color: var(--link);
+    color: var(--accent-purple);
     text-decoration: none;
     font-weight: 600;
   }
