@@ -261,19 +261,26 @@
     background: linear-gradient(135deg, rgba(59, 130, 246, 0.3) 0%, rgba(139, 92, 246, 0.3) 100%);
     border: 1px solid rgba(96, 165, 250, 0.5);
     color: #bfdbfe;
-    padding: 6px 12px;
+    padding: 8px 16px;
     border-radius: 6px;
     font-size: 0.9em;
     font-weight: 500;
     transition: all 0.3s ease;
+    cursor: pointer;
+    user-select: none;
   }
-  
+
   .keyword-badge:hover {
     background: linear-gradient(135deg, rgba(59, 130, 246, 0.5) 0%, rgba(139, 92, 246, 0.5) 100%);
     transform: translateY(-2px);
     box-shadow: 0 4px 12px rgba(96, 165, 250, 0.4);
+    border-color: rgba(96, 165, 250, 0.8);
   }
-  
+
+  .keyword-badge:active {
+    transform: translateY(0);
+  }
+
   /* Buttons */
   .btn-primary {
     margin-top: 24px;
@@ -288,16 +295,16 @@
     transition: all 0.3s ease;
     box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4);
   }
-  
+
   .btn-primary:hover {
     transform: translateY(-2px);
     box-shadow: 0 6px 25px rgba(59, 130, 246, 0.6);
   }
-  
+
   .btn-primary:active {
     transform: translateY(0);
   }
-  
+
   .btn-secondary {
     margin-top: 20px;
     padding: 12px 24px;
@@ -310,36 +317,36 @@
     transition: all 0.3s ease;
     backdrop-filter: blur(5px);
   }
-  
+
   .btn-secondary:hover {
     background: rgba(100, 116, 139, 0.8);
     transform: translateY(-2px);
     box-shadow: 0 4px 15px rgba(100, 116, 139, 0.5);
   }
-  
+
   .btn-secondary:active {
     transform: translateY(0);
   }
-  
+
   /* Error Message */
   #error-message {
     display: none;
     text-align: center;
     padding: 40px;
   }
-  
+
   .error-icon {
     font-size: 3em;
     margin-bottom: 16px;
     filter: drop-shadow(0 0 10px rgba(239, 68, 68, 0.5));
   }
-  
+
   #error-text {
     font-size: 1.1em;
     color: #fca5a5;
     line-height: 1.6;
   }
-  
+
   /* Animations */
   @keyframes fadeIn {
     from {
@@ -351,63 +358,63 @@
       transform: translateY(0);
     }
   }
-  
+
   @keyframes spin {
     to {
       transform: rotate(360deg);
     }
   }
-  
+
   /* Responsive Design */
   @media (max-width: 768px) {
     .learn-container {
       padding: 30px 15px;
     }
-    
+
     .learn-header h1 {
       font-size: 2em;
     }
-    
+
     .learn-header p {
       font-size: 1em;
     }
-    
+
     .topics-grid {
       grid-template-columns: 1fr;
     }
-    
+
     #summary-section {
       padding: 24px;
     }
-    
+
     #summary-title {
       font-size: 1.5em;
     }
-    
+
     #summary-text {
       font-size: 1em;
     }
-    
+
     #custom-topic-input {
       padding: 14px 60px 14px 16px;
       font-size: 14px;
     }
   }
-  
+
   @media (max-width: 480px) {
     .learn-header h1 {
       font-size: 1.75em;
     }
-    
+
     .search-button {
       padding: 8px 16px;
       font-size: 14px;
     }
-    
+
     .topic-card {
       padding: 20px;
     }
-    
+
     #summary-section {
       padding: 20px;
       border-radius: 12px;
@@ -418,7 +425,7 @@
 
 {% block content %}
 <div class="learn-container">
-  
+
   <!-- Header -->
   <header class="learn-header">
     <h1>Learn About Space</h1>
@@ -427,8 +434,8 @@
 
   <!-- Search Bar -->
   <div class="search-wrapper">
-    <input 
-      type="text" 
+    <input
+      type="text"
       id="custom-topic-input"
       placeholder="Ask about any space topic..."
       onkeypress="if(event.key === 'Enter') searchCustomTopic()">
@@ -451,32 +458,32 @@
 
   <!-- Summary Display Section -->
   <section id="summary-section">
-    
+
     <!-- Topic Title -->
     <h2 id="summary-title"></h2>
-    
+
     <!-- Loading Spinner -->
     <div id="loading-spinner">
       <div class="spinner"></div>
       <p>Generating summary...</p>
     </div>
-    
+
     <!-- Summary Content -->
     <div id="summary-content">
       <div id="summary-text"></div>
-      
+
       <!-- Keywords Section -->
       <div id="keywords-section">
         <h3>🔍 Related Topics</h3>
         <div id="keywords-list"></div>
       </div>
-      
+
       <!-- Try Another Button -->
       <button class="btn-primary" onclick="resetSearch()">
         ← Explore Another Topic
       </button>
     </div>
-    
+
     <!-- Error Message -->
     <div id="error-message">
       <div class="error-icon">😔</div>
@@ -534,17 +541,17 @@
     const loadingSpinner = document.getElementById('loading-spinner');
     const summaryContent = document.getElementById('summary-content');
     const errorMessage = document.getElementById('error-message');
-    
+
     // Show section with loading state
     summarySection.style.display = 'block';
     summaryTitle.textContent = topicName;
     loadingSpinner.style.display = 'block';
     summaryContent.style.display = 'none';
     errorMessage.style.display = 'none';
-    
+
     // Scroll to summary section
     summarySection.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    
+
     // Fetch summary from API
     fetch('{% url "learn_page:generate_summary" %}', {
       method: 'POST',
@@ -558,21 +565,25 @@
     .then(response => response.json())
     .then(data => {
       loadingSpinner.style.display = 'none';
-      
+
       if (data.success) {
         // Display summary
         document.getElementById('summary-text').textContent = data.summary;
-        
-        // Display keywords
+
+        // Display keywords as clickable buttons
         const keywordsList = document.getElementById('keywords-list');
         keywordsList.innerHTML = '';
-        
+
         if (data.keywords) {
           const keywords = data.keywords.split(',').map(k => k.trim());
           keywords.forEach(keyword => {
             const badge = document.createElement('span');
             badge.className = 'keyword-badge';
             badge.textContent = keyword;
+            badge.onclick = function() {
+              loadTopic(keyword);
+            };
+            badge.title = 'Click to learn about ' + keyword;
             keywordsList.appendChild(badge);
           });
         }
