@@ -63,6 +63,7 @@
     transition: all 0.3s ease;
     color: var(--text);
     backdrop-filter: blur(10px);
+    box-sizing: border-box;
   }
 
   .search-input:focus {
@@ -97,6 +98,7 @@
     /* Prevent any movement or transformation */
     transform: none !important;
     box-shadow: none !important;
+    box-sizing: border-box;
   }
 
   .search-submit-btn:hover {
@@ -126,6 +128,7 @@
     min-width: 120px;
     font-family: 'Orbitron', sans-serif;
     font-weight: 600;
+    box-sizing: border-box;
   }
 
   .media-type-select:focus {
@@ -171,12 +174,27 @@
     .search-form {
       flex-direction: column;
       gap: 12px;
+      align-items: stretch;
     }
 
-    .search-input,
-    .media-type-select,
-    .search-submit-btn {
+    .search-input {
+      flex: none;
       width: 100%;
+      margin: 0;
+    }
+
+    .media-type-select {
+      flex: none;
+      width: 100%;
+      margin: 0;
+    }
+
+    .search-submit-btn {
+      flex: none;
+      width: 100%;
+      margin: 0;
+      padding: 16px 20px;
+      justify-content: center;
     }
   }
 
