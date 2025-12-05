@@ -19,15 +19,41 @@
     background: transparent !important;
   }
 
+  /* Page Header */
+  .gallery-header {
+    text-align: center;
+    margin-bottom: 50px;
+  }
+
+  .gallery-title {
+    font-size: 2.5em;
+    font-weight: 700;
+    background: linear-gradient(135deg, #60a5fa 0%, #a78bfa 50%, #f472b6 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 12px;
+    text-shadow: 0 0 30px rgba(96, 165, 250, 0.3);
+  }
+
+  .gallery-subtitle {
+    font-size: 1.1em;
+    color: var(--text-secondary);
+    line-height: 1.6;
+  }
+
   /* Search Form Container */
   .search-form {
-    position: relative;
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    margin-bottom: 20px;
   }
 
   /* Search Bar Styling */
   .search-input {
-    width: 100%;
-    padding: 16px 60px 16px 20px;
+    flex: 1;
+    padding: 16px 20px;
     font-size: 16px;
     background: var(--bg-tertiary);
     border: 2px solid var(--input-border);
@@ -48,56 +74,69 @@
     color: var(--muted);
   }
 
-  /* Search Submit Button */
+  /* Search Submit Button - matches GPS button (location-btn + location-btn-secondary) */
   .search-submit-btn {
-    position: absolute;
-    right: 8px;
-    top: 50%;
-    transform: translateY(-50%);
-    padding: 10px 20px;
-    background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
-    color: white;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    font-weight: 600;
-    transition: all 0.3s ease;
-    box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4);
+    /* Base button styles from .location-btn */
     display: flex;
     align-items: center;
-    justify-content: center;
+    gap: 10px;
+    padding: 16px 28px;
+    font-size: 1em;
+    font-weight: 600;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: background 0.3s ease, border-color 0.3s ease;
+
+    /* Secondary button styles from .location-btn-secondary */
+    background: var(--bg-tertiary);
+    color: var(--text);
+    border: 2px solid var(--input-border);
+    backdrop-filter: blur(10px);
+
+    /* Prevent any movement or transformation */
+    transform: none !important;
+    box-shadow: none !important;
   }
 
   .search-submit-btn:hover {
-    transform: translateY(-50%) scale(1.05);
-    box-shadow: 0 6px 25px rgba(59, 130, 246, 0.6);
+    border-color: var(--accent-blue);
+    background: var(--bg-secondary);
+    box-shadow: 0 6px 20px var(--text-shadow);
+    transform: none !important;
   }
 
-  .search-submit-btn:active {
-    transform: translateY(-50%) scale(0.98);
+  .search-submit-btn:active,
+  .search-submit-btn:focus {
+    transform: none !important;
   }
 
-  /* Filter Buttons */
-  .filter-btn {
-    background: rgba(30, 41, 59, 0.6);
-    border: 2px solid rgba(96, 165, 250, 0.3);
-    color: #cbd5e1;
-    backdrop-filter: blur(10px);
+  /* Media Type Dropdown */
+  .media-type-select {
+    padding: 16px 20px;
+    font-size: 16px;
+    background: var(--bg-tertiary);
+    border: 2px solid var(--input-border);
+    border-radius: 12px;
+    outline: none;
     transition: all 0.3s ease;
+    color: var(--text);
+    backdrop-filter: blur(10px);
+    cursor: pointer;
+    min-width: 150px;
+    font-family: 'Orbitron', sans-serif;
+    font-weight: 600;
   }
 
-  .filter-btn:hover {
-    border-color: #60a5fa;
-    background: rgba(30, 41, 59, 0.8);
-    color: #f1f5f9;
-    transform: translateY(-2px);
+  .media-type-select:focus {
+    border-color: var(--accent-blue);
+    box-shadow: 0 0 15px var(--text-shadow);
+    background: var(--input-bg);
   }
 
-  .filter-btn.active {
-    background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
-    border-color: transparent;
-    color: white;
-    box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4);
+  .media-type-select option {
+    background: var(--bg-secondary);
+    color: var(--text);
+    padding: 10px;
   }
 
   /* Load More Button */
@@ -117,11 +156,48 @@
     box-shadow: none;
     opacity: 0.5;
   }
+
+  /* Responsive Design */
+  @media (max-width: 768px) {
+    .gallery-title {
+      font-size: 2em;
+    }
+
+    .gallery-subtitle {
+      font-size: 1em;
+    }
+
+    .search-form {
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .search-input,
+    .media-type-select,
+    .search-submit-btn {
+      width: 100%;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .gallery-title {
+      font-size: 1.75em;
+    }
+
+    .gallery-header {
+      margin-bottom: 30px;
+    }
+  }
 </style>
 {% endblock %}
 
 {% block content %}
 <div class="gallery-container">
+  <div class="gallery-header">
+    <h1 class="gallery-title">Gallery</h1>
+    <p class="gallery-subtitle">Explore NASA's stunning collection of space imagery</p>
+  </div>
+
   <div class="search-section">
     <div class="search-wrapper">
       <form method="get" action="" class="search-form">
@@ -132,25 +208,14 @@
           value="{{ q }}"
           placeholder="Search NASA Media"
         >
+        <select name="type" class="media-type-select">
+          <option value="image" {% if media_type == 'image' %}selected{% endif %}>Images</option>
+          <option value="video" {% if media_type == 'video' %}selected{% endif %}>Videos</option>
+        </select>
         <button type="submit" class="search-submit-btn">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="11" cy="11" r="8"></circle>
-            <path d="m21 21-4.35-4.35"></path>
-          </svg>
+          Search
         </button>
-        <input type="hidden" name="type" value="{{ media_type|default:'image' }}">
       </form>
-
-      <div class="filter-buttons">
-        <a href="?q={{ q|urlencode }}&type=image"
-           class="filter-btn {% if media_type == 'image' %}active{% endif %}">
-          Images
-        </a>
-        <a href="?q={{ q|urlencode }}&type=video"
-           class="filter-btn {% if media_type == 'video' %}active{% endif %}">
-          Videos
-        </a>
-      </div>
     </div>
   </div>
 

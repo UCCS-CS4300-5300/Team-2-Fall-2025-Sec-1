@@ -16,28 +16,6 @@
 
   <link rel="stylesheet" href="{% static 'home/styles.css' %}">
 
-  <style>
-    /* Custom Scrollbar - Sitewide */
-    ::-webkit-scrollbar {
-      width: 10px;
-    }
-
-    ::-webkit-scrollbar-track {
-      background: var(--scrollbar-track);
-      border: 1px solid var(--input-border);
-    }
-
-    ::-webkit-scrollbar-thumb {
-      background: linear-gradient(180deg, var(--scrollbar-thumb-start) 0%, var(--scrollbar-thumb-end) 100%);
-      box-shadow: 0 0 10px var(--text-shadow);
-      border-radius: 5px;
-    }
-
-    ::-webkit-scrollbar-thumb:hover {
-      background: linear-gradient(180deg, var(--accent-purple-light) 0%, var(--scrollbar-thumb-start) 100%);
-    }
-  </style>
-
   {# page-specific CSS goes here #}
   {% block extra_css %}{% endblock %}
 </head>
@@ -87,7 +65,7 @@
 
     // Initialize theme on page load
     const storedTheme = getStoredTheme();
-    const initialTheme = storedTheme || 'auto';
+    const initialTheme = storedTheme || 'dark';
     setTheme(initialTheme);
 
     // Listen for system theme changes if user preference is 'auto'

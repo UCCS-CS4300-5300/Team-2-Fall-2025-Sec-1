@@ -47,12 +47,14 @@
   .search-wrapper {
     max-width: 600px;
     margin: 0 auto 40px;
-    position: relative;
+    display: flex;
+    gap: 12px;
+    align-items: center;
   }
 
   #custom-topic-input {
-    width: 100%;
-    padding: 16px 60px 16px 20px;
+    flex: 1;
+    padding: 16px 20px;
     font-size: 16px;
     background: var(--bg-tertiary);
     border: 2px solid var(--input-border);
@@ -73,29 +75,40 @@
     color: var(--muted);
   }
 
+  /* Search Submit Button - exact copy from gallery */
   .search-button {
-    position: absolute;
-    right: 8px;
-    top: 50%;
-    transform: translateY(-50%);
-    padding: 10px 20px;
-    background: linear-gradient(135deg, var(--accent-blue) 0%, var(--accent-purple) 100%);
-    color: white;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
+    /* Base button styles from .location-btn */
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 16px 28px;
+    font-size: 1em;
     font-weight: 600;
-    transition: all 0.3s ease;
-    box-shadow: 0 4px 15px var(--text-shadow);
+    border-radius: 12px;
+    cursor: pointer;
+    transition: background 0.3s ease, border-color 0.3s ease;
+
+    /* Secondary button styles from .location-btn-secondary */
+    background: var(--bg-tertiary);
+    color: var(--text);
+    border: 2px solid var(--input-border);
+    backdrop-filter: blur(10px);
+
+    /* Prevent any movement or transformation */
+    transform: none !important;
+    box-shadow: none !important;
   }
 
   .search-button:hover {
-    transform: translateY(-50%) scale(1.05);
-    box-shadow: 0 6px 25px var(--text-shadow);
+    border-color: var(--accent-blue);
+    background: var(--bg-secondary);
+    box-shadow: 0 6px 20px var(--text-shadow);
+    transform: none !important;
   }
-  
-  .search-button:active {
-    transform: translateY(-50%) scale(0.98);
+
+  .search-button:active,
+  .search-button:focus {
+    transform: none !important;
   }
   
   /* Topics Section */
