@@ -1,4 +1,8 @@
 import json
+import requests
+from io import BytesIO
+from PIL import Image
+from django.core.files.base import ContentFile
 from django.shortcuts import render, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse, Http404
@@ -10,6 +14,40 @@ from .models import (
     SavedLearnTopic,
     SavedNewsArticle,
 )
+
+
+def download_file_from_url(url, timeout=30):
+    """Download a file from a URL and return its content"""
+    try:
+        response = requests.get(url, timeout=timeout, stream=True)
+        response.raise_for_status()
+        return BytesIO(response.content)
+    except Exception as e:
+        print(f"Error downloading file from {url}: {e}")
+        return None
+
+
+def create_thumbnail(image_file, size=(300, 300)):
+    """Create a thumbnail from an image file"""
+    try:
+        img = Image.open(image_file)
+        img.thumbnail(size, Image.Resampling.LANCZOS)
+
+        # Convert RGBA to RGB if necessary
+        if img.mode in ('RGBA', 'LA', 'P'):
+            background = Image.new('RGB', img.size, (255, 255, 255))
+            if img.mode == 'P':
+                img = img.convert('RGBA')
+            background.paste(img, mask=img.split()[-1] if img.mode == 'RGBA' else None)
+            img = background
+
+        thumb_io = BytesIO()
+        img.save(thumb_io, format='JPEG', quality=85)
+        thumb_io.seek(0)
+        return ContentFile(thumb_io.read())
+    except Exception as e:
+        print(f"Error creating thumbnail: {e}")
+        return None
 
 
 @login_required
@@ -76,15 +114,67 @@ def toggle_save_gallery(request):
             existing.delete()
             return JsonResponse({'saved': False, 'message': 'Gallery item removed from saved'})
 
-        SavedGalleryItem.objects.create(
+        # Get URLs
+        media_url = data.get('media_url')
+        thumbnail_url = data.get('thumbnail_url')
+        media_type = data.get('media_type', 'image')
+
+        # Create the gallery item first
+        gallery_item = SavedGalleryItem.objects.create(
             user=request.user,
             nasa_id=nasa_id,
             title=title,
             description=data.get('description'),
-            media_url=data.get('media_url'),
-            thumbnail_url=data.get('thumbnail_url'),
-            media_type=data.get('media_type', 'image'),
+            media_url=media_url,
+            thumbnail_url=thumbnail_url,
+            media_type=media_type,
         )
+
+        # Download and save media file
+        if media_url:
+            try:
+                media_content = download_file_from_url(media_url)
+                if media_content:
+                    # Generate a safe filename
+                    import os
+                    extension = os.path.splitext(media_url)[1][:10]  # Limit extension length
+                    if not extension or '?' in extension:
+                        extension = '.jpg' if media_type == 'image' else '.mp4'
+                    filename = f"{nasa_id}{extension}"
+
+                    gallery_item.media_file.save(
+                        filename,
+                        ContentFile(media_content.read()),
+                        save=False
+                    )
+
+                    # Create thumbnail for images
+                    if media_type == 'image':
+                        media_content.seek(0)  # Reset file pointer
+                        thumbnail_content = create_thumbnail(media_content)
+                        if thumbnail_content:
+                            gallery_item.thumbnail_file.save(
+                                f"{nasa_id}_thumb.jpg",
+                                thumbnail_content,
+                                save=False
+                            )
+            except Exception as e:
+                print(f"Error saving media file: {e}")
+
+        # Download and save thumbnail (if not already created from image)
+        if thumbnail_url and not gallery_item.thumbnail_file:
+            try:
+                thumb_content = download_file_from_url(thumbnail_url)
+                if thumb_content:
+                    gallery_item.thumbnail_file.save(
+                        f"{nasa_id}_thumb.jpg",
+                        ContentFile(thumb_content.read()),
+                        save=False
+                    )
+            except Exception as e:
+                print(f"Error saving thumbnail: {e}")
+
+        gallery_item.save()
         return JsonResponse({'saved': True, 'message': 'Gallery item saved'})
     except (json.JSONDecodeError, KeyError) as e:
         return JsonResponse({'error': str(e)}, status=400)
@@ -367,3 +457,22 @@ def view_saved_article(request, pk):
     }
 
     return render(request, 'space_news/article.html', context)
+
+
+@login_required
+def view_saved_media(request, pk):
+    """Display a saved gallery media item"""
+    saved_media = get_object_or_404(SavedGalleryItem, pk=pk, user=request.user)
+
+    # Use saved file if available, otherwise fall back to URL
+    media_url = saved_media.media_file.url if saved_media.media_file else saved_media.media_url
+    thumbnail_url = saved_media.thumbnail_file.url if saved_media.thumbnail_file else saved_media.thumbnail_url
+
+    context = {
+        'media_item': saved_media,
+        'media_url': media_url,
+        'thumbnail_url': thumbnail_url,
+        'is_saved_view': True,
+    }
+
+    return render(request, 'saved_page/saved_media.html', context)

@@ -526,11 +526,13 @@ h1::after {
                 {% for item in saved_gallery_items %}
                     <div class="saved-item" data-type="gallery" data-id="{{ item.id }}">
                         <div class="saved-item-row">
-                            {% if item.thumbnail_url %}
+                            {% if item.thumbnail_file %}
+                                <img src="{{ item.thumbnail_file.url }}" alt="{{ item.title }}" class="saved-item-image">
+                            {% elif item.thumbnail_url %}
                                 <img src="{{ item.thumbnail_url }}" alt="{{ item.title }}" class="saved-item-image">
                             {% endif %}
                             <div class="saved-item-content">
-                                <h4><a href="{% url 'space_imagery:full_media' %}?nasa_id={{ item.nasa_id }}" target="_blank">{{ item.title }}</a></h4>
+                                <h4><a href="{% url 'saved_page:view_saved_media' item.id %}">{{ item.title }}</a></h4>
                                 <div class="saved-item-details">
                                     <p><strong>Type:</strong> {{ item.media_type|title }}</p>
                                     {% if item.description %}

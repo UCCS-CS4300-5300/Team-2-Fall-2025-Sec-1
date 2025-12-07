@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{{ media_item.title }} - Saved Media{% endblock %}
+
+{% block body_class %}full-media-page{% endblock %}
+
+{% block content %}
+<div class="full-media-container">
+  <a href="{% url 'saved_page:saved_page' %}" class="back-button">
+    ← Back to Saved Items
+  </a>
+
+  <div class="media-wrapper">
+    <div class="media-display">
+      {% if media_item.media_type == "image" %}
+        <img src="{{ media_url }}" alt="{{ media_item.title }}" class="full-image">
+      {% elif media_item.media_type == "video" %}
+        <div class="video-container">
+          {% if media_url %}
+            <video controls class="full-video">
+              <source src="{{ media_url }}" type="video/mp4">
+              Your browser does not support the video tag.
+            </video>
+          {% else %}
+            <div class="video-placeholder">
+              <p>Video not available</p>
+            </div>
+          {% endif %}
+        </div>
+      {% endif %}
+    </div>
+
+    <div class="media-details">
+      <h1>{{ media_item.title }}</h1>
+
+      <div class="metadata">
+        <div class="meta-item">
+          <strong>NASA ID:</strong>
+          <span>{{ media_item.nasa_id }}</span>
+        </div>
+
+        <div class="meta-item">
+          <strong>Media Type:</strong>
+          <span>{{ media_item.media_type|title }}</span>
+        </div>
+
+        <div class="meta-item">
+          <strong>Saved:</strong>
+          <span>{{ media_item.saved_at|date:"F d, Y" }}</span>
+        </div>
+      </div>
+
+      {% if media_item.description %}
+        <div class="description">
+          <h2>Description</h2>
+          <p>{{ media_item.description }}</p>
+        </div>
+      {% endif %}
+
+      {% if media_url %}
+        <div class="download-section">
+          <a href="{{ media_url }}" download class="download-btn">
+            Download {{ media_item.media_type|title }}
+          </a>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -16,6 +16,8 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
+from django.conf import settings
+from django.conf.urls.static import static
 from home.views import index  # Import from home app
 
 urlpatterns = [
@@ -29,3 +31,7 @@ urlpatterns = [
     path('launches/' , include('launches.urls')),        # launches path path
     path('saved/', include('saved_page.urls')),          # saved page path
 ]
+
+# Serve media files in development
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
