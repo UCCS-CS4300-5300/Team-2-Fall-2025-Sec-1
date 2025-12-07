@@ -484,11 +484,21 @@
           <h3>🔍 Related Topics</h3>
           <div id="keywords-list"></div>
         </div>
-  
-        <!-- Try Another Button -->
-        <button class="btn-primary" onclick="resetSearch()">
-          ← Explore Another Topic
-        </button>
+
+        <!-- Action Buttons -->
+        <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+          <button class="btn-primary" onclick="resetSearch()">
+            ← Explore Another Topic
+          </button>
+          {% if user.is_authenticated %}
+          <button id="save-topic-btn" class="btn-primary" style="background: linear-gradient(135deg, #8b5cf6 0%, #a78bfa 100%);">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 6px; vertical-align: middle;">
+              <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>
+            </svg>
+            <span id="save-topic-text">Save Topic</span>
+          </button>
+          {% endif %}
+        </div>
       </div>
   
       <!-- Error Message -->
@@ -575,6 +585,13 @@
       loadingSpinner.style.display = 'none';
 
       if (data.success) {
+        // Store current topic data for saving
+        currentTopicData = {
+          topic: topicName,
+          summary: data.summary,
+          keywords: data.keywords || ''
+        };
+
         // Display summary
         document.getElementById('summary-text').textContent = data.summary;
 
@@ -595,7 +612,10 @@
             keywordsList.appendChild(badge);
           });
         }
-        
+
+        // Check if topic is already saved
+        checkTopicSaveStatus(topicName);
+
         summaryContent.style.display = 'block';
       } else {
         // Show error
@@ -626,8 +646,66 @@
   function resetSearch() {
     document.getElementById('summary-section').style.display = 'none';
     document.getElementById('custom-topic-input').value = '';
+    currentTopicData = null;
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
+
+  // Save topic functionality
+  let currentTopicData = null;
+
+  function updateSaveButtonState(isSaved) {
+    const saveBtn = document.getElementById('save-topic-btn');
+    const saveText = document.getElementById('save-topic-text');
+    if (!saveBtn || !saveText) return;
+
+    if (isSaved) {
+      saveBtn.querySelector('svg path').setAttribute('fill', 'currentColor');
+      saveText.textContent = 'Saved';
+    } else {
+      saveBtn.querySelector('svg path').setAttribute('fill', 'none');
+      saveText.textContent = 'Save Topic';
+    }
+  }
+
+  function checkTopicSaveStatus(topic) {
+    const saveBtn = document.getElementById('save-topic-btn');
+    if (!saveBtn) return;
+
+    fetch('/saved/api/check/learn/?topic=' + encodeURIComponent(topic))
+      .then(r => r.json())
+      .then(data => updateSaveButtonState(data.saved))
+      .catch(err => console.error('Error:', err));
+  }
+
+  {% if user.is_authenticated %}
+  document.addEventListener('DOMContentLoaded', function() {
+    const saveBtn = document.getElementById('save-topic-btn');
+    if (saveBtn) {
+      saveBtn.addEventListener('click', function() {
+        if (!currentTopicData) {
+          alert('No topic to save');
+          return;
+        }
+
+        fetch('/saved/api/toggle/learn/', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCSRFToken()
+          },
+          body: JSON.stringify(currentTopicData)
+        })
+        .then(r => r.json())
+        .then(data => {
+          if (!data.error) {
+            updateSaveButtonState(data.saved);
+          }
+        })
+        .catch(err => console.error('Error:', err));
+      });
+    }
+  });
+  {% endif %}
 </script>
 
 {% endblock %}

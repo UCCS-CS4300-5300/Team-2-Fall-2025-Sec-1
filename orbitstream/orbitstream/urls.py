@@ -26,5 +26,6 @@ urlpatterns = [
     path('gallery/', include('space_imagery.urls')),     # gallery page path
     path('satellite-tracking/', include('satellite_tracking.urls')),  # satellite tracking page path
     path('learn_page/', include('learn_page.urls')),  # learn page path
-    path('launches/' , include('launches.urls'))        # launches path path
+    path('launches/' , include('launches.urls')),        # launches path path
+    path('saved/', include('saved_page.urls')),          # saved page path
 ]

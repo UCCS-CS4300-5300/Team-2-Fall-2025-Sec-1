@@ -78,6 +78,7 @@ INSTALLED_APPS = [
     'learn_page',
     'launches',
     'satellite_tracking',
+    'saved_page',
 ]
 
 MIDDLEWARE = [

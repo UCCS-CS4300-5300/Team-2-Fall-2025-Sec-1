@@ -96,12 +96,89 @@
             <a href="{{ media_url }}" download class="download-btn">
               Download {{ media_type|title }}
             </a>
+            {% if user.is_authenticated %}
+            <button id="save-gallery-btn" class="download-btn save-btn" style="margin-left: 10px; background: linear-gradient(135deg, #8b5cf6 0%, #a78bfa 100%);">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 6px;">
+                <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>
+              </svg>
+              <span id="save-gallery-text">Save</span>
+            </button>
+            {% endif %}
           </div>
         {% endif %}
       </div>
     </div>
   {% endif %}
 </div>
+
+{% if user.is_authenticated and item %}
+<script>
+(function() {
+  const saveBtn = document.getElementById('save-gallery-btn');
+  const saveText = document.getElementById('save-gallery-text');
+  if (!saveBtn) return;
+
+  const galleryData = {
+    nasa_id: '{{ item.nasa_id|escapejs }}',
+    title: '{{ item.title|escapejs }}',
+    description: '{{ item.description|escapejs|truncatewords:50 }}',
+    media_url: '{{ media_url|escapejs }}',
+    thumbnail_url: '{% if item.links %}{{ item.links.0.href|default:""|escapejs }}{% endif %}',
+    media_type: '{{ media_type|escapejs }}'
+  };
+
+  function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+      const cookies = document.cookie.split(';');
+      for (let i = 0; i < cookies.length; i++) {
+        const cookie = cookies[i].trim();
+        if (cookie.substring(0, name.length + 1) === (name + '=')) {
+          cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+          break;
+        }
+      }
+    }
+    return cookieValue;
+  }
+
+  function updateButtonState(isSaved) {
+    if (isSaved) {
+      saveBtn.querySelector('svg path').setAttribute('fill', 'currentColor');
+      saveText.textContent = 'Saved';
+    } else {
+      saveBtn.querySelector('svg path').setAttribute('fill', 'none');
+      saveText.textContent = 'Save';
+    }
+  }
+
+  // Check initial save status
+  fetch('/saved/api/check/gallery/?nasa_id=' + encodeURIComponent(galleryData.nasa_id))
+    .then(r => r.json())
+    .then(data => updateButtonState(data.saved))
+    .catch(err => console.error('Error:', err));
+
+  // Handle save button click
+  saveBtn.addEventListener('click', function() {
+    fetch('/saved/api/toggle/gallery/', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': getCookie('csrftoken')
+      },
+      body: JSON.stringify(galleryData)
+    })
+    .then(r => r.json())
+    .then(data => {
+      if (!data.error) {
+        updateButtonState(data.saved);
+      }
+    })
+    .catch(err => console.error('Error:', err));
+  });
+})();
+</script>
+{% endif %}
 
 <script>
 // Video player enhancements
