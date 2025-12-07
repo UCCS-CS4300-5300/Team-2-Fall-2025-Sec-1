@@ -6,6 +6,9 @@ app_name = 'saved_page'
 urlpatterns = [
     path('', views.saved_page, name='saved_page'),
 
+    # View saved article in OrbitStream format
+    path('article/<int:pk>/', views.view_saved_article, name='view_saved_article'),
+
     # Toggle save/unsave endpoints
     path('api/toggle/satellite/', views.toggle_save_satellite, name='toggle_save_satellite'),
     path('api/toggle/gallery/', views.toggle_save_gallery, name='toggle_save_gallery'),

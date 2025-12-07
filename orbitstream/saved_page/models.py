@@ -87,6 +87,9 @@ class SavedNewsArticle(models.Model):
     image_url = models.URLField(max_length=1000, blank=True, null=True)
     source_name = models.CharField(max_length=255, blank=True, null=True)
     published_at = models.CharField(max_length=100, blank=True, null=True)
+    full_html = models.TextField(blank=True, null=True)  # Store full article content
+    content = models.TextField(blank=True, null=True)  # Store article content fallback
+    author = models.CharField(max_length=255, blank=True, null=True)  # Store author info
     saved_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:

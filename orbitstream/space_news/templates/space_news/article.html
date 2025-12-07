@@ -74,7 +74,10 @@
     description: '{{ article.description|default:""|escapejs }}',
     image_url: '{{ article.urlToImage|default:""|escapejs }}',
     source_name: '{{ article.source.name|default:""|escapejs }}',
-    published_at: '{{ article.publishedAt|default:""|escapejs }}'
+    published_at: '{{ article.publishedAt|default:""|escapejs }}',
+    full_html: '{{ full_html|default:""|escapejs }}',
+    content: '{{ article.content|default:""|escapejs }}',
+    author: '{{ article.author|default:""|escapejs }}'
   };
 
   function getCookie(name) {

@@ -1,7 +1,7 @@
 import json
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404
 from django.contrib.auth.decorators import login_required
-from django.http import JsonResponse
+from django.http import JsonResponse, Http404
 from django.views.decorators.http import require_POST
 from .models import (
     SavedSatellite,
@@ -179,6 +179,9 @@ def toggle_save_news(request):
             image_url=data.get('image_url'),
             source_name=data.get('source_name'),
             published_at=data.get('published_at'),
+            full_html=data.get('full_html'),
+            content=data.get('content'),
+            author=data.get('author'),
         )
         return JsonResponse({'saved': True, 'message': 'Article saved'})
     except (json.JSONDecodeError, KeyError) as e:
@@ -336,3 +339,31 @@ def delete_saved_news(request, pk):
         return JsonResponse({'success': True})
     except SavedNewsArticle.DoesNotExist:
         return JsonResponse({'error': 'Not found'}, status=404)
+
+
+@login_required
+def view_saved_article(request, pk):
+    """Display a saved news article in OrbitStream's article format"""
+    saved_article = get_object_or_404(SavedNewsArticle, pk=pk, user=request.user)
+
+    # Format the saved article data to match what article.html expects
+    article = {
+        'title': saved_article.title,
+        'description': saved_article.description,
+        'url': saved_article.article_url,
+        'urlToImage': saved_article.image_url,
+        'source': {
+            'name': saved_article.source_name or 'Unknown Source'
+        },
+        'publishedAt': saved_article.published_at,
+        'author': saved_article.author,
+        'content': saved_article.content,
+    }
+
+    context = {
+        'article': article,
+        'full_html': saved_article.full_html,  # Use the saved full HTML content
+        'is_saved_view': True,  # Flag to indicate this is a saved article view
+    }
+
+    return render(request, 'space_news/article.html', context)

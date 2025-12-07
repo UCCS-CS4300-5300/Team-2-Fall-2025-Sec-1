@@ -504,7 +504,7 @@ h1::after {
                                 <img src="{{ article.image_url }}" alt="{{ article.title }}" class="saved-item-image" onerror="this.style.display='none'">
                             {% endif %}
                             <div class="saved-item-content">
-                                <h4><a href="{{ article.article_url }}" target="_blank" rel="noopener noreferrer">{{ article.title }}</a></h4>
+                                <h4><a href="{% url 'saved_page:view_saved_article' article.id %}">{{ article.title }}</a></h4>
                                 <div class="saved-item-details">
                                     {% if article.source_name %}
                                         <p><strong>Source:</strong> {{ article.source_name }}</p>
