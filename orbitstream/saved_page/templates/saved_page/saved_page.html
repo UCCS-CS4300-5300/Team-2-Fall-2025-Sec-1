@@ -294,6 +294,134 @@ h1::after {
     text-overflow: ellipsis;
 }
 
+/* Learn Topic Modal */
+.topic-modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(5px);
+    z-index: 9999;
+    overflow-y: auto;
+    padding: 2rem;
+}
+
+.topic-modal.active {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.topic-modal-content {
+    background: var(--bg-tertiary);
+    border: 1px solid var(--input-border);
+    border-radius: 16px;
+    padding: 40px;
+    max-width: 800px;
+    width: 100%;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+    position: relative;
+    animation: modalSlideIn 0.3s ease;
+}
+
+@keyframes modalSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.topic-modal-close {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid var(--input-border);
+    color: var(--text);
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+}
+
+.topic-modal-close:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: rotate(90deg);
+}
+
+.topic-modal-title {
+    font-size: 2em;
+    font-weight: 700;
+    background: linear-gradient(135deg, var(--accent-blue) 0%, var(--accent-purple-light) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 20px;
+    border-left: 4px solid var(--accent-blue);
+    padding-left: 16px;
+    padding-right: 40px;
+}
+
+.topic-modal-summary {
+    font-size: 1.1em;
+    line-height: 1.8;
+    color: var(--text);
+    margin-bottom: 24px;
+    white-space: pre-wrap;
+}
+
+.topic-modal-keywords {
+    background: var(--button-bg);
+    border: 1px solid var(--input-border);
+    border-radius: 12px;
+    padding: 20px;
+    margin-top: 24px;
+}
+
+.topic-modal-keywords h3 {
+    font-size: 1.2em;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 12px;
+}
+
+.topic-modal-keywords-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.topic-keyword-badge {
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.3) 0%, rgba(139, 92, 246, 0.3) 100%);
+    border: 1px solid rgba(96, 165, 250, 0.5);
+    color: #bfdbfe;
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-size: 0.9em;
+    font-weight: 500;
+}
+
+.learn-topic-clickable {
+    cursor: pointer;
+}
+
+.learn-topic-clickable:hover h4 {
+    color: var(--accent-blue) !important;
+    text-decoration: underline;
+}
+
 /* Responsive */
 @media (max-width: 768px) {
     .saved-container {
@@ -318,6 +446,23 @@ h1::after {
     .saved-item-image {
         width: 100%;
         height: 150px;
+    }
+
+    .topic-modal {
+        padding: 1rem;
+    }
+
+    .topic-modal-content {
+        padding: 24px;
+    }
+
+    .topic-modal-title {
+        font-size: 1.5em;
+        padding-right: 40px;
+    }
+
+    .topic-modal-summary {
+        font-size: 1em;
     }
 }
 </style>
@@ -464,7 +609,10 @@ h1::after {
                 {% for topic in saved_learn_topics %}
                     <div class="saved-item" data-type="learn" data-id="{{ topic.id }}">
                         <div class="saved-item-row">
-                            <div class="saved-item-content">
+                            <div class="saved-item-content learn-topic-clickable"
+                                 data-topic="{{ topic.topic }}"
+                                 data-summary="{{ topic.summary }}"
+                                 data-keywords="{{ topic.keywords }}">
                                 <h4>{{ topic.topic }}</h4>
                                 <div class="saved-item-details">
                                     <p class="saved-item-description">{{ topic.summary|truncatewords:30 }}</p>
@@ -528,6 +676,20 @@ h1::after {
     </div>
 
 </div>
+
+<!-- Learn Topic Modal -->
+<div id="topic-modal" class="topic-modal">
+    <div class="topic-modal-content">
+        <button class="topic-modal-close" onclick="closeTopicModal()">&times;</button>
+        <h2 id="modal-topic-title" class="topic-modal-title"></h2>
+        <div id="modal-topic-summary" class="topic-modal-summary"></div>
+        <div id="modal-topic-keywords" class="topic-modal-keywords" style="display: none;">
+            <h3>🔍 Related Topics</h3>
+            <div id="modal-keywords-list" class="topic-modal-keywords-list"></div>
+        </div>
+    </div>
+</div>
+
 </div>
 
 <script>
@@ -539,8 +701,74 @@ document.querySelectorAll('.section-header').forEach(function(header) {
     });
 });
 
+// Learn Topic Modal Functions
+function openTopicModal(topic, summary, keywords) {
+    var modal = document.getElementById('topic-modal');
+    var titleEl = document.getElementById('modal-topic-title');
+    var summaryEl = document.getElementById('modal-topic-summary');
+    var keywordsSection = document.getElementById('modal-topic-keywords');
+    var keywordsList = document.getElementById('modal-keywords-list');
+
+    titleEl.textContent = topic;
+    summaryEl.textContent = summary;
+
+    // Handle keywords
+    if (keywords && keywords.trim()) {
+        var keywordsArray = keywords.split(',').map(function(k) { return k.trim(); });
+        keywordsList.innerHTML = '';
+        keywordsArray.forEach(function(keyword) {
+            var badge = document.createElement('span');
+            badge.className = 'topic-keyword-badge';
+            badge.textContent = keyword;
+            keywordsList.appendChild(badge);
+        });
+        keywordsSection.style.display = 'block';
+    } else {
+        keywordsSection.style.display = 'none';
+    }
+
+    modal.classList.add('active');
+    document.body.style.overflow = 'hidden';
+}
+
+function closeTopicModal() {
+    var modal = document.getElementById('topic-modal');
+    modal.classList.remove('active');
+    document.body.style.overflow = '';
+}
+
+// Close modal when clicking outside
+document.getElementById('topic-modal').addEventListener('click', function(e) {
+    if (e.target === this) {
+        closeTopicModal();
+    }
+});
+
+// Close modal on Escape key
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+        closeTopicModal();
+    }
+});
+
 // Delete saved item using event delegation
 document.addEventListener('DOMContentLoaded', function() {
+    // Add click handlers for learn topic items
+    document.querySelectorAll('.learn-topic-clickable').forEach(function(element) {
+        element.addEventListener('click', function(e) {
+            // Don't trigger if clicking the delete button
+            if (e.target.classList.contains('delete-btn') || e.target.closest('.delete-btn')) {
+                return;
+            }
+
+            var topic = this.getAttribute('data-topic');
+            var summary = this.getAttribute('data-summary');
+            var keywords = this.getAttribute('data-keywords');
+
+            openTopicModal(topic, summary, keywords);
+        });
+    });
+
     document.querySelectorAll('.delete-btn').forEach(function(button) {
         button.addEventListener('click', function() {
             var type = this.getAttribute('data-type');
