@@ -4,6 +4,7 @@ Tests for the launches app.
 from unittest.mock import patch, MagicMock
 from django.test import TestCase
 from django.urls import reverse
+from django.core.cache import cache
 import requests
 
 from launches.api import spacedev_api
@@ -13,8 +14,11 @@ class SpaceDevAPITests(TestCase):
     """Test suite for SpaceDevs API functions."""
 
     def setUp(self):
-        """Clear cache before each test."""
-        spacedev_api._cache.clear()
+        """Clear caches before each test."""
+        # in-module cache (even though you're mostly using Django cache now)
+        if hasattr(spacedev_api, "_cache"):
+            spacedev_api._cache.clear()
+        cache.clear()
 
     @patch('launches.api.spacedev_api.requests.get')
     def test_get_next_launch_success(self, mock_get):
@@ -24,7 +28,8 @@ class SpaceDevAPITests(TestCase):
             "results": [{
                 "id": "test-123",
                 "name": "Falcon 9 | Starlink",
-                "net": "2025-11-20T10:30:00Z"
+                # far in the future so it always counts as 'upcoming'
+                "net": "2050-11-20T10:30:00Z"
             }]
         }
         mock_response.raise_for_status = MagicMock()
@@ -55,7 +60,7 @@ class SpaceDevAPITests(TestCase):
             "results": [{
                 "id": "hero-123",
                 "name": "Mission Name",
-                "net": "2025-11-20T10:00:00Z",
+                "net": "2050-11-20T10:00:00Z",
                 "image": "https://example.com/img.jpg",
                 "rocket": {"configuration": {"full_name": "Falcon 9"}},
                 "pad": {"name": "Launch Pad", "location": {"name": "Location"}}
@@ -72,10 +77,19 @@ class SpaceDevAPITests(TestCase):
 
     @patch('launches.api.spacedev_api.requests.get')
     def test_get_upcoming_launches(self, mock_get):
-        """Test fetching multiple upcoming launches."""
+        """
+        Test fetching multiple upcoming launches.
+
+        get_upcoming_launches(limit=3) should return 3 *future* launches,
+        skipping the hero (handled via the shared upcoming helper).
+        """
         launches = [
-            {"id": f"up-{i}", "net": f"2025-11-{20+i}T10:00:00Z"}
-            for i in range(5)
+            {
+                "id": f"up-{i}",
+                # all future dates
+                "net": f"2050-11-{10 + i:02d}T10:00:00Z"
+            }
+            for i in range(6)
         ]
         mock_response = MagicMock()
         mock_response.json.return_value = {"results": launches}
@@ -84,15 +98,20 @@ class SpaceDevAPITests(TestCase):
 
         result = spacedev_api.get_upcoming_launches(limit=3)
 
-        # Expects 2 because the function pops the first launch (hero launch)
-        self.assertEqual(len(result), 2)
+        # Now we expect exactly 'limit' results
+        self.assertEqual(len(result), 3)
+        # And they should be the ones after the hero candidate
+        self.assertEqual([r["id"] for r in result], ["up-1", "up-2", "up-3"])
 
     @patch('launches.api.spacedev_api.requests.get')
     def test_get_recent_and_completed(self, mock_get):
         """Test fetching recent and completed launches."""
         launches = [
-            {"id": f"launch-{i}", "net": f"2025-11-{15-i}T10:00:00Z",
-             "status": {"name": "Success"}}
+            {
+                "id": f"launch-{i}",
+                "net": f"2025-11-{15 - i:02d}T10:00:00Z",
+                "status": {"name": "Success"}
+            }
             for i in range(10)
         ]
         mock_response = MagicMock()
@@ -111,6 +130,7 @@ class SpaceDevAPITests(TestCase):
     def test_get_launch_by_id(self, mock_get):
         """Test fetching a specific launch by ID."""
         mock_response = MagicMock()
+        # minimal launch; no mission → get_mission_patches() returns []
         mock_response.json.return_value = {"id": "specific-123"}
         mock_response.raise_for_status = MagicMock()
         mock_get.return_value = mock_response
@@ -119,18 +139,74 @@ class SpaceDevAPITests(TestCase):
 
         self.assertIsNotNone(result)
         self.assertEqual(result["id"], "specific-123")
+        # mission_patches should at least exist as a list
+        self.assertIn("mission_patches", result)
+        self.assertIsInstance(result["mission_patches"], list)
+
+    # ---------- NEW / UPDATED TESTS FOR get_mission_patches ----------
 
     @patch('launches.api.spacedev_api.requests.get')
-    def test_get_mission_patches(self, mock_get):
-        """Test fetching mission patches."""
+    def test_get_mission_patches_empty_results(self, mock_get):
+        """If API returns no patches, we should get an empty list."""
+        launch = {
+            "id": "launch-1",
+            "mission": {
+                "name": "Raise and Shine (RAISE-4)",
+                "agencies": []
+            }
+        }
+
         mock_response = MagicMock()
         mock_response.json.return_value = {"results": []}
         mock_response.raise_for_status = MagicMock()
         mock_get.return_value = mock_response
 
-        result = spacedev_api.get_mission_patches("mission-123")
+        result = spacedev_api.get_mission_patches(launch)
 
         self.assertEqual(result, [])
+
+    @patch('launches.api.spacedev_api.requests.get')
+    def test_get_mission_patches_picks_best_patch(self, mock_get):
+        """
+        When the API returns multiple candidate patches, make sure we
+        pick the one that best matches the mission (name + agency).
+        """
+        launch = {
+            "id": "launch-2",
+            "mission": {
+                "name": "Starlink Group 11-25",
+                "agencies": [{"id": 121}]
+            }
+        }
+
+        mock_response = MagicMock()
+        mock_response.json.return_value = {
+            "results": [
+                {
+                    "id": 999,
+                    "name": "Totally Unrelated Patch",
+                    "priority": 5,
+                    "image_url": "https://example.com/unrelated.png",
+                    "agency": {"id": 999, "name": "Other"}
+                },
+                {
+                    "id": 7,
+                    "name": "Space X Starlink Mission Patch",
+                    "priority": 10,
+                    "image_url": "https://example.com/starlink.png",
+                    "agency": {"id": 121, "name": "SpaceX"}
+                },
+            ]
+        }
+        mock_response.raise_for_status = MagicMock()
+        mock_get.return_value = mock_response
+
+        result = spacedev_api.get_mission_patches(launch)
+
+        # We return a single best patch in a list
+        self.assertEqual(len(result), 1)
+        self.assertEqual(result[0]["id"], 7)
+        self.assertIn("starlink", result[0]["name"].lower())
 
     def test_extract_youtube_id(self):
         """Test YouTube ID extraction."""
@@ -205,3 +281,4 @@ class LaunchViewsTests(TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertIn('launch', response.context)
+    

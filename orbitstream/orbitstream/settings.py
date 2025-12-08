@@ -9,11 +9,15 @@ https://docs.djangoproject.com/en/5.2/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.2/ref/settings/
 """
-from pathlib import Path
-import dj_database_url
+# Standard library imports
 import os
-from dotenv import load_dotenv
 import sys
+from pathlib import Path
+
+# Third-party imports
+import dj_database_url
+from dotenv import load_dotenv
+
 
 load_dotenv()
 
@@ -74,6 +78,7 @@ INSTALLED_APPS = [
     'learn_page',
     'launches',
     'satellite_tracking',
+    'saved_page',
 ]
 
 MIDDLEWARE = [
@@ -114,7 +119,7 @@ WSGI_APPLICATION = 'orbitstream.wsgi.application'
 # Check if we're in GitHub Actions or CI environment
 if 'GITHUB_ACTIONS' in os.environ or 'CI' in os.environ:
     # Use SQLite for CI/testing
-    DATABASES = {
+    DATABASES = {  # pylint: disable=invalid-name
         'default': {
             'ENGINE': 'django.db.backends.sqlite3',
             'NAME': ':memory:',  # In-memory database for fast tests
@@ -122,7 +127,7 @@ if 'GITHUB_ACTIONS' in os.environ or 'CI' in os.environ:
     }
 elif os.environ.get("DATABASE_URL"):
     # Production (Render) - use PostgreSQL
-    DATABASES = {
+    DATABASES = { # pylint: disable=invalid-name
         "default": dj_database_url.config(
             default=os.environ.get("DATABASE_URL"),
             conn_max_age=600,     # keep connections open
@@ -131,7 +136,7 @@ elif os.environ.get("DATABASE_URL"):
     }
 else:
     # Local development fallback - use SQLite
-    DATABASES = {
+    DATABASES = { # pylint: disable=invalid-name
         'default': {
             'ENGINE': 'django.db.backends.sqlite3',
             'NAME': BASE_DIR / 'db.sqlite3',
@@ -180,6 +185,10 @@ if not DEBUG:
     STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
     STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
+# Media files (User uploaded content)
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
+
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
@@ -190,7 +199,7 @@ SESSION_COOKIE_SECURE = True
 
 # Use SQLite for testing to avoid connecting to production PostgreSQL database
 if 'test' in sys.argv or 'test_coverage' in sys.argv:
-    DATABASES = {
+    DATABASES = { # pylint: disable=invalid-name
         'default': {
             'ENGINE': 'django.db.backends.sqlite3',
             'NAME': ':memory:',  # Use in-memory database for faster tests

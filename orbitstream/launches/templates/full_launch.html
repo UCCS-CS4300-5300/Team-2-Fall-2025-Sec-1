@@ -26,6 +26,14 @@
         <a href="{% url 'launches:launch' %}" class="back-button">
             <span class="arrow">&larr;</span> Back
         </a>
+        {% if user.is_authenticated %}
+        <button id="save-launch-btn" class="watch-button" style="right: 180px; background: linear-gradient(135deg, #8b5cf6 0%, #a78bfa 100%);">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 6px;">
+                <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>
+            </svg>
+            <span id="save-launch-text">SAVE</span>
+        </button>
+        {% endif %}
         <a href="#" class="watch-button" id="openVideoBtn">
             WATCH <span class="arrow">&rarr;</span>
         </a>
@@ -43,7 +51,17 @@
                 <div class="detail-grid">
                     <div class="detail-item">
                         <span class="detail-label">Status</span>
-                        <span class="detail-value status-{{ launch.status.abbrev|lower }}">{{ launch.status.name }}</span>
+                        <span class="detail-value 
+                            {% if 'GO' in launch.status.name|upper %}
+                                launch-status-go
+                            {% elif 'IN FLIGHT' in launch.status.name|upper or 'INFLIGHT' in launch.status.name|upper %}
+                                launch-status-inflight
+                            {% elif 'SUCCESS' in launch.status.name|upper %}
+                                launch-status-success
+                            {% else %}
+                                launch-status-tbd
+                            {% endif %}
+                        ">{{ launch.status.name }}</span>
                     </div>
                     
                     <div class="detail-item">
@@ -161,16 +179,16 @@
         <h2 class="info-card-title">{{ launch.mission.name }}</h2>
         <div class="info-card-container">
             <div class="info-card-left mission-patch-container">
-                {% if launch.mission_patches and launch.mission_patches|length > 0 %}
-                <div class="mission-patch-bg" style="background-image: url('{{ launch.mission_patches.0.image_url }}');"></div>
-                {% elif launch.mission.mission_patches and launch.mission.mission_patches|length > 0 %}
-                <div class="mission-patch-bg" style="background-image: url('{{ launch.mission.mission_patches.0.image_url }}');"></div>
+                {% if launch.mission_patches and launch.mission_patches.0.image_url %}
+                    <div class="mission-patch-bg"
+                         style="background-image: url('{{ launch.mission_patches.0.image_url }}');">
+                    </div>
                 {% else %}
-                <div class="mission-patch-placeholder">
-                    <span class="patch-icon">🛰️</span>
-                </div>
+                    <div class="mission-patch-placeholder">
+                        <span class="patch-icon">🛰️</span>
+                    </div>
                 {% endif %}
-            </div>
+            </div>            
             <div class="info-card-right">
                 <p class="info-card-description">{{ launch.mission.description|default:"No mission description available" }}</p>
                 <div class="info-card-buttons">
@@ -439,5 +457,77 @@
             );
     });
 </script>
+
+{% if user.is_authenticated %}
+<script>
+(function() {
+    const saveBtn = document.getElementById('save-launch-btn');
+    const saveText = document.getElementById('save-launch-text');
+    if (!saveBtn) return;
+
+    const launchData = {
+        launch_id: '{{ launch.id|escapejs }}',
+        name: '{{ launch.name|escapejs }}',
+        status: '{{ launch.status.name|escapejs }}',
+        net: '{{ launch.net|escapejs }}',
+        rocket_name: '{{ launch.rocket.configuration.full_name|escapejs }}',
+        pad_name: '{{ launch.pad.name|escapejs }}',
+        pad_location: '{{ launch.pad.location.name|escapejs }}',
+        image_url: '{{ launch.image|escapejs }}'
+    };
+
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+    function updateButtonState(isSaved) {
+        if (isSaved) {
+            saveBtn.querySelector('svg path').setAttribute('fill', 'currentColor');
+            saveText.textContent = 'SAVED';
+        } else {
+            saveBtn.querySelector('svg path').setAttribute('fill', 'none');
+            saveText.textContent = 'SAVE';
+        }
+    }
+
+    // Check initial save status
+    fetch('/saved/api/check/launch/?launch_id=' + encodeURIComponent(launchData.launch_id))
+        .then(r => r.json())
+        .then(data => updateButtonState(data.saved))
+        .catch(err => console.error('Error:', err));
+
+    // Handle save button click
+    saveBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+        fetch('/saved/api/toggle/launch/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCookie('csrftoken')
+            },
+            body: JSON.stringify(launchData)
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (!data.error) {
+                updateButtonState(data.saved);
+            }
+        })
+        .catch(err => console.error('Error:', err));
+    });
+})();
+</script>
+{% endif %}
 
 {% endblock %}

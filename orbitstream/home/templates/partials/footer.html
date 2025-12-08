@@ -30,12 +30,11 @@
           Navigation
         </h3> 
         <ul class="footer__links">
-          <li><a href="{% url 'space_news:nasa_news' %}" class="footer-link"><span class="link-dot"></span>News</a></li>
-          <li><a href="#" class="footer-link"><span class="link-dot"></span>GPS Tracking</a></li>
-          <li><a href="{% url 'launches:launch' %}" class="footer-link"><span class="link-dot"></span>Launches</span></a></li>
-          <li><a href="#" class="footer-link"><span class="link-dot"></span>Preferences</a></li>
+          <li><a href="{% url 'satellite_tracking:closest_satellite' %}" class="footer-link"><span class="link-dot"></span>Closest Satellite</a></li>
           <li><a href="{% url 'space_imagery:gallery' %}" class="footer-link"><span class="link-dot"></span>Gallery</a></li>
+          <li><a href="{% url 'launches:launch' %}" class="footer-link"><span class="link-dot"></span>Launches</span></a></li>
           <li><a href="{% url 'learn_page:learn_page' %}" class="footer-link"><span class="link-dot"></span>Learn</a></li>
+          <li><a href="{% url 'space_news:nasa_news' %}" class="footer-link"><span class="link-dot"></span>News</a></li>
         </ul>
       </section>
 

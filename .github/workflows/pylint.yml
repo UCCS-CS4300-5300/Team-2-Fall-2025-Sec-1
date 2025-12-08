@@ -28,4 +28,4 @@ jobs:
     - name: Run pylint
       working-directory: ./orbitstream # this should take care of the errors I was getting, then add each app individually to run command
       run: |
-        pylint orbitstream --fail-under=8.0
+        pylint orbitstream --rcfile=.pylintrc --fail-under=8.0

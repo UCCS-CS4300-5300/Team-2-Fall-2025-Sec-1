@@ -16,6 +16,8 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
+from django.conf import settings
+from django.conf.urls.static import static
 from home.views import index  # Import from home app
 
 urlpatterns = [
@@ -26,5 +28,10 @@ urlpatterns = [
     path('gallery/', include('space_imagery.urls')),     # gallery page path
     path('satellite-tracking/', include('satellite_tracking.urls')),  # satellite tracking page path
     path('learn_page/', include('learn_page.urls')),  # learn page path
-    path('launches/' , include('launches.urls'))        # launches path path
+    path('launches/' , include('launches.urls')),        # launches path path
+    path('saved/', include('saved_page.urls')),          # saved page path
 ]
+
+# Serve media files in development
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

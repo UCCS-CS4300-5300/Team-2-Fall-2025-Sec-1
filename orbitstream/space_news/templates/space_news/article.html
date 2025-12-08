@@ -49,7 +49,87 @@
         <a href="https://www.facebook.com/sharer/sharer.php?u={{ share_url }}" target="_blank" rel="noopener">Facebook</a>
         <a href="https://www.linkedin.com/shareArticle?mini=true&url={{ share_url }}&title={{ share_title }}" target="_blank" rel="noopener">LinkedIn</a>
       {% endwith %}
+      {% if user.is_authenticated %}
+      <button id="save-article-btn" style="margin-left: 16px; padding: 8px 16px; background: linear-gradient(135deg, #8b5cf6 0%, #a78bfa 100%); color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; display: inline-flex; align-items: center; gap: 6px;">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>
+        </svg>
+        <span id="save-article-text">Save</span>
+      </button>
+      {% endif %}
     </div>
   </footer>
 </div>
+
+{% if user.is_authenticated and article %}
+<script>
+(function() {
+  const saveBtn = document.getElementById('save-article-btn');
+  const saveText = document.getElementById('save-article-text');
+  if (!saveBtn) return;
+
+  const articleData = {
+    article_url: '{{ article.url|escapejs }}',
+    title: '{{ article.title|escapejs }}',
+    description: '{{ article.description|default:""|escapejs }}',
+    image_url: '{{ article.urlToImage|default:""|escapejs }}',
+    source_name: '{{ article.source.name|default:""|escapejs }}',
+    published_at: '{{ article.publishedAt|default:""|escapejs }}',
+    full_html: '{{ full_html|default:""|escapejs }}',
+    content: '{{ article.content|default:""|escapejs }}',
+    author: '{{ article.author|default:""|escapejs }}'
+  };
+
+  function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+      const cookies = document.cookie.split(';');
+      for (let i = 0; i < cookies.length; i++) {
+        const cookie = cookies[i].trim();
+        if (cookie.substring(0, name.length + 1) === (name + '=')) {
+          cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+          break;
+        }
+      }
+    }
+    return cookieValue;
+  }
+
+  function updateButtonState(isSaved) {
+    if (isSaved) {
+      saveBtn.querySelector('svg path').setAttribute('fill', 'currentColor');
+      saveText.textContent = 'Saved';
+    } else {
+      saveBtn.querySelector('svg path').setAttribute('fill', 'none');
+      saveText.textContent = 'Save';
+    }
+  }
+
+  // Check initial save status
+  fetch('/saved/api/check/news/?article_url=' + encodeURIComponent(articleData.article_url))
+    .then(r => r.json())
+    .then(data => updateButtonState(data.saved))
+    .catch(err => console.error('Error:', err));
+
+  // Handle save button click
+  saveBtn.addEventListener('click', function() {
+    fetch('/saved/api/toggle/news/', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': getCookie('csrftoken')
+      },
+      body: JSON.stringify(articleData)
+    })
+    .then(r => r.json())
+    .then(data => {
+      if (!data.error) {
+        updateButtonState(data.saved);
+      }
+    })
+    .catch(err => console.error('Error:', err));
+  });
+})();
+</script>
+{% endif %}
 {% endblock %}

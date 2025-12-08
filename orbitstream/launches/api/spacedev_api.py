@@ -4,8 +4,9 @@ import os
 import time
 import re
 import requests
+from django.core.cache import cache
 
-SPACEDEVS_BASE = "https://ll.thespacedevs.com/2.0.0"
+SPACEDEVS_BASE = "https://ll.thespacedevs.com/2.2.0"
 
 # --- API key (from env) ---
 SPACEDEVS_API_KEY = os.environ.get("SPACEDEV_API_KEY")
@@ -16,17 +17,10 @@ _cache = {}  # {key: (timestamp, data)}
 
 
 def _get_cached(key):
-    entry = _cache.get(key)
-    if not entry:
-        return None
-    ts, data = entry
-    if time.time() - ts > CACHE_TTL_SECONDS:
-        return None
-    return data
-
+    return cache.get(key)
 
 def _set_cache(key, data):
-    _cache[key] = (time.time(), data)
+    cache.set(key, data, CACHE_TTL_SECONDS)
 
 
 def _do_spacedevs_get(path, params=None):
@@ -59,6 +53,45 @@ def _parse_net_to_dt(net_str):
     except ValueError:
         return None
 
+def _get_future_upcoming(total_needed: int = 10):
+    """
+    Internal helper:
+    - Calls /launch/upcoming/ ONCE
+    - Filters to future launches (net >= now, with parsed net_dt)
+    - Returns a list of launches sorted by net
+    """
+    cache_key = f"future_upcoming_{total_needed}"
+    cached = _get_cached(cache_key)
+    if cached is not None:
+        return cached
+
+    params = {
+        "limit": total_needed * 2,   # over-fetch a bit in case some are in the past
+        "ordering": "net",
+        "hide_recent_previous": "true",
+    }
+
+    try:
+        data = _do_spacedevs_get("/launch/upcoming/", params=params)
+    except requests.RequestException as e:
+        print("SpaceDevs upcoming error:", e)
+        return []
+
+    results = data.get("results") or []
+    now = datetime.datetime.now(datetime.timezone.utc)
+
+    future = []
+    for launch in results:
+        dt = _parse_net_to_dt(launch.get("net"))
+        if dt and dt >= now:
+            launch["net_dt"] = dt
+            future.append(launch)
+            if len(future) >= total_needed:
+                break
+
+    _set_cache(cache_key, future)
+    return future
+
 
 def extract_youtube_id(url):
     """
@@ -87,8 +120,13 @@ def extract_youtube_id(url):
 
 def get_best_video_url(launch):
     """
-    Return the best video URL for a launch, preferably the 'Official Webcast'
-    from launch['vidURLs'], otherwise the first URL available.
+    Return the best video URL for YouTube embedding.
+
+    Preference:
+      1. YouTube 'Official Webcast' / 'Webcast'
+      2. Any YouTube URL
+      3. Any 'Official Webcast'
+      4. First available URL
     """
     if not launch:
         return None
@@ -97,7 +135,9 @@ def get_best_video_url(launch):
     if not vid_urls:
         return None
 
-    official = None
+    youtube_best = None
+    youtube_any = None
+    official_any = None
     fallback = None
 
     for entry in vid_urls:
@@ -108,97 +148,150 @@ def get_best_video_url(launch):
         if not fallback:
             fallback = url
 
+        source = (entry.get("source") or "").lower()
         type_obj = entry.get("type") or {}
-        if type_obj.get("name") == "Official Webcast":
-            official = url
-            break
+        type_name = (type_obj.get("name") or "").lower()
 
-    return official or fallback
+        # 1/2: YouTube URLs
+        if "youtube.com" in source or "youtube.com" in url:
+            if not youtube_any:
+                youtube_any = url
+            if "official webcast" in type_name or "webcast" in type_name:
+                youtube_best = url
+
+        # 3: Any official webcast (may be X.com etc.)
+        if "official webcast" in type_name and not official_any:
+            official_any = url
+
+    return youtube_best or youtube_any or official_any or fallback
 
 
-def get_mission_patches(mission_id):
+def get_mission_patches(launch):
     """
-    Fetch mission patches for a specific mission ID.
-    Returns a list of mission patch objects with image_url.
+    Find mission patches.
+    FIXED: 
+    1. Uses 'name__contains' (double underscore) so the API actually filters.
+    2. Uses 'limit': 100 to ensure we see all candidates.
     """
-    cache_key = f"mission_patches_{mission_id}"
+    if not launch:
+        return []
+
+    mission = launch.get("mission") or {}
+    raw_name = mission.get("name")
+    
+    if not raw_name:
+        return []
+
+    # mission agency ids (for filtering)
+    mission_agencies = mission.get("agencies") or []
+    mission_agency_ids = {
+        a.get("id") for a in mission_agencies if isinstance(a, dict)
+    }
+
+    # Cache key
+    safe_key = re.sub(r"\s+", "_", raw_name)
+    cache_key = f"mission_patches_{safe_key}"
     cached = _get_cached(cache_key)
     if cached is not None:
         return cached
 
-    params = {
-        "mission": mission_id,
-    }
+    # 1) strip anything in parentheses
+    base_name = re.sub(r"\s*\(.*?\)", "", raw_name).strip()
+    if not base_name:
+        base_name = raw_name.strip()
+    
+    base_name = base_name.replace("-", " ")
 
-    try:
-        data = _do_spacedevs_get("/mission_patches/", params=params)
-    except requests.RequestException as e:
-        print(f"SpaceDevs API error fetching mission patches for {mission_id}:", e)
+    # 2) split into words
+    words = base_name.split()
+    if not words:
+        _set_cache(cache_key, [])
         return []
 
-    results = data.get("results") or []
-    _set_cache(cache_key, results)
-    return results
+    def pick_best_patch(results, mission_name):
+        mission_lower = mission_name.lower().replace("-", " ")
+        mission_tokens = set(re.findall(r"\w+", mission_lower))
+
+        # Filter by agency if possible
+        if mission_agency_ids:
+            agency_filtered = []
+            for p in results:
+                agency = p.get("agency") or {}
+                if agency.get("id") in mission_agency_ids:
+                    agency_filtered.append(p)
+            if agency_filtered:
+                results = agency_filtered
+
+        # Starlink special case
+        if "starlink" in mission_lower:
+            starlink_candidates = [
+                p for p in results
+                if "starlink" in (p.get("name") or "").lower()
+            ]
+            if starlink_candidates:
+                results = starlink_candidates
+
+        # Scoring
+        best = None
+        best_score = -1
+        
+        for p in results:
+            pname = (p.get("name") or "").lower().replace("-", " ")
+            p_tokens = set(re.findall(r"\w+", pname))
+            overlap = len(mission_tokens & p_tokens)
+            
+            if overlap > best_score:
+                best_score = overlap
+                best = p
+            elif overlap == best_score:
+                if best and len(pname) < len((best.get("name") or "").lower()):
+                    best = p
+                     
+        return best
+
+    patches = []
+
+    # 3) progressively shorten
+    for i in range(len(words)):
+        search_term = " ".join(words[:len(words) - i])
+        if not search_term:
+            break
+
+        params = {
+            # --- THE FIX IS HERE ---
+            "name__contains": search_term,  # Double Underscore!
+            "limit": 100 
+        }
+
+        try:
+            data = _do_spacedevs_get("/mission_patch/", params=params)
+        except requests.RequestException as e:
+            print(f"[mission_patches] error for '{search_term}': {e}")
+            continue
+
+        results = data.get("results") or []
+        
+        if not results:
+            continue
+
+        best_patch = pick_best_patch(results, raw_name)
+        
+        if best_patch:
+            patches = [best_patch]
+            break 
+
+    _set_cache(cache_key, patches)
+    return patches
+
 
 
 def get_next_launch():
     """
-    Fetch the next *truly upcoming* launch by:
-      1. Asking Launch Library 2 for several upcoming launches.
-      2. Filtering in Python to pick the earliest launch whose NET is >= now.
-    Uses in-memory caching so we don't hammer the API.
-    Returns the full launch object with all details.
+    Next upcoming launch (earliest net >= now).
     """
-    cache_key = "next_launch"
-    cached = _get_cached(cache_key)
-    if cached is not None:
-        return cached
+    future = _get_future_upcoming(total_needed=10)
+    return future[0] if future else None
 
-    params = {
-        "limit": 10,                   # grab a few so we can filter
-        "ordering": "net",             # earliest first
-        "hide_recent_previous": "true"
-    }
-
-    try:
-        data = _do_spacedevs_get("/launch/upcoming/", params=params)
-    except requests.RequestException as e:
-        print("SpaceDevs API error:", e)
-        return None
-
-    results = data.get("results") or []
-    if not results:
-        return None
-
-    now = datetime.datetime.now(datetime.timezone.utc)
-
-    def parse_net(net_str: str) -> datetime.datetime | None:
-        if not net_str:
-            return None
-        if net_str.endswith("Z"):
-            net_str = net_str.replace("Z", "+00:00")
-        try:
-            return datetime.datetime.fromisoformat(net_str)
-        except ValueError:
-            return None
-
-    future_launches = []
-    for launch in results:
-        net_str = launch.get("net")
-        net_dt = parse_net(net_str)
-        if net_dt is None:
-            continue
-        if net_dt >= now:
-            future_launches.append((net_dt, launch))
-
-    if future_launches:
-        future_launches.sort(key=lambda pair: pair[0])
-        chosen = future_launches[0][1]
-    else:
-        chosen = results[0]
-
-    _set_cache(cache_key, chosen)
-    return chosen
 
 
 def spacedev_hero():
@@ -253,10 +346,11 @@ def get_full_launch_data():
     return launch
 
 
+
 def get_launch_by_id(launch_id):
     """
     Fetch a specific launch by its ID.
-    Now also fetches mission patches if available.
+    Also fetches mission patches if available.
     """
     cache_key = f"launch_{launch_id}"
     cached = _get_cached(cache_key)
@@ -275,15 +369,12 @@ def get_launch_by_id(launch_id):
     data["video_url"] = video_url
     data["youtube_id"] = youtube_id
 
-    # Fetch mission patches if mission exists
-    mission = data.get("mission")
-    if mission and mission.get("id"):
-        mission_patches = get_mission_patches(mission["id"])
-        data["mission_patches"] = mission_patches
-    else:
-        data["mission_patches"] = []
+    # ✅ get the best patch for THIS launch
+    mission_patches = get_mission_patches(data)
+    data["mission_patches"] = mission_patches
 
     _set_cache(cache_key, data)
+
     return data
 
 
@@ -291,53 +382,27 @@ def get_upcoming_launches(limit):
     """
     Return a list of upcoming launches (dicts from Launch Library 2).
     Used for the 'Upcoming Launches' feature card area.
-    Only returns launches that haven't happened yet.
+
+    We share the same /launch/upcoming/ data as get_next_launch, and
+    skip the very next launch (which is used in the hero).
     """
-    cache_key = f"upcoming_{limit}"
+    # we need "hero + limit" items
+    total_needed = limit + 1
+    cache_key = f"upcoming_{total_needed}"
     cached = _get_cached(cache_key)
     if cached is not None:
         return cached
 
-    # Request more than needed since we'll filter out past launches
-    params = {
-        "limit": limit * 3,  # Request 3x to account for filtering
-        "ordering": "net",
-        "hide_recent_previous": "true",
-    }
+    future = _get_future_upcoming(total_needed=total_needed)
+    if not future:
+        return []
 
-    try:
-        data = _do_spacedevs_get("/launch/upcoming/", params=params)
-    except requests.RequestException as e:
-        print("SpaceDevs upcoming error:", e)
-        return cached or []
+    # skip the first item (hero)
+    upcoming_only = future[1:total_needed] if len(future) > 1 else []
 
-    results = data.get("results") or []
+    _set_cache(cache_key, upcoming_only)
+    return upcoming_only
 
-    now = datetime.datetime.now(datetime.timezone.utc)
-
-    def parse_net(net_str):
-        if not net_str:
-            return None
-        if net_str.endswith("Z"):
-            net_str = net_str.replace("Z", "+00:00")
-        try:
-            return datetime.datetime.fromisoformat(net_str)
-        except ValueError:
-            return None
-
-    # Filter to only truly future launches
-    future = []
-    for launch in results:
-        net_dt = parse_net(launch.get("net"))
-        if net_dt and net_dt >= now:
-            launch["net_dt"] = net_dt
-            future.append(launch)
-            if len(future) >= limit:
-                break
-    future.pop(0)
-    
-    _set_cache(cache_key, future)
-    return future
 
 
 def get_recent_and_completed(recent_limit, completed_limit):
@@ -357,12 +422,15 @@ def get_recent_and_completed(recent_limit, completed_limit):
     total_limit = recent_limit + completed_limit * 2
 
     params = {
-        "limit": total_limit,
-        "ordering": "-net",
-    }
+    "limit": total_limit,
+    "ordering": "-net",
+    "net__lte": datetime.datetime.now(datetime.timezone.utc).isoformat(),
+}
+
 
     try:
-        data = _do_spacedevs_get("/launch/previous/", params=params)
+        data = _do_spacedevs_get("/launch/", params=params)
+
     except requests.RequestException as e:
         print("SpaceDevs recent+completed error:", e)
         return cached or {"recent": [], "completed": []}
@@ -383,7 +451,7 @@ def get_recent_and_completed(recent_limit, completed_limit):
     for launch in older:
         status = launch.get("status") or {}
         status_name = status.get("name")
-        if status_name == "Success":
+        if status_name in ("Launch Successful", "Success"):
             completed_success.append(launch)
             if len(completed_success) >= completed_limit:
                 break

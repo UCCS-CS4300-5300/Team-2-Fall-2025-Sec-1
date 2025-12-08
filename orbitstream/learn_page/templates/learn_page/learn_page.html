@@ -5,129 +5,513 @@
 
 {% block extra_css %}
 <style>
-  /* Learn page specific styles */
+  /* ========================================
+     Learn Page Styles - Space Theme
+     ======================================== */
+  
+  /*Background color for learn page*/
+  .learn-container-background{
+    max-width: 100%;
+    background: var(--bg);
+  }
+
+  /* Layout */
   .learn-container {
     max-width: 1200px;
     margin: 0 auto;
     padding: 40px 20px;
     min-height: 100vh;
+    background: var(--bg);
   }
   
-  @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(20px); }
-    to { opacity: 1; transform: translateY(0); }
+  /* Header */
+  .learn-header {
+    text-align: center;
+    margin-bottom: 50px;
   }
   
-  @keyframes spin {
-    to { transform: rotate(360deg); }
+  .learn-header h1 {
+    font-size: 2.5em;
+    font-weight: 700;
+    background: linear-gradient(135deg, #60a5fa 0%, #a78bfa 50%, #f472b6 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 12px;
+    text-shadow: 0 0 30px rgba(96, 165, 250, 0.3);
   }
   
+  .learn-header p {
+    font-size: 1.1em;
+    color: var(--text-secondary);
+    max-width: 600px;
+    margin: 0 auto;
+    line-height: 1.6;
+  }
+
+  /* Search Bar */
+  .search-wrapper {
+    max-width: 600px;
+    margin: 0 auto 40px;
+    display: flex;
+    gap: 12px;
+    align-items: center;
+  }
+
+  #custom-topic-input {
+    flex: 1;
+    padding: 16px 20px;
+    font-size: 16px;
+    background: var(--bg-tertiary);
+    border: 2px solid var(--input-border);
+    border-radius: 12px;
+    outline: none;
+    transition: all 0.3s ease;
+    color: var(--text);
+    backdrop-filter: blur(10px);
+  }
+
   #custom-topic-input:focus {
-    border-color: #3b82f6;
-    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    border-color: var(--accent-blue);
+    box-shadow: 0 0 15px var(--text-shadow);
+    background: var(--input-bg);
+  }
+
+  #custom-topic-input::placeholder {
+    color: var(--muted);
+  }
+
+  /* Search Submit Button - exact copy from gallery */
+  .search-button {
+    /* Base button styles from .location-btn */
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 16px 28px;
+    font-size: 1em;
+    font-weight: 600;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: background 0.3s ease, border-color 0.3s ease;
+
+    /* Secondary button styles from .location-btn-secondary */
+    background: var(--bg-tertiary);
+    color: var(--text);
+    border: 2px solid var(--input-border);
+    backdrop-filter: blur(10px);
+
+    /* Prevent any movement or transformation */
+    transform: none !important;
+    box-shadow: none !important;
+  }
+
+  .search-button:hover {
+    border-color: var(--accent-blue);
+    background: var(--bg-secondary);
+    box-shadow: 0 6px 20px var(--text-shadow);
+    transform: none !important;
+  }
+
+  .search-button:active,
+  .search-button:focus {
+    transform: none !important;
+  }
+  
+  /* Topics Section */
+  .topics-section {
+    margin-bottom: 50px;
+  }
+  
+  .topics-section h2 {
+    font-size: 1.8em;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 24px;
+    text-align: center;
+  }
+
+  .topics-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+  }
+
+  /* Topic Cards */
+  .topic-card {
+    background: var(--bg-tertiary);
+    border: 2px solid var(--input-border);
+    border-radius: 12px;
+    padding: 24px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: var(--shadow);
+    backdrop-filter: blur(10px);
+  }
+
+  .topic-card:hover {
+    border-color: var(--accent-blue);
+    transform: translateY(-4px);
+    box-shadow: 0 8px 30px var(--text-shadow);
+    background: var(--bg-secondary);
+  }
+  
+  .topic-card:active {
+    transform: translateY(-2px);
+  }
+  
+  .topic-card-icon {
+    font-size: 2.5em;
+    margin-bottom: 12px;
+    filter: drop-shadow(0 0 10px rgba(96, 165, 250, 0.5));
+  }
+  
+  .topic-card h3 {
+    font-size: 1.2em;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 8px;
+  }
+
+  .topic-card p {
+    font-size: 0.9em;
+    color: var(--text-secondary);
+    line-height: 1.5;
+    margin: 0;
+  }
+
+  /* Summary Section */
+  #summary-section {
+    display: none;
+    max-width: 800px;
+    margin: 0 auto;
+    background: var(--bg-tertiary);
+    border: 1px solid var(--input-border);
+    border-radius: 16px;
+    padding: 40px;
+    box-shadow: var(--shadow);
+    backdrop-filter: blur(10px);
+    animation: fadeIn 0.5s ease;
+  }
+  
+  #summary-title {
+    font-size: 2em;
+    font-weight: 700;
+    background: linear-gradient(135deg, var(--accent-blue) 0%, var(--accent-purple-light) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 20px;
+    border-left: 4px solid var(--accent-blue);
+    padding-left: 16px;
+  }
+
+  /* Loading Spinner */
+  #loading-spinner {
+    text-align: center;
+    padding: 40px;
+  }
+
+  .spinner {
+    display: inline-block;
+    width: 50px;
+    height: 50px;
+    border: 4px solid var(--input-border);
+    border-top-color: var(--accent-blue);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    box-shadow: 0 0 20px var(--text-shadow);
+  }
+
+  #loading-spinner p {
+    margin-top: 16px;
+    color: var(--text-secondary);
+    font-size: 1.1em;
+  }
+
+  /* Summary Content */
+  #summary-content {
+    display: none;
+  }
+
+  #summary-text {
+    font-size: 1.1em;
+    line-height: 1.8;
+    color: var(--text);
+    margin-bottom: 24px;
+    white-space: pre-wrap;
+  }
+
+  /* Keywords Section */
+  #keywords-section {
+    background: var(--button-bg);
+    border: 1px solid var(--input-border);
+    border-radius: 12px;
+    padding: 20px;
+    margin-top: 24px;
+  }
+
+  #keywords-section h3 {
+    font-size: 1.2em;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 12px;
+  }
+  
+  #keywords-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  
+  .keyword-badge {
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.3) 0%, rgba(139, 92, 246, 0.3) 100%);
+    border: 1px solid rgba(96, 165, 250, 0.5);
+    color: #bfdbfe;
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-size: 0.9em;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    user-select: none;
+  }
+
+  .keyword-badge:hover {
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.5) 0%, rgba(139, 92, 246, 0.5) 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(96, 165, 250, 0.4);
+    border-color: rgba(96, 165, 250, 0.8);
+  }
+
+  .keyword-badge:active {
+    transform: translateY(0);
+  }
+
+  /* Buttons */
+  .btn-primary {
+    margin-top: 24px;
+    padding: 12px 24px;
+    background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 1em;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4);
+  }
+
+  .btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 25px rgba(59, 130, 246, 0.6);
+  }
+
+  .btn-primary:active {
+    transform: translateY(0);
+  }
+
+  .btn-secondary {
+    margin-top: 20px;
+    padding: 12px 24px;
+    background: rgba(100, 116, 139, 0.6);
+    color: white;
+    border: 1px solid rgba(148, 163, 184, 0.5);
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(5px);
+  }
+
+  .btn-secondary:hover {
+    background: rgba(100, 116, 139, 0.8);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(100, 116, 139, 0.5);
+  }
+
+  .btn-secondary:active {
+    transform: translateY(0);
+  }
+
+  /* Error Message */
+  #error-message {
+    display: none;
+    text-align: center;
+    padding: 40px;
+  }
+
+  .error-icon {
+    font-size: 3em;
+    margin-bottom: 16px;
+    filter: drop-shadow(0 0 10px rgba(239, 68, 68, 0.5));
+  }
+
+  #error-text {
+    font-size: 1.1em;
+    color: #fca5a5;
+    line-height: 1.6;
+  }
+
+  /* Animations */
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  /* Responsive Design */
+  @media (max-width: 768px) {
+    .learn-container {
+      padding: 30px 15px;
+    }
+
+    .learn-header h1 {
+      font-size: 2em;
+    }
+
+    .learn-header p {
+      font-size: 1em;
+    }
+
+    .topics-grid {
+      grid-template-columns: 1fr;
+    }
+
+    #summary-section {
+      padding: 24px;
+    }
+
+    #summary-title {
+      font-size: 1.5em;
+    }
+
+    #summary-text {
+      font-size: 1em;
+    }
+
+    #custom-topic-input {
+      padding: 14px 60px 14px 16px;
+      font-size: 14px;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .learn-header h1 {
+      font-size: 1.75em;
+    }
+
+    .search-button {
+      padding: 8px 16px;
+      font-size: 14px;
+    }
+
+    .topic-card {
+      padding: 20px;
+    }
+
+    #summary-section {
+      padding: 20px;
+      border-radius: 12px;
+    }
   }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="learn-container">
+<div class="learn-container-background">
+  <div class="learn-container">
+
+    <!-- Header -->
+    <header class="learn-header">
+      <h1>Learn About Space</h1>
+      <p>Explore space topics with AI-powered summaries. Select a topic below or search for anything space-related!</p>
+    </header>
   
-  <!-- Header -->
-  <header style="text-align: center; margin-bottom: 50px;">
-    <h1 style="font-size: 2.5em; font-weight: 700; color: #1e293b; margin-bottom: 12px;">
-      🚀 Learn About Space
-    </h1>
-    <p style="font-size: 1.1em; color: #64748b; max-width: 600px; margin: 0 auto;">
-      Explore space topics with AI-powered summaries. Select a topic below or search for anything space-related!
-    </p>
-  </header>
-
-  <!-- Search Bar -->
-  <div style="max-width: 600px; margin: 0 auto 40px; position: relative;">
-    <input 
-      type="text" 
-      id="custom-topic-input"
-      placeholder="Ask about any space topic... (e.g., 'Mars rovers', 'gravitational waves')"
-      style="width: 100%; padding: 16px 60px 16px 20px; font-size: 16px; border: 2px solid #cbd5e1; border-radius: 12px; outline: none; transition: border-color 0.3s;"
-      onkeypress="if(event.key === 'Enter') searchCustomTopic()">
-    <button 
-      onclick="searchCustomTopic()"
-      style="position: absolute; right: 8px; top: 50%; transform: translateY(-50%); padding: 10px 20px; background: #3b82f6; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; transition: background 0.3s;"
-      onmouseover="this.style.background='#2563eb'"
-      onmouseout="this.style.background='#3b82f6'">
-      Search
-    </button>
-  </div>
-
-  <!-- Predefined Topics Grid -->
-  <section style="margin-bottom: 50px;">
-    <h2 style="font-size: 1.8em; font-weight: 600; color: #1e293b; margin-bottom: 24px; text-align: center;">
-      Popular Topics
-    </h2>
-    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px;">
-      {% for topic in topics %}
-        <div 
-          class="topic-card"
-          onclick="loadTopic('{{ topic.title }}')"
-          style="background: white; border: 2px solid #e2e8f0; border-radius: 12px; padding: 24px; cursor: pointer; transition: all 0.3s; box-shadow: 0 1px 3px rgba(0,0,0,0.1);"
-          onmouseover="this.style.borderColor='#3b82f6'; this.style.transform='translateY(-4px)'; this.style.boxShadow='0 4px 12px rgba(59,130,246,0.2)'"
-          onmouseout="this.style.borderColor='#e2e8f0'; this.style.transform='translateY(0)'; this.style.boxShadow='0 1px 3px rgba(0,0,0,0.1)'">
-          <div style="font-size: 2.5em; margin-bottom: 12px;">{{ topic.icon }}</div>
-          <h3 style="font-size: 1.2em; font-weight: 600; color: #1e293b; margin-bottom: 8px;">{{ topic.title }}</h3>
-          <p style="font-size: 0.9em; color: #64748b; line-height: 1.5;">{{ topic.description }}</p>
-        </div>
-      {% endfor %}
+    <!-- Search Bar -->
+    <div class="search-wrapper">
+      <input
+        type="text"
+        id="custom-topic-input"
+        placeholder="Ask about any space topic..."
+        onkeypress="if(event.key === 'Enter') searchCustomTopic()">
+      <button class="search-button" onclick="searchCustomTopic()">Search</button>
     </div>
-  </section>
-
-  <!-- Summary Display Section -->
-  <section 
-    id="summary-section" 
-    style="display: none; max-width: 800px; margin: 0 auto; background: white; border-radius: 16px; padding: 40px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); animation: fadeIn 0.5s;">
-    
-    <!-- Topic Title -->
-    <h2 id="summary-title" style="font-size: 2em; font-weight: 700; color: #1e293b; margin-bottom: 20px; border-left: 4px solid #3b82f6; padding-left: 16px;"></h2>
-    
-    <!-- Loading Spinner -->
-    <div id="loading-spinner" style="text-align: center; padding: 40px;">
-      <div style="display: inline-block; width: 50px; height: 50px; border: 4px solid #e2e8f0; border-top-color: #3b82f6; border-radius: 50%; animation: spin 1s linear infinite;"></div>
-      <p style="margin-top: 16px; color: #64748b; font-size: 1.1em;">Generating summary...</p>
-    </div>
-    
-    <!-- Summary Content -->
-    <div id="summary-content" style="display: none;">
-      <div id="summary-text" style="font-size: 1.1em; line-height: 1.8; color: #334155; margin-bottom: 24px;"></div>
-      
-      <!-- Keywords Section -->
-      <div id="keywords-section" style="background: #f1f5f9; border-radius: 12px; padding: 20px; margin-top: 24px;">
-        <h3 style="font-size: 1.2em; font-weight: 600; color: #1e293b; margin-bottom: 12px;">🔍 Related Topics</h3>
-        <div id="keywords-list" style="display: flex; flex-wrap: wrap; gap: 10px;"></div>
+  
+    <!-- Predefined Topics Grid -->
+    <section class="topics-section">
+      <h2>Popular Topics</h2>
+      <div class="topics-grid">
+        {% for topic in topics %}
+          <div class="topic-card" onclick="loadTopic('{{ topic.title }}')">
+            <div class="topic-card-icon">{{ topic.icon }}</div>
+            <h3>{{ topic.title }}</h3>
+            <p>{{ topic.description }}</p>
+          </div>
+        {% endfor %}
       </div>
-      
-      <!-- Try Another Button -->
-      <button 
-        onclick="resetSearch()"
-        style="margin-top: 24px; padding: 12px 24px; background: #3b82f6; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 1em; transition: background 0.3s;"
-        onmouseover="this.style.background='#2563eb'"
-        onmouseout="this.style.background='#3b82f6'">
-        ← Explore Another Topic
-      </button>
-    </div>
-    
-    <!-- Error Message -->
-    <div id="error-message" style="display: none; text-align: center; padding: 40px;">
-      <div style="font-size: 3em; margin-bottom: 16px;">😔</div>
-      <p id="error-text" style="font-size: 1.1em; color: #ef4444; line-height: 1.6;"></p>
-      <button 
-        onclick="resetSearch()"
-        style="margin-top: 20px; padding: 12px 24px; background: #64748b; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600;"
-        onmouseover="this.style.background='#475569'"
-        onmouseout="this.style.background='#64748b'">
-        Try Again
-      </button>
-    </div>
-  </section>
+    </section>
+  
+    <!-- Summary Display Section -->
+    <section id="summary-section">
+  
+      <!-- Topic Title -->
+      <h2 id="summary-title"></h2>
+  
+      <!-- Loading Spinner -->
+      <div id="loading-spinner">
+        <div class="spinner"></div>
+        <p>Generating summary...</p>
+      </div>
+  
+      <!-- Summary Content -->
+      <div id="summary-content">
+        <div id="summary-text"></div>
+  
+        <!-- Keywords Section -->
+        <div id="keywords-section">
+          <h3>🔍 Related Topics</h3>
+          <div id="keywords-list"></div>
+        </div>
 
+        <!-- Action Buttons -->
+        <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+          <button class="btn-primary" onclick="resetSearch()">
+            ← Explore Another Topic
+          </button>
+          {% if user.is_authenticated %}
+          <button id="save-topic-btn" class="btn-primary" style="background: linear-gradient(135deg, #8b5cf6 0%, #a78bfa 100%);">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 6px; vertical-align: middle;">
+              <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>
+            </svg>
+            <span id="save-topic-text">Save Topic</span>
+          </button>
+          {% endif %}
+        </div>
+      </div>
+  
+      <!-- Error Message -->
+      <div id="error-message">
+        <div class="error-icon">😔</div>
+        <p id="error-text"></p>
+        <button class="btn-secondary" onclick="resetSearch()">
+          Try Again
+        </button>
+      </div>
+    </section>
+  
+  </div>
 </div>
 
 <script>
@@ -175,17 +559,17 @@
     const loadingSpinner = document.getElementById('loading-spinner');
     const summaryContent = document.getElementById('summary-content');
     const errorMessage = document.getElementById('error-message');
-    
+
     // Show section with loading state
     summarySection.style.display = 'block';
     summaryTitle.textContent = topicName;
     loadingSpinner.style.display = 'block';
     summaryContent.style.display = 'none';
     errorMessage.style.display = 'none';
-    
+
     // Scroll to summary section
     summarySection.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    
+
     // Fetch summary from API
     fetch('{% url "learn_page:generate_summary" %}', {
       method: 'POST',
@@ -199,25 +583,39 @@
     .then(response => response.json())
     .then(data => {
       loadingSpinner.style.display = 'none';
-      
+
       if (data.success) {
+        // Store current topic data for saving
+        currentTopicData = {
+          topic: topicName,
+          summary: data.summary,
+          keywords: data.keywords || ''
+        };
+
         // Display summary
         document.getElementById('summary-text').textContent = data.summary;
-        
-        // Display keywords
+
+        // Display keywords as clickable buttons
         const keywordsList = document.getElementById('keywords-list');
         keywordsList.innerHTML = '';
-        
+
         if (data.keywords) {
           const keywords = data.keywords.split(',').map(k => k.trim());
           keywords.forEach(keyword => {
             const badge = document.createElement('span');
+            badge.className = 'keyword-badge';
             badge.textContent = keyword;
-            badge.style.cssText = 'background: #dbeafe; color: #1e40af; padding: 6px 12px; border-radius: 6px; font-size: 0.9em; font-weight: 500;';
+            badge.onclick = function() {
+              loadTopic(keyword);
+            };
+            badge.title = 'Click to learn about ' + keyword;
             keywordsList.appendChild(badge);
           });
         }
-        
+
+        // Check if topic is already saved
+        checkTopicSaveStatus(topicName);
+
         summaryContent.style.display = 'block';
       } else {
         // Show error
@@ -248,8 +646,66 @@
   function resetSearch() {
     document.getElementById('summary-section').style.display = 'none';
     document.getElementById('custom-topic-input').value = '';
+    currentTopicData = null;
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
+
+  // Save topic functionality
+  let currentTopicData = null;
+
+  function updateSaveButtonState(isSaved) {
+    const saveBtn = document.getElementById('save-topic-btn');
+    const saveText = document.getElementById('save-topic-text');
+    if (!saveBtn || !saveText) return;
+
+    if (isSaved) {
+      saveBtn.querySelector('svg path').setAttribute('fill', 'currentColor');
+      saveText.textContent = 'Saved';
+    } else {
+      saveBtn.querySelector('svg path').setAttribute('fill', 'none');
+      saveText.textContent = 'Save Topic';
+    }
+  }
+
+  function checkTopicSaveStatus(topic) {
+    const saveBtn = document.getElementById('save-topic-btn');
+    if (!saveBtn) return;
+
+    fetch('/saved/api/check/learn/?topic=' + encodeURIComponent(topic))
+      .then(r => r.json())
+      .then(data => updateSaveButtonState(data.saved))
+      .catch(err => console.error('Error:', err));
+  }
+
+  {% if user.is_authenticated %}
+  document.addEventListener('DOMContentLoaded', function() {
+    const saveBtn = document.getElementById('save-topic-btn');
+    if (saveBtn) {
+      saveBtn.addEventListener('click', function() {
+        if (!currentTopicData) {
+          alert('No topic to save');
+          return;
+        }
+
+        fetch('/saved/api/toggle/learn/', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCSRFToken()
+          },
+          body: JSON.stringify(currentTopicData)
+        })
+        .then(r => r.json())
+        .then(data => {
+          if (!data.error) {
+            updateSaveButtonState(data.saved);
+          }
+        })
+        .catch(err => console.error('Error:', err));
+      });
+    }
+  });
+  {% endif %}
 </script>
 
 {% endblock %}

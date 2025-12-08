@@ -5,7 +5,410 @@
 {% block body_class %}satellite-tracking-page{% endblock %}
 
 {% block extra_css %}
-<link rel="stylesheet" href="{% static 'satellite_tracking/closest_satellite.css' %}">
+<style>
+  /* ========================================
+     Closest Satellite Page - Space Theme
+     ======================================== */
+
+  /* Layout */
+  .satellite-container {
+    max-width: 100%;
+    margin: 0 auto;
+    padding: 40px 20px;
+    min-height: 100vh;
+    background: var(--bg);
+  }
+
+  /* Header */
+  .satellite-header {
+    text-align: center;
+    margin-bottom: 50px;
+  }
+
+  .satellite-title {
+    font-size: 2.5em;
+    font-weight: 700;
+    background: linear-gradient(135deg, #60a5fa 0%, #a78bfa 50%, #f472b6 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 12px;
+    text-shadow: 0 0 30px rgba(96, 165, 250, 0.3);
+  }
+
+  .satellite-subtitle {
+    font-size: 1.1em;
+    color: var(--text-secondary);
+    line-height: 1.6;
+  }
+
+  /* Location Buttons */
+  .location-buttons {
+    display: flex;
+    gap: 16px;
+    justify-content: center;
+    margin-bottom: 40px;
+    flex-wrap: wrap;
+  }
+
+  .location-btn {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 28px;
+    font-size: 1em;
+    font-weight: 600;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+
+  .location-btn-primary {
+    background: linear-gradient(135deg, var(--accent-blue) 0%, var(--accent-purple) 100%);
+    color: white;
+    box-shadow: 0 4px 15px var(--text-shadow);
+  }
+
+  .location-btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 25px var(--text-shadow);
+  }
+
+  .location-btn-secondary {
+    background: var(--bg-tertiary);
+    color: var(--text);
+    border: 2px solid var(--input-border);
+    backdrop-filter: blur(10px);
+  }
+
+  .location-btn-secondary:hover {
+    border-color: var(--accent-blue);
+    background: var(--bg-secondary);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px var(--text-shadow);
+  }
+
+  .location-btn:active {
+    transform: translateY(0);
+  }
+
+  .location-btn svg {
+    flex-shrink: 0;
+  }
+
+  /* Dialog */
+  .dialog-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: var(--shadow-color);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    backdrop-filter: blur(5px);
+    animation: fadeIn 0.3s ease;
+  }
+
+  .dialog-box {
+    background: var(--bg-tertiary);
+    border: 2px solid var(--input-border);
+    border-radius: 16px;
+    padding: 32px;
+    max-width: 500px;
+    width: 90%;
+    box-shadow: var(--shadow);
+    backdrop-filter: blur(20px);
+    animation: slideUp 0.3s ease;
+  }
+
+  .dialog-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+  }
+
+  .dialog-header h2 {
+    font-size: 1.5em;
+    font-weight: 700;
+    color: var(--text);
+    margin: 0;
+  }
+
+  .dialog-close {
+    background: transparent;
+    border: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    padding: 4px;
+    transition: all 0.3s ease;
+    border-radius: 6px;
+  }
+
+  .dialog-close:hover {
+    color: var(--text);
+    background: var(--button-bg-hover);
+  }
+
+  /* Form */
+  .coordinates-form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .form-group label {
+    font-size: 0.95em;
+    font-weight: 600;
+    color: var(--text);
+  }
+
+  .form-group input {
+    padding: 12px 16px;
+    font-size: 1em;
+    background: var(--input-bg);
+    border: 2px solid var(--input-border);
+    border-radius: 8px;
+    color: var(--text);
+    outline: none;
+    transition: all 0.3s ease;
+  }
+
+  .form-group input:focus {
+    border-color: var(--accent-blue);
+    box-shadow: 0 0 15px var(--text-shadow);
+    background: var(--input-bg);
+  }
+
+  .form-group input::placeholder {
+    color: var(--muted);
+  }
+
+  .form-hint {
+    font-size: 0.85em;
+    color: var(--muted);
+  }
+
+  .submit-btn {
+    padding: 14px 24px;
+    font-size: 1em;
+    font-weight: 600;
+    background: linear-gradient(135deg, var(--accent-blue) 0%, var(--accent-purple) 100%);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px var(--text-shadow);
+    margin-top: 8px;
+  }
+
+  .submit-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 25px var(--text-shadow);
+  }
+
+  .submit-btn:active {
+    transform: translateY(0);
+  }
+
+  /* Loading Indicator */
+  .loading-indicator {
+    text-align: center;
+    padding: 60px 20px;
+    animation: fadeIn 0.3s ease;
+  }
+
+  .spinner {
+    display: inline-block;
+    width: 50px;
+    height: 50px;
+    border: 4px solid var(--input-border);
+    border-top-color: var(--accent-blue);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    box-shadow: 0 0 20px var(--text-shadow);
+    margin-bottom: 16px;
+  }
+
+  .loading-indicator p {
+    color: var(--text-secondary);
+    font-size: 1.1em;
+  }
+
+  /* Error Message */
+  .error-message {
+    background: rgba(239, 68, 68, 0.1);
+    border: 2px solid rgba(239, 68, 68, 0.4);
+    border-radius: 12px;
+    padding: 20px;
+    margin: 20px auto;
+    max-width: 600px;
+    color: #fca5a5;
+    text-align: center;
+    animation: fadeIn 0.3s ease;
+  }
+
+  /* Satellite Info */
+  .satellite-info {
+    animation: fadeIn 0.5s ease;
+  }
+
+  .info-title {
+    font-size: 2em;
+    font-weight: 700;
+    background: linear-gradient(135deg, #60a5fa 0%, #a78bfa 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    text-align: center;
+    margin-bottom: 32px;
+  }
+
+  .info-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 20px;
+  }
+
+  .info-card {
+    background: var(--bg-tertiary);
+    border: 2px solid var(--input-border);
+    border-radius: 12px;
+    padding: 24px;
+    backdrop-filter: blur(10px);
+    transition: all 0.3s ease;
+  }
+
+  .info-card:hover {
+    border-color: var(--accent-blue);
+    box-shadow: var(--shadow);
+    transform: translateY(-2px);
+  }
+
+  .info-card-primary {
+    border-color: var(--accent-blue);
+    background: var(--bg-secondary);
+  }
+
+  .info-card h3 {
+    font-size: 1.2em;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+    border-bottom: 2px solid var(--input-border);
+  }
+
+  .info-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--input-border);
+  }
+
+  .info-row:last-child {
+    border-bottom: none;
+  }
+
+  .info-label {
+    font-size: 0.95em;
+    color: var(--muted);
+    font-weight: 500;
+  }
+
+  .info-value {
+    font-size: 1em;
+    color: var(--text);
+    font-weight: 600;
+    text-align: right;
+  }
+
+  /* Animations */
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  @keyframes slideUp {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  /* Responsive Design */
+  @media (max-width: 768px) {
+    .satellite-container {
+      padding: 30px 15px;
+    }
+
+    .satellite-title {
+      font-size: 2em;
+    }
+
+    .satellite-subtitle {
+      font-size: 1em;
+    }
+
+    .location-buttons {
+      flex-direction: column;
+    }
+
+    .location-btn {
+      width: 100%;
+      justify-content: center;
+    }
+
+    .dialog-box {
+      padding: 24px;
+    }
+
+    .info-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .satellite-title {
+      font-size: 1.75em;
+    }
+
+    .location-btn {
+      padding: 12px 20px;
+      font-size: 0.95em;
+    }
+
+    .info-card {
+      padding: 20px;
+    }
+  }
+</style>
 {% endblock %}
 
 {% block content %}
@@ -111,6 +514,17 @@
   <!-- Satellite Information Display -->
   <div id="satellite-info" class="satellite-info" style="display: none;">
     <h2 class="info-title">Closest Satellite Found</h2>
+
+    {% if user.is_authenticated %}
+    <div style="text-align: center; margin-bottom: 20px;">
+      <button id="save-satellite-btn" class="location-btn location-btn-primary" style="padding: 10px 20px;">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>
+        </svg>
+        <span id="save-satellite-text">Save Satellite</span>
+      </button>
+    </div>
+    {% endif %}
 
     <div class="info-grid">
       <div class="info-card info-card-primary">
