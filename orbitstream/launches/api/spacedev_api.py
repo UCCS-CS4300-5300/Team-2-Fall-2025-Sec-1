@@ -120,8 +120,13 @@ def extract_youtube_id(url):
 
 def get_best_video_url(launch):
     """
-    Return the best video URL for a launch, preferably the 'Official Webcast'
-    from launch['vidURLs'], otherwise the first URL available.
+    Return the best video URL for YouTube embedding.
+
+    Preference:
+      1. YouTube 'Official Webcast' / 'Webcast'
+      2. Any YouTube URL
+      3. Any 'Official Webcast'
+      4. First available URL
     """
     if not launch:
         return None
@@ -130,7 +135,9 @@ def get_best_video_url(launch):
     if not vid_urls:
         return None
 
-    official = None
+    youtube_best = None
+    youtube_any = None
+    official_any = None
     fallback = None
 
     for entry in vid_urls:
@@ -141,12 +148,23 @@ def get_best_video_url(launch):
         if not fallback:
             fallback = url
 
+        source = (entry.get("source") or "").lower()
         type_obj = entry.get("type") or {}
-        if type_obj.get("name") == "Official Webcast":
-            official = url
-            break
+        type_name = (type_obj.get("name") or "").lower()
 
-    return official or fallback
+        # 1/2: YouTube URLs
+        if "youtube.com" in source or "youtube.com" in url:
+            if not youtube_any:
+                youtube_any = url
+            if "official webcast" in type_name or "webcast" in type_name:
+                youtube_best = url
+
+        # 3: Any official webcast (may be X.com etc.)
+        if "official webcast" in type_name and not official_any:
+            official_any = url
+
+    return youtube_best or youtube_any or official_any or fallback
+
 
 def get_mission_patches(launch):
     """
@@ -356,6 +374,7 @@ def get_launch_by_id(launch_id):
     data["mission_patches"] = mission_patches
 
     _set_cache(cache_key, data)
+
     return data
 
 

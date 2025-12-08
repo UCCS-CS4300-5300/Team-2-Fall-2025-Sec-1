@@ -2004,7 +2004,7 @@ html:has(body.nasa-page) {
 
 .nasa-hero-media iframe {
   width: 100%;
-  height: auto;
+  aspect-ratio: 16 / 9; /* Replaces height: auto */
   border: 0;
 }
 
@@ -2644,6 +2644,14 @@ body.nasa-page .nasa-f-meta {
 
 :root:not([data-theme="light"]) body.nasa-page .nasa-f-title {
   color: #ffffff;
+}
+
+:root:not([data-theme="light"]) .nasa-feed-text {
+  color: rgb(228, 228, 228);
+}
+
+:root:not([data-theme="light"]) .nasa-feed-meta {
+  color: rgb(228, 228, 228);
 }
 
 /* ============================================
