@@ -88,6 +88,7 @@ During the development of OrbitStream, AI tools were utilized to assist with:
 1. **HTML Formatting** - Structuring and optimizing markup
 2. **CSS Styling** - Designing and refining visual elements
 3. **Testing** - Generating and improving test coverage
+4. **Narration** - Reading a script that was provided for our promotional video
 
 ## Attributions
 
