@@ -26,17 +26,19 @@
         <a href="{% url 'launches:launch' %}" class="back-button">
             <span class="arrow">&larr;</span> Back
         </a>
-        {% if user.is_authenticated %}
-        <button id="save-launch-btn" class="watch-button" style="right: 180px; background: linear-gradient(135deg, #8b5cf6 0%, #a78bfa 100%);">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 6px;">
-                <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>
-            </svg>
-            <span id="save-launch-text">SAVE</span>
-        </button>
-        {% endif %}
-        <a href="#" class="watch-button" id="openVideoBtn">
-            WATCH <span class="arrow">&rarr;</span>
-        </a>
+        <div class="launch-button-group">
+            <a href="#" class="watch-button" id="openVideoBtn">
+                WATCH <span class="arrow">&rarr;</span>
+            </a>
+            {% if user.is_authenticated %}
+            <button id="save-launch-btn" class="watch-button save-launch-button">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 6px;">
+                    <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>
+                </svg>
+                <span id="save-launch-text">SAVE</span>
+            </button>
+            {% endif %}
+        </div>
     </div>
 
     <!-- Main Content Area -->

@@ -5592,6 +5592,34 @@ body.full-media-page .site-footer {
   font-size: 1.1rem;
 }
 
+/* Launch Button Group */
+.launch-button-group {
+  position: absolute;
+  left: 5%;
+  bottom: 5%;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 0.75rem;
+  z-index: 10;
+}
+
+.launch-button-group .watch-button {
+  position: static !important;
+  left: auto !important;
+  bottom: auto !important;
+}
+
+.save-launch-button {
+  background: linear-gradient(135deg, #8b5cf6 0%, #a78bfa 100%) !important;
+  border: 1px solid rgba(139, 92, 246, 0.5) !important;
+}
+
+.save-launch-button:hover {
+  background: linear-gradient(135deg, #7c3aed 0%, #8b5cf6 100%) !important;
+  transform: translateX(0) scale(1.05);
+}
+
 /* Responsive Design */
 @media (max-width: 1400px) {
   .info-card-container {
