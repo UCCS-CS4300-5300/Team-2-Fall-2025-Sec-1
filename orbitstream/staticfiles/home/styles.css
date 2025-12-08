@@ -809,8 +809,8 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .dropdown-item:hover {
-  background: var(--button-bg-hover);
-  color: var(--text);
+   color: var(--accent-purple);
+
 }
 
 .dropdown-item svg {
@@ -913,6 +913,8 @@ h1, h2, h3, h4, h5, h6 {
   opacity: 0.1;
 }
 
+
+
 /* Theme toggle in navigation (non-logged-in users) */
 .nav__auth .theme-toggle {
   background: none;
@@ -985,6 +987,73 @@ h1, h2, h3, h4, h5, h6 {
   border-color: rgba(139, 92, 246, 0.6);
   color: #fff;
 }
+
+
+
+/* =========================================================
+   MOBILE: unify Theme + User Settings button styles
+   ========================================================= */
+
+/* Base (dark mode) styles – shared */
+.mobile-auth-btn--theme,
+.mobile-auth-btn--settings {
+  background: rgba(11, 13, 24, 0.6);
+  border-color: rgba(139, 92, 246, 0.3);
+  color: #e9eefc;
+}
+
+.mobile-auth-btn--theme:hover,
+.mobile-auth-btn--settings:hover {
+  background: rgba(139, 92, 246, 0.1);
+  border-color: rgba(139, 92, 246, 0.6);
+  color: #fff;
+}
+
+/* Light mode: make them match (use the old theme style for both) */
+[data-theme="light"] .mobile-auth-btn--theme,
+[data-theme="light"] .mobile-auth-btn--settings {
+  background: var(--bg-tertiary);
+  border-color: var(--input-border);
+  color: var(--text);
+}
+
+[data-theme="light"] .mobile-auth-btn--theme:hover,
+[data-theme="light"] .mobile-auth-btn--settings:hover {
+  background: var(--button-bg-hover);
+  border-color: var(--accent-purple);
+  color: var(--accent-purple);
+}
+/* =========================================================
+   MOBILE: make user name card readable in light mode
+   ========================================================= */
+
+[data-theme="light"] .mobile-user-info {
+  background: var(--bg-tertiary);
+  border-color: var(--input-border);
+  color: var(--text);
+}
+
+[data-theme="light"] .mobile-user-info span,
+[data-theme="light"] .mobile-user-info strong {
+  color: var(--text);
+}
+
+/* Light mode: user menu + hamburger should match light header */
+[data-theme="light"] .user-dropdown-toggle,
+[data-theme="light"] .nav-toggle {
+  background: var(--bg-tertiary);
+  border-color: var(--input-border);
+  color: var(--text);
+}
+
+/* Optional: nicer hover state in light mode */
+[data-theme="light"] .user-dropdown-toggle:hover,
+[data-theme="light"] .nav-toggle:hover {
+  background: var(--button-bg-hover);
+  border-color: var(--accent-purple);
+  color: var(--accent-purple);
+}
+
 
 /* Hamburger Toggle Button */
 .nav-toggle {
@@ -1307,6 +1376,7 @@ h1, h2, h3, h4, h5, h6 {
   background: rgba(139, 92, 246, 0.3);
   border-color: rgba(139, 92, 246, 0.6);
 }
+
 
 /* ================= FOOTER ================= */
 
@@ -1934,7 +2004,7 @@ html:has(body.nasa-page) {
 
 .nasa-hero-media iframe {
   width: 100%;
-  height: auto;
+  aspect-ratio: 16 / 9; /* Replaces height: auto */
   border: 0;
 }
 
@@ -2574,6 +2644,14 @@ body.nasa-page .nasa-f-meta {
 
 :root:not([data-theme="light"]) body.nasa-page .nasa-f-title {
   color: #ffffff;
+}
+
+:root:not([data-theme="light"]) .nasa-feed-text {
+  color: rgb(228, 228, 228);
+}
+
+:root:not([data-theme="light"]) .nasa-feed-meta {
+  color: rgb(228, 228, 228);
 }
 
 /* ============================================
@@ -5512,6 +5590,34 @@ body.full-media-page .site-footer {
 
 .watch-button .arrow {
   font-size: 1.1rem;
+}
+
+/* Launch Button Group */
+.launch-button-group {
+  position: absolute;
+  left: 5%;
+  bottom: 5%;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 0.75rem;
+  z-index: 10;
+}
+
+.launch-button-group .watch-button {
+  position: static !important;
+  left: auto !important;
+  bottom: auto !important;
+}
+
+.save-launch-button {
+  background: linear-gradient(135deg, #8b5cf6 0%, #a78bfa 100%) !important;
+  border: 1px solid rgba(139, 92, 246, 0.5) !important;
+}
+
+.save-launch-button:hover {
+  background: linear-gradient(135deg, #7c3aed 0%, #8b5cf6 100%) !important;
+  transform: translateX(0) scale(1.05);
 }
 
 /* Responsive Design */

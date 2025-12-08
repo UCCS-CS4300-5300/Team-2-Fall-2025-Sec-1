@@ -37,7 +37,7 @@ N2YO_API_KEY = os.getenv("N2YO_API_KEY")
 SECRET_KEY = 'django-insecure-sua7#*5#@b7m1mw!)m^!qhjik+dao!zmg7%ee8=d@(zya&=zr-'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = [
     "*",
