@@ -26,7 +26,7 @@ jiter==0.12.0
 lxml==6.0.2
 lxml_html_clean==0.4.3
 newsapi-python==0.2.7
-openai==2.7.2
+openai==2.9.0
 packaging==25.0
 Pillow==12.0.0
 pluggy==1.6.0
