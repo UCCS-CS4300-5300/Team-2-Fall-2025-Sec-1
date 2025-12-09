@@ -10,6 +10,8 @@ document.addEventListener('DOMContentLoaded', function() {
     const loadingIndicator = document.getElementById('loading-indicator');
     const errorMessage = document.getElementById('error-message');
     const satelliteInfo = document.getElementById('satellite-info');
+    const testModeToggle = document.getElementById('test-mode-toggle');
+    const testModeIndicator = document.getElementById('test-mode-indicator');
 
     // Get CSRF token for POST requests
     function getCookie(name) {
@@ -30,9 +32,6 @@ document.addEventListener('DOMContentLoaded', function() {
     const csrftoken = getCookie('csrftoken');
 
     // Test mode toggle handler
-    const testModeToggle = document.getElementById('test-mode-toggle');
-    const testModeIndicator = document.getElementById('test-mode-indicator');
-
     if (testModeToggle && testModeIndicator) {
         testModeToggle.addEventListener('change', function() {
             if (this.checked) {
@@ -152,7 +151,6 @@ document.addEventListener('DOMContentLoaded', function() {
         const numSatellites = parseInt(document.getElementById('num-satellites').value) || 5;
 
         // Check if test mode is enabled
-        const testModeToggle = document.getElementById('test-mode-toggle');
         const isTestMode = testModeToggle && testModeToggle.checked;
 
         const data = {

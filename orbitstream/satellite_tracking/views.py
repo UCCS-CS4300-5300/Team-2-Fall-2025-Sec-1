@@ -36,6 +36,7 @@ def get_closest_satellite_api(request):
         longitude = float(data.get('longitude'))
         altitude = float(data.get('altitude', 0))  # Default altitude to 0 (sea level)
         num_satellites = int(data.get('num_satellites', 5))  # Default to 5 satellites
+        test_mode = data.get('test_mode', False)  # Test mode flag
 
         # Validate coordinates
         if not (-90 <= latitude <= 90):
@@ -46,6 +47,50 @@ def get_closest_satellite_api(request):
         # Validate num_satellites
         if num_satellites < 1 or num_satellites > 50:
             return JsonResponse({'error': 'Number of satellites must be between 1 and 50'}, status=400)
+
+        # TEST MODE: Return dummy satellite data
+        if test_mode:
+            import random
+            dummy_satellites = []
+            satellite_names = [
+                "STARLINK-1007", "COSMOS 2251 DEB", "IRIDIUM 33 DEB",
+                "FENGYUN 1C DEB", "HST (HUBBLE)", "TERRA", "AQUA",
+                "NOAA 18", "METOP-B", "SUOMI NPP", "GOES 16", "GOES 17",
+                "LANDSAT 8", "SENTINEL-1A", "SENTINEL-2A", "JASON-3",
+                "CRYOSAT-2", "ENVISAT", "ERS-2", "RADARSAT-2"
+            ]
+
+            for i in range(num_satellites):
+                # Generate realistic satellite data
+                sat_lat = latitude + random.uniform(-30, 30)
+                sat_lng = longitude + random.uniform(-30, 30)
+                sat_alt = random.uniform(400, 800)  # km
+
+                dummy_satellites.append({
+                    'name': satellite_names[i % len(satellite_names)],
+                    'id': 40000 + i,
+                    'altitude': sat_alt,
+                    'azimuth': random.uniform(0, 360),
+                    'elevation': random.uniform(10, 90),
+                    'right_ascension': random.uniform(0, 360),
+                    'declination': random.uniform(-90, 90),
+                    'latitude': sat_lat,
+                    'longitude': sat_lng,
+                })
+
+            result = {
+                'success': True,
+                'test_mode': True,
+                'location': {
+                    'latitude': latitude,
+                    'longitude': longitude,
+                    'altitude': altitude
+                },
+                'satellites': dummy_satellites,
+                'total_satellites_found': num_satellites,
+                'info': {'message': 'TEST MODE - Using dummy data'}
+            }
+            return JsonResponse(result)
 
         # Get API key from settings
         api_key = settings.N2YO_API_KEY

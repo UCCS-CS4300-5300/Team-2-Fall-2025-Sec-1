@@ -692,19 +692,32 @@
     </button>
   </div>
 
-  <!-- Number of Satellites Selector -->
+  <!-- Number of Satellites Selector and Test Mode -->
   <div style="text-align: center; margin-bottom: 30px;">
-    <label for="num-satellites" style="display: inline-block; margin-right: 15px; color: var(--text); font-weight: 600; font-size: 1.1em;">
-      Number of Satellites:
-    </label>
-    <select id="num-satellites" style="padding: 10px 20px; font-size: 1em; background: var(--bg-tertiary); color: var(--text); border: 2px solid var(--input-border); border-radius: 8px; cursor: pointer; font-weight: 600;">
-      <option value="1">1</option>
-      <option value="3">3</option>
-      <option value="5" selected>5</option>
-      <option value="10">10</option>
-      <option value="15">15</option>
-      <option value="20">20</option>
-    </select>
+    <div style="margin-bottom: 15px;">
+      <label for="num-satellites" style="display: inline-block; margin-right: 15px; color: var(--text); font-weight: 600; font-size: 1.1em;">
+        Number of Satellites:
+      </label>
+      <select id="num-satellites" style="padding: 10px 20px; font-size: 1em; background: var(--bg-tertiary); color: var(--text); border: 2px solid var(--input-border); border-radius: 8px; cursor: pointer; font-weight: 600;">
+        <option value="1">1</option>
+        <option value="3">3</option>
+        <option value="5" selected>5</option>
+        <option value="10">10</option>
+        <option value="15">15</option>
+        <option value="20">20</option>
+      </select>
+    </div>
+
+    <!-- Test Mode Toggle -->
+    <div style="margin-top: 15px;">
+      <label style="display: inline-flex; align-items: center; gap: 10px; cursor: pointer; color: var(--text); font-weight: 600;">
+        <input type="checkbox" id="test-mode-toggle" checked style="width: 18px; height: 18px; cursor: pointer;">
+        <span>Test Mode (Use Dummy Data - Enable this to avoid API rate limits)</span>
+      </label>
+      <div id="test-mode-indicator" style="display: block; margin-top: 8px; padding: 8px 16px; background: rgba(255, 165, 0, 0.2); border: 2px solid rgba(255, 165, 0, 0.5); border-radius: 8px; color: #ffa500; font-weight: 600; font-size: 0.9em;">
+        TEST MODE ACTIVE - Using dummy satellite data (no API calls)
+      </div>
+    </div>
   </div>
 
   <!-- Manual Location Dialog -->
