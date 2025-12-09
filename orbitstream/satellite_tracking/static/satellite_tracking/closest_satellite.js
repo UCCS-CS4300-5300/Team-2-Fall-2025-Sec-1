@@ -195,6 +195,11 @@ document.addEventListener('DOMContentLoaded', function() {
             longitude: sat.longitude || 0
         };
 
+        // Update the Orbital Tracker visualization
+        if (window.OrbitalTracker) {
+            window.OrbitalTracker.updateWithSatelliteData(data);
+        }
+
         // Update satellite details
         document.getElementById('sat-name').textContent = sat.name;
         document.getElementById('sat-id').textContent = sat.id;
