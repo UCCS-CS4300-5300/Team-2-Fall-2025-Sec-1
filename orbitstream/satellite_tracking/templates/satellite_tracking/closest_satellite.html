@@ -408,6 +408,261 @@
       padding: 20px;
     }
   }
+
+  /* ========================================
+     Orbital Tracking Visualization
+     ======================================== */
+
+  .orbital-tracking-container {
+    margin: 60px auto;
+    max-width: 1400px;
+    background: var(--bg-tertiary);
+    border: 2px solid var(--input-border);
+    border-radius: 12px;
+    padding: 0;
+    box-shadow: var(--shadow);
+    backdrop-filter: blur(10px);
+  }
+
+  .orbital-header {
+    background: linear-gradient(135deg, var(--accent-blue) 0%, var(--accent-purple) 100%);
+    color: white;
+    padding: 16px 24px;
+    font-size: 1.3em;
+    font-weight: 700;
+    letter-spacing: 3px;
+    border-radius: 10px 10px 0 0;
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+  }
+
+  .orbital-main {
+    padding: 20px;
+    display: grid;
+    grid-template-columns: 1fr 280px;
+    grid-template-rows: auto auto;
+    gap: 20px;
+  }
+
+  .orbital-viewport {
+    grid-column: 1;
+    grid-row: 1 / 3;
+    position: relative;
+    background: #000;
+    border: 2px solid var(--input-border);
+    border-radius: 8px;
+    min-height: 600px;
+    height: 600px;
+    overflow: hidden;
+    box-shadow: inset 0 0 50px rgba(96, 165, 250, 0.1);
+  }
+
+  #orbital-canvas {
+    width: 100%;
+    height: 100%;
+    display: block;
+    min-height: 600px;
+  }
+
+  .orbital-instruction {
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    color: var(--accent-blue);
+    font-size: 14px;
+    letter-spacing: 2px;
+    pointer-events: none;
+    text-shadow: 0 0 10px var(--text-shadow);
+    font-weight: 600;
+  }
+
+  .orbital-info-panel {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background: var(--bg-tertiary);
+    border: 2px solid var(--input-border);
+    border-radius: 8px;
+    padding: 15px;
+    min-width: 200px;
+    backdrop-filter: blur(10px);
+    box-shadow: var(--shadow);
+  }
+
+  .info-line {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 8px;
+    color: var(--text);
+    font-size: 14px;
+  }
+
+  .info-line:last-child {
+    margin-bottom: 0;
+  }
+
+  .info-key {
+    color: var(--accent-blue);
+    font-weight: bold;
+  }
+
+  .info-val {
+    color: var(--text);
+    text-align: right;
+  }
+
+  .orbital-controls {
+    grid-column: 2;
+    grid-row: 1;
+  }
+
+  .orbital-data {
+    grid-column: 2;
+    grid-row: 2;
+  }
+
+  .control-section,
+  .data-section {
+    margin-bottom: 20px;
+  }
+
+  .section-title {
+    background: linear-gradient(135deg, var(--accent-blue) 0%, var(--accent-purple) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    font-size: 1.1em;
+    font-weight: 700;
+    letter-spacing: 2px;
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid var(--input-border);
+  }
+
+  .button-row {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  .target-buttons {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(70px, 1fr));
+    gap: 10px;
+  }
+
+  .ctrl-btn {
+    background: var(--bg-tertiary);
+    color: var(--text);
+    border: 2px solid var(--input-border);
+    padding: 10px 15px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    border-radius: 6px;
+  }
+
+  .ctrl-btn:hover {
+    background: linear-gradient(135deg, var(--accent-blue) 0%, var(--accent-purple) 100%);
+    color: white;
+    border-color: var(--accent-blue);
+    box-shadow: 0 0 15px var(--text-shadow);
+    transform: translateY(-1px);
+  }
+
+  .ctrl-btn.active,
+  .tgt-btn.active {
+    background: linear-gradient(135deg, var(--accent-blue) 0%, var(--accent-purple) 100%);
+    color: white;
+    border-color: var(--accent-blue);
+    box-shadow: 0 0 20px var(--text-shadow);
+  }
+
+  .data-toggle {
+    background: linear-gradient(135deg, var(--accent-blue) 0%, var(--accent-purple) 100%);
+    color: white;
+    border: none;
+    padding: 12px 20px;
+    width: 100%;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+    letter-spacing: 2px;
+    border-radius: 6px;
+    box-shadow: 0 4px 15px var(--text-shadow);
+  }
+
+  .data-toggle:hover {
+    box-shadow: 0 6px 20px var(--text-shadow);
+    transform: translateY(-1px);
+  }
+
+  .data-toggle:not(.active) {
+    background: var(--bg-tertiary);
+    color: var(--text);
+    border: 2px solid var(--input-border);
+  }
+
+  .data-info {
+    margin-top: 15px;
+    padding: 15px;
+    background: var(--bg-secondary);
+    border: 1px solid var(--input-border);
+    border-radius: 6px;
+  }
+
+  .data-line {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10px;
+    color: var(--text);
+    font-size: 14px;
+  }
+
+  .data-line:last-child {
+    margin-bottom: 0;
+  }
+
+  .data-key {
+    color: var(--accent-blue);
+    font-weight: bold;
+  }
+
+  .data-val {
+    color: var(--text);
+  }
+
+  .status-ok {
+    color: #4ade80;
+    text-shadow: 0 0 5px rgba(74, 222, 128, 0.5);
+  }
+
+  @media (max-width: 1024px) {
+    .orbital-main {
+      grid-template-columns: 1fr;
+      grid-template-rows: auto auto auto;
+    }
+
+    .orbital-viewport {
+      grid-column: 1;
+      grid-row: 1;
+      min-height: 400px;
+    }
+
+    .orbital-controls {
+      grid-column: 1;
+      grid-row: 2;
+    }
+
+    .orbital-data {
+      grid-column: 1;
+      grid-row: 3;
+    }
+  }
 </style>
 {% endblock %}
 
@@ -592,7 +847,90 @@
       </div>
     </div>
   </div>
+
+  <!-- Orbital Tracking Visualization -->
+  <div id="orbital-tracking" class="orbital-tracking-container">
+    <div class="orbital-header">ORBITAL TRACKING</div>
+
+    <div class="orbital-main">
+      <!-- 3D Visualization Canvas -->
+      <div class="orbital-viewport">
+        <canvas id="orbital-canvas"></canvas>
+        <div class="orbital-instruction">⊕ DRAG TO ROTATE</div>
+        <div class="orbital-info-panel">
+          <div class="info-line">
+            <span class="info-key">TGT:</span>
+            <span class="info-val" id="current-target">ISS</span>
+          </div>
+          <div class="info-line">
+            <span class="info-key">LAT:</span>
+            <span class="info-val" id="target-lat">--</span>
+          </div>
+          <div class="info-line">
+            <span class="info-key">LON:</span>
+            <span class="info-val" id="target-lon">--</span>
+          </div>
+          <div class="info-line">
+            <span class="info-key">ALT:</span>
+            <span class="info-val" id="target-alt">--</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Control Panels -->
+      <div class="orbital-controls">
+        <div class="control-section">
+          <div class="section-title">CAM</div>
+          <div class="button-row">
+            <button class="ctrl-btn" id="cam-zoom-in" title="Zoom In">+</button>
+            <button class="ctrl-btn" id="cam-zoom-out" title="Zoom Out">−</button>
+            <button class="ctrl-btn" id="cam-reset" title="Reset Camera">RST</button>
+          </div>
+        </div>
+
+        <div class="control-section">
+          <div class="section-title">TGT</div>
+          <div class="button-row target-buttons">
+            {% if user.is_authenticated %}
+              <button class="ctrl-btn tgt-btn active" data-target="ALL" id="tgt-all">ALL</button>
+              <button class="ctrl-btn tgt-btn" data-target="ISS" data-satid="25544">ISS</button>
+              {% for sat in saved_satellites %}
+                <button class="ctrl-btn tgt-btn" data-target="{{ sat.name|truncatewords:1|upper }}" data-satid="{{ sat.satellite_id }}">{{ sat.name|truncatewords:1|upper }}</button>
+              {% endfor %}
+            {% else %}
+              <button class="ctrl-btn tgt-btn active" data-target="ISS" data-satid="25544">ISS</button>
+              <button class="ctrl-btn tgt-btn" data-target="CSS" data-satid="closest" id="tgt-closest" style="display:none;">CSS</button>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+
+      <div class="orbital-data">
+        <div class="data-section">
+          <div class="section-title">DATA</div>
+          <button class="data-toggle active" id="grid-toggle">GRID ON</button>
+        </div>
+        <div class="data-info">
+          <div class="data-line">
+            <span class="data-key">SIG:</span>
+            <span class="data-val status-ok">OK</span>
+          </div>
+          <div class="data-line">
+            <span class="data-key">ENC:</span>
+            <span class="data-val">AES</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/three@0.149.0/build/three.min.js"></script>
+<script>
+// Pass saved satellites to JavaScript
+window.savedSatellites = {{ saved_satellites_json|safe }};
+window.isAuthenticated = {{ user.is_authenticated|yesno:"true,false" }};
+</script>
+<script src="{% static 'satellite_tracking/orbital_tracking.js' %}"></script>
 <script src="{% static 'satellite_tracking/closest_satellite.js' %}"></script>
 {% endblock %}

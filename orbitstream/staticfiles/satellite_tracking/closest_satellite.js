@@ -221,6 +221,17 @@ document.addEventListener('DOMContentLoaded', function() {
         // Check if satellite is already saved and update button state
         checkSatelliteSaveStatus(sat.id);
 
+        // Dispatch event for orbital tracking visualization
+        window.dispatchEvent(new CustomEvent('satelliteFound', {
+            detail: {
+                id: sat.id,
+                name: sat.name,
+                latitude: sat.latitude,
+                longitude: sat.longitude,
+                altitude: sat.altitude
+            }
+        }));
+
         // Scroll to info section
         satelliteInfo.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     }

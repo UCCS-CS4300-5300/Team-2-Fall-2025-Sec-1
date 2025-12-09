@@ -8,7 +8,19 @@ import json
 
 def closest_satellite(request):
     """Render the closest satellite page"""
-    return render(request, 'satellite_tracking/closest_satellite.html')
+    # Get saved satellites for logged-in users
+    saved_satellites = []
+    if request.user.is_authenticated:
+        from saved_page.models import SavedSatellite
+        saved_satellites = list(SavedSatellite.objects.filter(user=request.user).values(
+            'satellite_id', 'name', 'latitude', 'longitude', 'altitude'
+        ))
+
+    context = {
+        'saved_satellites': saved_satellites,
+        'saved_satellites_json': json.dumps(saved_satellites),
+    }
+    return render(request, 'satellite_tracking/closest_satellite.html', context)
 
 
 @require_http_methods(["POST"])
@@ -96,5 +108,64 @@ def get_closest_satellite_api(request):
         return JsonResponse({'error': f'Failed to fetch satellite data: {str(e)}'}, status=500)
     except KeyError as e:
         return JsonResponse({'error': f'Missing required field: {str(e)}'}, status=400)
+    except Exception as e:
+        return JsonResponse({'error': f'An unexpected error occurred: {str(e)}'}, status=500)
+
+
+@require_http_methods(["GET"])
+def get_satellite_position_api(request):
+    """
+    API endpoint to get current position of a specific satellite by ID
+    """
+    try:
+        satellite_id = request.GET.get('satellite_id')
+        if not satellite_id:
+            return JsonResponse({'error': 'satellite_id parameter required'}, status=400)
+
+        # Observer coordinates (default to 0,0 for orbital data)
+        observer_lat = float(request.GET.get('observer_lat', 0))
+        observer_lng = float(request.GET.get('observer_lng', 0))
+        observer_alt = float(request.GET.get('observer_alt', 0))
+
+        # Get API key
+        api_key = settings.N2YO_API_KEY
+        if not api_key:
+            return JsonResponse({'error': 'N2YO API key not configured'}, status=500)
+
+        # N2YO API for satellite positions
+        # API: /positions/{id}/{observer_lat}/{observer_lng}/{observer_alt}/{seconds}/&apiKey={api_key}
+        seconds = 1  # Get current position
+        api_url = f"https://api.n2yo.com/rest/v1/satellite/positions/{satellite_id}/{observer_lat}/{observer_lng}/{observer_alt}/{seconds}/&apiKey={api_key}"
+
+        # Make request
+        response = requests.get(api_url, timeout=10)
+        response.raise_for_status()
+
+        satellite_data = response.json()
+
+        # Format response
+        if 'positions' in satellite_data and len(satellite_data['positions']) > 0:
+            pos = satellite_data['positions'][0]
+            result = {
+                'success': True,
+                'satellite': {
+                    'id': satellite_data.get('info', {}).get('satid'),
+                    'name': satellite_data.get('info', {}).get('satname'),
+                    'latitude': pos.get('satlatitude'),
+                    'longitude': pos.get('satlongitude'),
+                    'altitude': pos.get('sataltitude'),
+                    'azimuth': pos.get('azimuth'),
+                    'elevation': pos.get('elevation'),
+                    'right_ascension': pos.get('ra'),
+                    'declination': pos.get('dec'),
+                    'timestamp': pos.get('timestamp'),
+                }
+            }
+            return JsonResponse(result)
+        else:
+            return JsonResponse({'error': 'No position data available'}, status=404)
+
+    except requests.exceptions.RequestException as e:
+        return JsonResponse({'error': f'Failed to fetch satellite data: {str(e)}'}, status=500)
     except Exception as e:
         return JsonResponse({'error': f'An unexpected error occurred: {str(e)}'}, status=500)
