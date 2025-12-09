@@ -670,21 +670,31 @@ const OrbitalTracker = (function() {
     function addUserLocation(lat, lon) {
         userLocation = { lat, lon };
 
-        // Remove existing user marker
+        // Remove existing user marker and connection line
         const existingMarker = scene.getObjectByName('userMarker');
         if (existingMarker) scene.remove(existingMarker);
 
+        const existingRing = scene.getObjectByName('userRing');
+        if (existingRing) scene.remove(existingRing);
+
+        const existingLine = scene.getObjectByName('userSatelliteLine');
+        if (existingLine) scene.remove(existingLine);
+
         // Create user location marker
         const position = latLonAltToVector3(lat, lon, 50); // Slightly above surface
-        const geometry = new THREE.SphereGeometry(0.02, 8, 8);
-        const material = new THREE.MeshBasicMaterial({ color: 0xff0000 });
+        const geometry = new THREE.SphereGeometry(0.025, 16, 16);
+        const material = new THREE.MeshBasicMaterial({
+            color: 0xff0000,
+            transparent: true,
+            opacity: 1
+        });
         const marker = new THREE.Mesh(geometry, material);
         marker.position.copy(position);
         marker.name = 'userMarker';
         scene.add(marker);
 
         // Add pulsing ring
-        const ringGeometry = new THREE.RingGeometry(0.03, 0.04, 32);
+        const ringGeometry = new THREE.RingGeometry(0.035, 0.045, 32);
         const ringMaterial = new THREE.MeshBasicMaterial({
             color: 0xff0000,
             transparent: true,
@@ -696,6 +706,74 @@ const OrbitalTracker = (function() {
         ring.lookAt(0, 0, 0);
         ring.name = 'userRing';
         scene.add(ring);
+
+        // Store user position for line connection
+        marker.userData.position = position;
+    }
+
+    /**
+     * Add a connection line from user location to satellite
+     */
+    function addUserToSatelliteLine(satelliteId) {
+        // Remove existing line
+        const existingLine = scene.getObjectByName('userSatelliteLine');
+        if (existingLine) scene.remove(existingLine);
+
+        // Find the user marker
+        const userMarker = scene.getObjectByName('userMarker');
+        if (!userMarker) return;
+
+        // Find the satellite
+        const satellite = satellites.find(sat => sat.userData.id === satelliteId);
+        if (!satellite) return;
+
+        // Create a line from user to satellite
+        const points = [
+            userMarker.position.clone(),
+            satellite.position.clone()
+        ];
+
+        const geometry = new THREE.BufferGeometry().setFromPoints(points);
+        const material = new THREE.LineDashedMaterial({
+            color: 0xff0000,
+            dashSize: 0.05,
+            gapSize: 0.03,
+            transparent: true,
+            opacity: 0.6,
+            linewidth: 2
+        });
+
+        const line = new THREE.Line(geometry, material);
+        line.computeLineDistances(); // Required for dashed lines
+        line.name = 'userSatelliteLine';
+        line.userData.satelliteId = satelliteId;
+        scene.add(line);
+    }
+
+    /**
+     * Update the user-to-satellite connection line
+     */
+    function updateUserToSatelliteLine() {
+        const line = scene.getObjectByName('userSatelliteLine');
+        if (!line) return;
+
+        const userMarker = scene.getObjectByName('userMarker');
+        if (!userMarker) return;
+
+        const satellite = satellites.find(sat => sat.userData.id === line.userData.satelliteId);
+        if (!satellite) return;
+
+        // Update line positions
+        const positions = line.geometry.attributes.position.array;
+        positions[0] = userMarker.position.x;
+        positions[1] = userMarker.position.y;
+        positions[2] = userMarker.position.z;
+        positions[3] = satellite.position.x;
+        positions[4] = satellite.position.y;
+        positions[5] = satellite.position.z;
+
+        line.geometry.attributes.position.needsUpdate = true;
+        line.computeLineDistances(); // Update for dashed line animation
     }
 
     /**
@@ -756,6 +834,9 @@ const OrbitalTracker = (function() {
             const scale = 1 + Math.sin(Date.now() * 0.003) * 0.2;
             userRing.scale.set(scale, scale, scale);
         }
+
+        // Update connection line between user and satellite
+        updateUserToSatelliteLine();
 
         renderer.render(scene, camera);
     }
@@ -828,9 +909,11 @@ const OrbitalTracker = (function() {
             addUserLocation(data.location.latitude, data.location.longitude);
         }
 
-        // Select the found satellite
+        // Select the found satellite and add connection line
         if (data.satellite) {
             selectTarget(data.satellite.id);
+            // Add connection line from user to this closest satellite
+            addUserToSatelliteLine(data.satellite.id);
         }
     }
 
