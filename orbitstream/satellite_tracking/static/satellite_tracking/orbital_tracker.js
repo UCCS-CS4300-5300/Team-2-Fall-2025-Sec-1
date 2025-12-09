@@ -10,10 +10,11 @@ const OrbitalTracker = (function() {
     const ORBIT_SEGMENTS = 128;
     const SCALE_FACTOR = EARTH_RADIUS / 6371; // km to scene units
     const API_URL = '/satellite-tracking/api/orbital-tracker-satellites/';
+    const EARTH_MODEL_URL = '/static/satellite_tracking/Earth_Model.glb'; // Path to the GLB file
 
     // Scene objects
     let scene, camera, renderer, controls;
-    let earth, earthGrid;
+    let earth, earthGrid, earthModel;
     let satellites = [];
     let orbitLines = [];
     let animationId = null;
@@ -24,6 +25,9 @@ const OrbitalTracker = (function() {
     let selectedTarget = 'all';
     let userLocation = null;
     let isAuthenticated = false;
+    let useRealisticEarth = false; // Toggle between hologram and realistic Earth
+    let gltfLoader = null;
+    let modelLoading = false; // Lock to prevent double loading
 
     // Colors for satellites (high contrast with purple/pink background)
     const SATELLITE_COLORS = [
@@ -54,6 +58,14 @@ const OrbitalTracker = (function() {
             return;
         }
 
+        // Reset scene variables to ensure no ghost objects from previous page loads
+        earth = null;
+        earthGrid = null;
+        earthModel = null;
+        satellites = [];
+        orbitLines = [];
+        modelLoading = false;
+
         console.log('Container dimensions:', container.clientWidth, 'x', container.clientHeight);
 
         // Check authentication status from data attribute
@@ -72,6 +84,7 @@ const OrbitalTracker = (function() {
         const aspect = container.clientWidth / container.clientHeight;
         camera = new THREE.PerspectiveCamera(45, aspect, 0.1, 1000);
         camera.position.set(0, 0, 4);
+        camera.lookAt(0, 0, 0);
         console.log('Camera created');
 
         // Create renderer
@@ -87,7 +100,18 @@ const OrbitalTracker = (function() {
         container.appendChild(renderer.domElement);
         console.log('Renderer created and added to DOM');
 
-        // Create Earth
+        // Initialize GLTF Loader if available
+        if (typeof THREE.GLTFLoader !== 'undefined') {
+            gltfLoader = new THREE.GLTFLoader();
+            console.log('GLTFLoader initialized from THREE.GLTFLoader');
+        } else if (typeof GLTFLoader !== 'undefined') {
+            gltfLoader = new GLTFLoader();
+            console.log('GLTFLoader initialized from global GLTFLoader');
+        } else {
+            console.warn('GLTFLoader not available - realistic Earth mode disabled');
+        }
+
+        // Create Earth (hologram by default)
         createEarth();
         console.log('Earth created');
 
@@ -95,14 +119,28 @@ const OrbitalTracker = (function() {
         createEarthGrid();
         console.log('Grid created');
 
-        // Add ambient light
-        const ambientLight = new THREE.AmbientLight(0x404040, 0.5);
+        // Add strong ambient light for overall brightness
+        const ambientLight = new THREE.AmbientLight(0xffffff, 1.0);
         scene.add(ambientLight);
 
-        // Add directional light
-        const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+        // Add main directional light (sun) - very bright
+        const directionalLight = new THREE.DirectionalLight(0xffffff, 1.5);
         directionalLight.position.set(5, 3, 5);
         scene.add(directionalLight);
+        
+        // Add a second directional light from the opposite side for fill
+        const fillLight = new THREE.DirectionalLight(0xffffff, 0.8);
+        fillLight.position.set(-5, -3, -5);
+        scene.add(fillLight);
+        
+        // Add a third light from above
+        const topLight = new THREE.DirectionalLight(0xffffff, 0.6);
+        topLight.position.set(0, 5, 0);
+        scene.add(topLight);
+        
+        // Add hemisphere light for natural sky/ground lighting
+        const hemisphereLight = new THREE.HemisphereLight(0xffffff, 0x444444, 0.8);
+        scene.add(hemisphereLight);
         console.log('Lights added');
 
         // Setup mouse controls
@@ -140,54 +178,37 @@ const OrbitalTracker = (function() {
         }
 
         fetch(API_URL)
-            .then(response => {
-                console.log('API response received:', response.status);
-                return response.json();
-            })
+            .then(response => response.json())
             .then(data => {
-                console.log('API data:', data);
                 // Hide loading, show info overlay
                 if (loadingEl) loadingEl.style.display = 'none';
                 document.getElementById('orbital-info-overlay').style.display = 'block';
 
                 if (data.success && data.satellites) {
-                    console.log('Found', data.satellites.length, 'satellites');
-                    // Clear existing satellites
                     clearSatellites();
-
-                    // Add each satellite
                     data.satellites.forEach((sat, index) => {
-                        console.log('Adding satellite:', sat.name);
                         addSatellite(sat, index);
                     });
-
-                    // Update satellite count
                     document.getElementById('sat-count').textContent = data.satellites.length;
-
-                    // Update status
                     document.getElementById('sig-status').textContent = 'OK';
 
-                    // Select first satellite if only one
                     if (data.satellites.length === 1) {
                         selectTarget(data.satellites[0].id);
                     }
                 } else {
                     document.getElementById('sig-status').textContent = 'ERR';
-                    console.error('Failed to fetch satellites:', data.error);
                 }
             })
             .catch(error => {
                 console.error('Fetch error:', error);
-                // Hide loading even on error
                 if (loadingEl) loadingEl.style.display = 'none';
                 document.getElementById('orbital-info-overlay').style.display = 'block';
                 document.getElementById('sig-status').textContent = 'ERR';
-                console.error('Error fetching satellites:', error);
             });
     }
 
     /**
-     * Create wireframe Earth
+     * Create wireframe Earth (hologram mode)
      */
     function createEarth() {
         // Wireframe sphere for Earth
@@ -199,6 +220,7 @@ const OrbitalTracker = (function() {
             opacity: 0.3
         });
         earth = new THREE.Mesh(geometry, material);
+        earth.name = 'hologramEarth';
         scene.add(earth);
 
         // Add solid core for better visibility
@@ -209,7 +231,223 @@ const OrbitalTracker = (function() {
             opacity: 0.9
         });
         const core = new THREE.Mesh(coreGeometry, coreMaterial);
+        core.name = 'hologramCore';
         scene.add(core);
+    }
+
+    /**
+     * Load the realistic Earth GLB model
+     */
+    function loadRealisticEarth() {
+        if (!gltfLoader) {
+            return Promise.reject(new Error('GLTFLoader not available'));
+        }
+
+        // 1. Return existing if loaded and force it into the current scene if missing
+        if (earthModel) {
+            // Check if model is actually in the current scene
+            const inScene = scene.getObjectByName('realisticEarth');
+            if (!inScene) {
+                console.log('Model exists in memory but not scene, re-adding...');
+                scene.add(earthModel);
+            }
+            return Promise.resolve(earthModel);
+        }
+
+        // 2. Return promise if currently loading
+        if (modelLoading) {
+            return new Promise((resolve) => {
+                const checkLoad = setInterval(() => {
+                    if (!modelLoading && earthModel) {
+                        clearInterval(checkLoad);
+                        resolve(earthModel);
+                    }
+                }, 100);
+            });
+        }
+
+        modelLoading = true;
+
+        return new Promise((resolve, reject) => {
+            console.log('Loading Earth model from:', EARTH_MODEL_URL);
+            
+            gltfLoader.load(
+                EARTH_MODEL_URL,
+                (gltf) => {
+                    console.log('Earth model loaded successfully');
+                    
+                    earthModel = gltf.scene;
+                    earthModel.name = 'realisticEarth';
+                    
+                    // IMPORTANT: Ensure it is HIDDEN initially
+                    earthModel.visible = false;
+                    earthModel.traverse((child) => {
+                        child.visible = false;
+                    });
+                    
+                    // Scale and center
+                    const box = new THREE.Box3().setFromObject(earthModel);
+                    const size = box.getSize(new THREE.Vector3());
+                    const maxDim = Math.max(size.x, size.y, size.z);
+                    const scale = (EARTH_RADIUS * 2) / maxDim;
+                    
+                    earthModel.position.set(0, 0, 0);
+                    earthModel.rotation.set(0, 0, 0);
+                    earthModel.scale.setScalar(scale);
+                    
+                    const newBox = new THREE.Box3().setFromObject(earthModel);
+                    const newCenter = newBox.getCenter(new THREE.Vector3());
+                    earthModel.position.sub(newCenter);
+                    
+                    // Fix materials
+                    earthModel.traverse((child) => {
+                        if (child.isMesh && child.material) {
+                            child.material = child.material.clone();
+                            child.material.side = THREE.FrontSide;
+                            child.material.depthWrite = true;
+                            child.material.depthTest = true;
+                            child.material.transparent = false;
+                            
+                            if (child.material.color) child.material.color.multiplyScalar(1.5);
+                            if (child.material.emissive) child.material.emissive.setHex(0x222222);
+                            
+                            child.material.needsUpdate = true;
+                            child.frustumCulled = false;
+                        }
+                    });
+                    
+                    scene.add(earthModel);
+                    modelLoading = false;
+                    resolve(earthModel);
+                },
+                undefined,
+                (error) => {
+                    console.error('Error loading Earth model:', error);
+                    modelLoading = false;
+                    reject(error);
+                }
+            );
+        });
+    }
+
+    /**
+     * Toggle between hologram and realistic Earth
+     */
+    function toggleEarthMode(useRealistic, isHiddenSwitch = false) {
+        console.log('=== toggleEarthMode called with:', useRealistic, '===');
+        useRealisticEarth = useRealistic;
+        
+        // Get hologram elements
+        const hologramEarth = scene.getObjectByName('hologramEarth');
+        const hologramCore = scene.getObjectByName('hologramCore');
+        const loadingOverlay = document.getElementById('earth-model-loading');
+        
+        if (useRealistic) {
+            console.log('Switching to 3D mode...');
+            
+            // Case 1: Model is already loaded
+            if (earthModel) {
+                // Immediate clean switch
+                if (hologramEarth) hologramEarth.visible = false;
+                if (hologramCore) hologramCore.visible = false;
+                if (earthGrid) earthGrid.visible = false; // Ensure grid is off!
+                
+                earthModel.visible = true;
+                earthModel.traverse((child) => child.visible = true);
+            } 
+            // Case 2: Model needs to load (First Time)
+            else {
+                if (loadingOverlay && !isHiddenSwitch) loadingOverlay.style.display = 'flex';
+                
+                loadRealisticEarth()
+                    .then((model) => {
+                        if (!useRealisticEarth) {
+                            if (loadingOverlay) loadingOverlay.style.display = 'none';
+                            return;
+                        }
+
+                        // === THE PRIMING SEQUENCE ===
+                        console.log('Model loaded, starting priming sequence...');
+
+                        // Step 1: Force 3D Visible (Hidden behind loading screen)
+                        if (hologramEarth) hologramEarth.visible = false;
+                        if (hologramCore) hologramCore.visible = false;
+                        if (earthGrid) earthGrid.visible = false; // Grid OFF
+                        
+                        model.visible = true;
+                        model.traverse(c => c.visible = true);
+                        
+                        // Step 2: Switch BACK to Holo briefly
+                        setTimeout(() => {
+                            if (!useRealisticEarth) return; 
+                            
+                            // Hide 3D
+                            model.visible = false;
+                            model.traverse(c => c.visible = false);
+                            
+                            // Show Holo & Grid (if user enabled it)
+                            if (hologramEarth) hologramEarth.visible = true;
+                            if (hologramCore) hologramCore.visible = true;
+                            if (earthGrid && gridVisible) earthGrid.visible = true;
+
+                            // Step 3: Final Reveal of 3D Model
+                            setTimeout(() => {
+                                if (!useRealisticEarth) return;
+
+                                // Hide Holo permanently
+                                if (hologramEarth) hologramEarth.visible = false;
+                                if (hologramCore) hologramCore.visible = false;
+                                
+                                // FORCE GRID OFF (This fixes the "grid on model" bug)
+                                if (earthGrid) earthGrid.visible = false;
+                                
+                                // Show 3D permanently
+                                model.visible = true;
+                                model.traverse(c => c.visible = true);
+
+                                // Remove Loading Screen
+                                if (loadingOverlay) loadingOverlay.style.display = 'none';
+                                console.log('Priming sequence complete, 3D model active.');
+                                
+                            }, 100); 
+                        }, 100); 
+                    })
+                    .catch((err) => {
+                        console.error('Load failed:', err);
+                        if (loadingOverlay) loadingOverlay.style.display = 'none';
+                        toggleEarthMode(false);
+                    });
+            }
+        } else {
+            console.log('Switching to HOLO mode...');
+            
+            // 1. Hide 3D Model
+            if (earthModel) {
+                earthModel.visible = false;
+                earthModel.traverse((child) => child.visible = false);
+            }
+            
+            // 2. Show Hologram
+            if (hologramEarth) hologramEarth.visible = true;
+            if (hologramCore) hologramCore.visible = true;
+            if (earthGrid && gridVisible) earthGrid.visible = true;
+        }
+        
+        // Update Buttons
+        if (!isHiddenSwitch) {
+            const holoBtn = document.getElementById('view-holo-btn');
+            const threeDBtn = document.getElementById('view-3d-btn');
+            
+            if (holoBtn && threeDBtn) {
+                if (useRealistic) {
+                    holoBtn.classList.remove('active');
+                    threeDBtn.classList.add('active');
+                } else {
+                    holoBtn.classList.add('active');
+                    threeDBtn.classList.remove('active');
+                }
+            }
+        }
     }
 
     /**
@@ -399,6 +637,26 @@ const OrbitalTracker = (function() {
         document.getElementById('tgt-all')?.addEventListener('click', () => {
             selectTarget('all');
         });
+
+        // HOLO button - switch to hologram view
+        const holoBtn = document.getElementById('view-holo-btn');
+        if (holoBtn) {
+            holoBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                toggleEarthMode(false);
+            });
+        }
+
+        // 3D button - switch to 3D Earth model
+        const threeDBtn = document.getElementById('view-3d-btn');
+        if (threeDBtn) {
+            threeDBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                toggleEarthMode(true);
+            });
+        }
     }
 
     /**
@@ -446,9 +704,7 @@ const OrbitalTracker = (function() {
         // Position satellite on the orbit path
         satellite.position.copy(orbitData.points[closestIndex]);
 
-        // Calculate speed for 90 second orbit (more realistic and slower)
-        // At 60 fps, we need to cover ORBIT_SEGMENTS points in 90 seconds
-        // Speed per frame = ORBIT_SEGMENTS / (90 seconds * 60 fps) = ORBIT_SEGMENTS / 5400
+        // Calculate speed
         const baseSpeed = ORBIT_SEGMENTS / 5400;
 
         // Store satellite data including orbit information
@@ -461,7 +717,7 @@ const OrbitalTracker = (function() {
             color: color,
             orbitPoints: orbitData.points,
             orbitIndex: closestIndex,
-            orbitSpeed: baseSpeed + (colorIndex * baseSpeed * 0.05) // Slightly different speeds for visual variety (±5%)
+            orbitSpeed: baseSpeed + (colorIndex * baseSpeed * 0.05)
         };
 
         scene.add(satellite);
@@ -782,12 +1038,23 @@ const OrbitalTracker = (function() {
     function animate() {
         animationId = requestAnimationFrame(animate);
 
-        // Slow rotation of Earth
-        if (earth) {
-            earth.rotation.y += 0.0005;
+        // Slow rotation of Earth (hologram)
+        const hologramEarth = scene.getObjectByName('hologramEarth');
+        const hologramCore = scene.getObjectByName('hologramCore');
+        
+        if (hologramEarth && hologramEarth.visible) {
+            hologramEarth.rotation.y += 0.0005;
         }
-        if (earthGrid) {
+        if (hologramCore && hologramCore.visible) {
+            hologramCore.rotation.y += 0.0005;
+        }
+        if (earthGrid && earthGrid.visible) {
             earthGrid.rotation.y += 0.0005;
+        }
+        
+        // Rotate realistic Earth model
+        if (earthModel && earthModel.visible) {
+            earthModel.rotation.y += 0.0005;
         }
 
         // Update satellites positions (follow orbit paths)
@@ -918,6 +1185,24 @@ const OrbitalTracker = (function() {
     }
 
     /**
+     * Set the path to the Earth model (for custom paths)
+     */
+    function setEarthModelPath(path) {
+        // Update the constant (we use a closure variable to allow changes)
+        Object.defineProperty(this, 'EARTH_MODEL_URL', { value: path, writable: true });
+    }
+
+    /**
+     * Preload the Earth model
+     */
+    function preloadEarthModel() {
+        if (!earthModel && gltfLoader) {
+            return loadRealisticEarth();
+        }
+        return Promise.resolve(earthModel);
+    }
+
+    /**
      * Destroy the tracker
      */
     function destroy() {
@@ -932,6 +1217,14 @@ const OrbitalTracker = (function() {
             renderer.dispose();
         }
         window.removeEventListener('resize', onWindowResize);
+        
+        // Clean up references
+        earth = null;
+        earthGrid = null;
+        earthModel = null;
+        satellites = [];
+        orbitLines = [];
+        
         isInitialized = false;
     }
 
@@ -947,7 +1240,26 @@ const OrbitalTracker = (function() {
         selectTarget,
         destroy,
         fetchSatellites,
-        isInitialized: () => isInitialized
+        isInitialized: () => isInitialized,
+        // New Earth model methods
+        toggleEarthMode,
+        loadRealisticEarth,
+        preloadEarthModel,
+        isRealisticMode: () => useRealisticEarth,
+        // Grid toggle
+        toggleGrid: function() {
+            gridVisible = !gridVisible;
+            if (earthGrid && !useRealisticEarth) {
+                earthGrid.visible = gridVisible;
+            }
+            const gridBtn = document.getElementById('grid-toggle');
+            if (gridBtn) {
+                gridBtn.classList.toggle('active', gridVisible);
+            }
+            console.log('Grid visibility toggled to:', gridVisible);
+            return gridVisible;
+        },
+        isGridVisible: () => gridVisible
     };
 })();
 

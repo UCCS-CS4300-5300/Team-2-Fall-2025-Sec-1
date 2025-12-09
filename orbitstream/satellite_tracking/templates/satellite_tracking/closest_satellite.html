@@ -5,11 +5,6 @@
 {% block body_class %}satellite-tracking-page{% endblock %}
 
 {% block extra_css %}
-<!-- Three.js for 3D rendering -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-<!-- satellite.js (tle.js) for orbital calculations -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/satellite.js/4.1.3/satellite.min.js"></script>
-
 <style>
   /* ========================================
      Closest Satellite Page - Space Theme
@@ -545,7 +540,7 @@
   /* Control panel */
   .orbital-controls {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 1fr 1fr 1fr;
     border-bottom: 2px solid var(--input-border);
     background: var(--bg-tertiary);
   }
@@ -620,6 +615,24 @@
     background: var(--accent-blue);
     color: white;
     border-color: var(--accent-blue);
+  }
+
+  /* Earth mode toggle button */
+  .control-btn.earth-toggle {
+    border-color: #f472b6;
+    color: #f472b6;
+  }
+
+  .control-btn.earth-toggle:hover {
+    border-color: #f472b6;
+    color: white;
+    background: #f472b6;
+  }
+
+  .control-btn.earth-toggle.active {
+    background: linear-gradient(135deg, #f472b6 0%, #60a5fa 100%);
+    color: white;
+    border-color: #f472b6;
   }
 
   /* Satellite tooltip */
@@ -725,6 +738,11 @@
     justify-content: center;
     height: 100%;
     color: var(--accent-purple);
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
   }
 
   .orbital-loading-spinner {
@@ -745,6 +763,16 @@
     color: var(--text-secondary);
   }
 
+  /* 3D Model loading overlay */
+  #earth-model-loading {
+    background: rgba(0, 0, 0, 0.85);
+    z-index: 100;
+  }
+
+  #earth-model-loading .orbital-loading-text {
+    color: var(--accent-blue);
+  }
+
   /* Responsive design for orbital tracker */
   @media (max-width: 768px) {
     .orbital-viewport {
@@ -757,7 +785,7 @@
 
     .control-section {
       border-right: none;
-      border-bottom: 2px solid #00ff00;
+      border-bottom: 2px solid var(--input-border);
     }
 
     .control-section:last-child {
@@ -770,7 +798,7 @@
 
     .data-section {
       border-right: none;
-      border-bottom: 2px solid #00ff00;
+      border-bottom: 2px solid var(--input-border);
     }
 
     .data-section:last-child {
@@ -927,6 +955,12 @@
           <div class="orbital-loading-text">Initializing tracker...</div>
         </div>
 
+        <!-- 3D Earth Model Loading Overlay -->
+        <div class="orbital-loading" id="earth-model-loading" style="display: none; background: rgba(0,0,0,0.8); z-index: 100;">
+          <div class="orbital-loading-spinner"></div>
+          <div class="orbital-loading-text">Loading 3D Earth Model...</div>
+        </div>
+
         <!-- Info overlay -->
         <div class="orbital-info-overlay" id="orbital-info-overlay" style="display: none;">
           <div class="orbital-info-box target" id="orbital-target-display">TGT: --</div>
@@ -953,6 +987,14 @@
           <div class="control-label">TGT</div>
           <div class="control-buttons" id="target-buttons">
             <button class="control-btn orange active" id="tgt-all" data-target="all">ALL</button>
+          </div>
+        </div>
+
+        <div class="control-section">
+          <div class="control-label">VIEW</div>
+          <div class="control-buttons">
+            <button class="control-btn earth-toggle active" id="view-holo-btn" title="Hologram view">HOLO</button>
+            <button class="control-btn earth-toggle" id="view-3d-btn" title="3D Earth model">3D</button>
           </div>
         </div>
       </div>
@@ -1056,6 +1098,13 @@
     </div>
   </div>
 </div>
+
+<!-- Three.js for 3D rendering -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<!-- GLTFLoader for loading .glb models (must match Three.js version) -->
+<script src="https://cdn.jsdelivr.net/gh/mrdoob/three.js@r128/examples/js/loaders/GLTFLoader.js"></script>
+<!-- satellite.js for orbital calculations -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/satellite.js/4.1.3/satellite.min.js"></script>
 
 <script src="{% static 'satellite_tracking/closest_satellite.js' %}"></script>
 <script src="{% static 'satellite_tracking/orbital_tracker.js' %}"></script>
