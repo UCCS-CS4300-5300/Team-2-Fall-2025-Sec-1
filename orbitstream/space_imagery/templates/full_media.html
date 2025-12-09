@@ -7,6 +7,24 @@
 
 {% block body_class %}full-media-page{% endblock %}
 
+{% block extra_css %}
+<style>
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+#save-gallery-btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+</style>
+{% endblock %}
+
 {% block content %}
 <div class="full-media-container">
   <a href="{% url 'space_imagery:gallery' %}?q={{ request.GET.q }}&type={{ request.GET.type|default:'image' }}" class="back-button">
@@ -98,8 +116,12 @@
             </a>
             {% if user.is_authenticated %}
             <button id="save-gallery-btn" class="download-btn save-btn" style="margin-left: 10px; background: linear-gradient(135deg, #8b5cf6 0%, #a78bfa 100%);">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 6px;">
+              <svg id="save-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 6px;">
                 <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>
+              </svg>
+              <svg id="spinner-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 6px; display: none; animation: spin 1s linear infinite;">
+                <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3" stroke-dasharray="31.4 31.4" stroke-linecap="round" opacity="0.25"/>
+                <path d="M12 2 A10 10 0 0 1 22 12" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
               </svg>
               <span id="save-gallery-text">Save</span>
             </button>
@@ -123,7 +145,7 @@
     title: '{{ item.title|escapejs }}',
     description: '{{ item.description|escapejs|truncatewords:50 }}',
     media_url: '{{ media_url|escapejs }}',
-    thumbnail_url: '{% if item.links %}{{ item.links.0.href|default:""|escapejs }}{% endif %}',
+    thumbnail_url: '{% if item_links %}{{ item_links.0.href|default:""|escapejs }}{% endif %}',
     media_type: '{{ media_type|escapejs }}'
   };
 
@@ -143,13 +165,32 @@
   }
 
   function updateButtonState(isSaved) {
+    const saveIcon = document.getElementById('save-icon');
+    const spinnerIcon = document.getElementById('spinner-icon');
+
     if (isSaved) {
-      saveBtn.querySelector('svg path').setAttribute('fill', 'currentColor');
+      saveIcon.style.display = 'inline';
+      spinnerIcon.style.display = 'none';
+      saveIcon.querySelector('path').setAttribute('fill', 'currentColor');
       saveText.textContent = 'Saved';
+      saveBtn.disabled = false;
     } else {
-      saveBtn.querySelector('svg path').setAttribute('fill', 'none');
+      saveIcon.style.display = 'inline';
+      spinnerIcon.style.display = 'none';
+      saveIcon.querySelector('path').setAttribute('fill', 'none');
       saveText.textContent = 'Save';
+      saveBtn.disabled = false;
     }
+  }
+
+  function setLoadingState() {
+    const saveIcon = document.getElementById('save-icon');
+    const spinnerIcon = document.getElementById('spinner-icon');
+
+    saveIcon.style.display = 'none';
+    spinnerIcon.style.display = 'inline';
+    saveText.textContent = 'Saving...';
+    saveBtn.disabled = true;
   }
 
   // Check initial save status
@@ -160,6 +201,18 @@
 
   // Handle save button click
   saveBtn.addEventListener('click', function() {
+    console.log('Attempting to save gallery item:', galleryData);
+
+    // Validate media_url
+    if (!galleryData.media_url) {
+      console.error('Cannot save: media_url is missing');
+      alert('Cannot save: media URL is missing');
+      return;
+    }
+
+    // Set loading state
+    setLoadingState();
+
     fetch('/saved/api/toggle/gallery/', {
       method: 'POST',
       headers: {
@@ -170,11 +223,23 @@
     })
     .then(r => r.json())
     .then(data => {
-      if (!data.error) {
+      console.log('Save response:', data);
+      if (data.error) {
+        console.error('Save error:', data.error);
+        alert('Error saving: ' + data.error);
+        // Revert to unsaved state on error
+        updateButtonState(false);
+      } else {
         updateButtonState(data.saved);
+        console.log('Save successful, saved:', data.saved);
       }
     })
-    .catch(err => console.error('Error:', err));
+    .catch(err => {
+      console.error('Save request failed:', err);
+      alert('Failed to save. Check console for details.');
+      // Revert to unsaved state on error
+      updateButtonState(false);
+    });
   });
 })();
 </script>
