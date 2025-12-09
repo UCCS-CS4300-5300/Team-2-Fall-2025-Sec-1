@@ -200,7 +200,11 @@ document.addEventListener('DOMContentLoaded', function() {
         const satellites = data.satellites;
         const loc = data.location;
 
-        if (!satellites || satellites.length === 0) {
+        console.log('Satellites type:', typeof satellites);
+        console.log('Satellites value:', satellites);
+        console.log('Is array?', Array.isArray(satellites));
+
+        if (!satellites || !Array.isArray(satellites) || satellites.length === 0) {
             console.error('No satellites in data:', data);
             showError('No satellite data received');
             return;
@@ -214,11 +218,13 @@ document.addEventListener('DOMContentLoaded', function() {
         // Display the first (closest) satellite in the info panel
         const sat = satellites[0];
         console.log('First satellite:', sat);
+        console.log('First satellite ID:', sat ? sat.id : 'undefined');
 
         // Validate that we have required data
-        if (!sat.id) {
+        if (!sat || !sat.id) {
             console.error('Satellite ID is missing:', sat);
             showError('Satellite data is incomplete - cannot save');
+            return;
         }
 
         // Store current satellite data for saving

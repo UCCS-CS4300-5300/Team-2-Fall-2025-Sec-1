@@ -947,6 +947,6 @@
 window.savedSatellites = {{ saved_satellites_json|safe }};
 window.isAuthenticated = {{ user.is_authenticated|yesno:"true,false" }};
 </script>
-<script src="{% static 'satellite_tracking/orbital_tracking.js' %}"></script>
-<script src="{% static 'satellite_tracking/closest_satellite.js' %}"></script>
+<script src="{% static 'satellite_tracking/orbital_tracking.js' %}?v=3.0.1"></script>
+<script src="{% static 'satellite_tracking/closest_satellite.js' %}?v=3.0.1"></script>
 {% endblock %}
