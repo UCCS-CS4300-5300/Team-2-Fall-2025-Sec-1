@@ -10,6 +10,10 @@ urlpatterns = [
     path('article/<int:pk>/', views.view_saved_article, name='view_saved_article'),
     path('media/<int:pk>/', views.view_saved_media, name='view_saved_media'),
 
+    # Serve media from database
+    path('media/<int:pk>/file/', views.serve_gallery_media, name='serve_gallery_media'),
+    path('media/<int:pk>/thumbnail/', views.serve_gallery_thumbnail, name='serve_gallery_thumbnail'),
+
     # Toggle save/unsave endpoints
     path('api/toggle/satellite/', views.toggle_save_satellite, name='toggle_save_satellite'),
     path('api/toggle/gallery/', views.toggle_save_gallery, name='toggle_save_gallery'),

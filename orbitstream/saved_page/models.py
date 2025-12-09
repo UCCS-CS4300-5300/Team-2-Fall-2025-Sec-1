@@ -33,9 +33,14 @@ class SavedGalleryItem(models.Model):
     media_url = models.URLField(max_length=1000, blank=True, null=True)
     thumbnail_url = models.URLField(max_length=1000, blank=True, null=True)
 
-    # Saved media files
-    media_file = models.FileField(upload_to='saved_gallery/media/', blank=True, null=True)
-    thumbnail_file = models.ImageField(upload_to='saved_gallery/thumbnails/', blank=True, null=True)
+    # Store media data directly in database
+    media_data = models.BinaryField(blank=True, null=True)
+    media_content_type = models.CharField(max_length=100, blank=True, null=True)
+    media_filename = models.CharField(max_length=255, blank=True, null=True)
+
+    thumbnail_data = models.BinaryField(blank=True, null=True)
+    thumbnail_content_type = models.CharField(max_length=100, blank=True, null=True)
+    thumbnail_filename = models.CharField(max_length=255, blank=True, null=True)
 
     media_type = models.CharField(max_length=50, default='image')
     saved_at = models.DateTimeField(auto_now_add=True)
@@ -46,14 +51,6 @@ class SavedGalleryItem(models.Model):
 
     def __str__(self):
         return f"{self.user.username} - {self.title}"
-
-    def delete(self, *args, **kwargs):
-        """Override delete to remove associated files"""
-        if self.media_file:
-            self.media_file.delete(save=False)
-        if self.thumbnail_file:
-            self.thumbnail_file.delete(save=False)
-        super().delete(*args, **kwargs)
 
 
 class SavedLaunch(models.Model):
