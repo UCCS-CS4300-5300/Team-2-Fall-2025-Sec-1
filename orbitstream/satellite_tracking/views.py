@@ -111,14 +111,19 @@ def get_closest_satellite_api(request):
         return JsonResponse(result)
 
     except json.JSONDecodeError:
-        return JsonResponse({'error': 'Invalid JSON data'}, status=400)
+        return JsonResponse({'error': 'Invalid JSON data in request'}, status=400)
     except ValueError as e:
         return JsonResponse({'error': f'Invalid coordinate values: {str(e)}'}, status=400)
+    except requests.exceptions.Timeout:
+        return JsonResponse({'error': 'Request to satellite API timed out. Please try again.'}, status=500)
     except requests.exceptions.RequestException as e:
-        return JsonResponse({'error': f'Failed to fetch satellite data: {str(e)}'}, status=500)
+        return JsonResponse({'error': f'Failed to fetch satellite data from N2YO API: {str(e)}'}, status=500)
     except KeyError as e:
         return JsonResponse({'error': f'Missing required field: {str(e)}'}, status=400)
     except Exception as e:
+        import traceback
+        error_details = traceback.format_exc()
+        print(f"Unexpected error in get_closest_satellite_api: {error_details}")
         return JsonResponse({'error': f'An unexpected error occurred: {str(e)}'}, status=500)
 
 

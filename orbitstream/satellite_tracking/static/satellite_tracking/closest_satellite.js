@@ -154,14 +154,18 @@ document.addEventListener('DOMContentLoaded', function() {
         })
         .then(response => {
             if (!response.ok) {
-                return response.json().then(err => Promise.reject(err));
+                return response.json().then(err => Promise.reject(err)).catch(() => {
+                    return Promise.reject({ error: `HTTP Error ${response.status}: ${response.statusText}` });
+                });
             }
             return response.json();
         })
         .then(data => {
             hideLoading();
 
-            if (data.success) {
+            console.log('API Response:', data);
+
+            if (data.success && data.satellites) {
                 displaySatelliteInfo(data);
             } else {
                 showError(data.error || 'Failed to fetch satellite data');
@@ -169,8 +173,19 @@ document.addEventListener('DOMContentLoaded', function() {
         })
         .catch(error => {
             hideLoading();
-            showError(error.error || 'An error occurred while fetching satellite data');
-            console.error('Error:', error);
+            console.error('Full error object:', error);
+
+            let errorMessage = 'An error occurred while fetching satellite data';
+
+            if (error.error) {
+                errorMessage = error.error;
+            } else if (error.message) {
+                errorMessage = error.message;
+            } else if (typeof error === 'string') {
+                errorMessage = error;
+            }
+
+            showError(errorMessage);
         });
     }
 
@@ -180,19 +195,25 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Display satellite information
     function displaySatelliteInfo(data) {
+        console.log('displaySatelliteInfo called with:', data);
+
         const satellites = data.satellites;
         const loc = data.location;
 
         if (!satellites || satellites.length === 0) {
+            console.error('No satellites in data:', data);
             showError('No satellite data received');
             return;
         }
+
+        console.log(`Processing ${satellites.length} satellites`);
 
         // Store all satellites
         currentSatellites = satellites;
 
         // Display the first (closest) satellite in the info panel
         const sat = satellites[0];
+        console.log('First satellite:', sat);
 
         // Validate that we have required data
         if (!sat.id) {
