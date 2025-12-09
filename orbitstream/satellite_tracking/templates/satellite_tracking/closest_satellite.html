@@ -622,20 +622,65 @@
     border-color: var(--accent-blue);
   }
 
+  /* Satellite tooltip */
+  .satellite-tooltip {
+    position: absolute;
+    background: var(--bg-tertiary);
+    border: 2px solid var(--accent-purple);
+    border-radius: 8px;
+    padding: 12px 16px;
+    min-width: 200px;
+    pointer-events: none;
+    z-index: 1000;
+    opacity: 0;
+    transform: translateY(10px);
+    transition: opacity 0.2s ease, transform 0.2s ease;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 4px 20px rgba(139, 92, 246, 0.4);
+  }
+
+  .satellite-tooltip.show {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .tooltip-name {
+    color: var(--accent-purple);
+    font-weight: 700;
+    font-size: 0.95em;
+    margin-bottom: 8px;
+    letter-spacing: 1px;
+  }
+
+  .tooltip-info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .tooltip-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.85em;
+  }
+
+  .tooltip-label {
+    color: var(--text-secondary);
+  }
+
+  .tooltip-value {
+    color: var(--accent-blue);
+    font-weight: 600;
+  }
+
   /* Data panel */
   .orbital-data-panel {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
+    display: block;
     background: var(--bg-tertiary);
   }
 
   .data-section {
     padding: 16px 20px;
-    border-right: 2px solid var(--input-border);
-  }
-
-  .data-section:last-child {
-    border-right: none;
   }
 
   .data-label {
@@ -851,6 +896,29 @@
   <div id="orbital-tracker" class="orbital-tracker-container" data-authenticated="{{ is_authenticated|yesno:'true,false' }}">
     <div class="orbital-tracker-header">Orbital Tracking</div>
 
+    <!-- Satellite tooltip -->
+    <div id="satellite-tooltip" class="satellite-tooltip">
+      <div class="tooltip-name" id="tooltip-name"></div>
+      <div class="tooltip-info">
+        <div class="tooltip-row">
+          <span class="tooltip-label">ID:</span>
+          <span class="tooltip-value" id="tooltip-id"></span>
+        </div>
+        <div class="tooltip-row">
+          <span class="tooltip-label">Altitude:</span>
+          <span class="tooltip-value" id="tooltip-altitude"></span>
+        </div>
+        <div class="tooltip-row">
+          <span class="tooltip-label">Latitude:</span>
+          <span class="tooltip-value" id="tooltip-lat"></span>
+        </div>
+        <div class="tooltip-row">
+          <span class="tooltip-label">Longitude:</span>
+          <span class="tooltip-value" id="tooltip-lon"></span>
+        </div>
+      </div>
+    </div>
+
     <div class="orbital-tracker-main">
       <!-- 3D Viewport -->
       <div class="orbital-viewport" id="orbital-viewport">
@@ -892,13 +960,7 @@
       <!-- Data Panel -->
       <div class="orbital-data-panel">
         <div class="data-section">
-          <div class="data-label">Data</div>
-          <div class="control-buttons">
-            <button class="control-btn active" id="grid-toggle">GRID ON</button>
-          </div>
-        </div>
-
-        <div class="data-section">
+          <div class="data-label">Status</div>
           <div class="data-row">
             <span class="data-key">SIG:</span>
             <span class="data-value green" id="sig-status">OK</span>

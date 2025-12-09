@@ -395,14 +395,6 @@ const OrbitalTracker = (function() {
             camera.lookAt(0, 0, 0);
         });
 
-        // Grid toggle
-        document.getElementById('grid-toggle')?.addEventListener('click', (e) => {
-            gridVisible = !gridVisible;
-            if (earthGrid) earthGrid.visible = gridVisible;
-            e.target.textContent = gridVisible ? 'GRID ON' : 'GRID OFF';
-            e.target.classList.toggle('active', gridVisible);
-        });
-
         // ALL target button
         document.getElementById('tgt-all')?.addEventListener('click', () => {
             selectTarget('all');
@@ -548,8 +540,69 @@ const OrbitalTracker = (function() {
         btn.style.borderColor = `#${color.toString(16).padStart(6, '0')}`;
         btn.style.color = `#${color.toString(16).padStart(6, '0')}`;
 
+        // Store satellite data on button for tooltip
+        btn.dataset.satName = satData.name;
+        btn.dataset.satId = satData.id;
+        btn.dataset.satAltitude = satData.altitude;
+        btn.dataset.satLatitude = satData.latitude;
+        btn.dataset.satLongitude = satData.longitude;
+
         btn.addEventListener('click', () => selectTarget(satData.id));
+
+        // Add hover event listeners for tooltip
+        btn.addEventListener('mouseenter', showSatelliteTooltip);
+        btn.addEventListener('mouseleave', hideSatelliteTooltip);
+        btn.addEventListener('mousemove', updateTooltipPosition);
+
         targetButtons.appendChild(btn);
+    }
+
+    /**
+     * Show satellite tooltip on hover
+     */
+    function showSatelliteTooltip(event) {
+        const btn = event.currentTarget;
+        const tooltip = document.getElementById('satellite-tooltip');
+        if (!tooltip) return;
+
+        // Update tooltip content
+        document.getElementById('tooltip-name').textContent = btn.dataset.satName;
+        document.getElementById('tooltip-id').textContent = btn.dataset.satId;
+        document.getElementById('tooltip-altitude').textContent = `${parseFloat(btn.dataset.satAltitude).toFixed(2)} km`;
+        document.getElementById('tooltip-lat').textContent = `${parseFloat(btn.dataset.satLatitude).toFixed(4)}°`;
+        document.getElementById('tooltip-lon').textContent = `${parseFloat(btn.dataset.satLongitude).toFixed(4)}°`;
+
+        // Position and show tooltip
+        updateTooltipPosition(event);
+        tooltip.classList.add('show');
+    }
+
+    /**
+     * Hide satellite tooltip
+     */
+    function hideSatelliteTooltip() {
+        const tooltip = document.getElementById('satellite-tooltip');
+        if (tooltip) {
+            tooltip.classList.remove('show');
+        }
+    }
+
+    /**
+     * Update tooltip position to follow mouse
+     */
+    function updateTooltipPosition(event) {
+        const tooltip = document.getElementById('satellite-tooltip');
+        if (!tooltip || !tooltip.classList.contains('show')) return;
+
+        const tracker = document.getElementById('orbital-tracker');
+        const trackerRect = tracker.getBoundingClientRect();
+
+        // Position relative to the tracker container
+        const x = event.clientX - trackerRect.left + 15;
+        const y = event.clientY - trackerRect.top + 15;
+
+        tooltip.style.left = `${x}px`;
+        tooltip.style.top = `${y}px`;
     }
 
     /**
@@ -688,6 +741,13 @@ const OrbitalTracker = (function() {
             const newLon = -Math.atan2(sat.position.x, sat.position.z) * (180 / Math.PI);
             sat.userData.latitude = newLat;
             sat.userData.longitude = newLon;
+
+            // Update button tooltip data if it exists
+            const btn = document.getElementById(`tgt-${sat.userData.id}`);
+            if (btn) {
+                btn.dataset.satLatitude = newLat;
+                btn.dataset.satLongitude = newLon;
+            }
         });
 
         // Update user ring pulse
