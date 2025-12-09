@@ -128,16 +128,20 @@ document.addEventListener('DOMContentLoaded', function() {
         );
     });
 
-    // Fetch closest satellite from API
+    // Fetch closest satellites from API
     function fetchClosestSatellite(latitude, longitude, altitude) {
         showLoading();
         hideError();
         hideSatelliteInfo();
 
+        // Get number of satellites from selector
+        const numSatellites = parseInt(document.getElementById('num-satellites').value) || 5;
+
         const data = {
             latitude: latitude,
             longitude: longitude,
-            altitude: altitude
+            altitude: altitude,
+            num_satellites: numSatellites
         };
 
         fetch('/satellite-tracking/api/get-closest-satellite/', {
@@ -172,11 +176,23 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Current satellite data storage for save functionality
     let currentSatelliteData = null;
+    let currentSatellites = [];
 
     // Display satellite information
     function displaySatelliteInfo(data) {
-        const sat = data.satellite;
+        const satellites = data.satellites;
         const loc = data.location;
+
+        if (!satellites || satellites.length === 0) {
+            showError('No satellite data received');
+            return;
+        }
+
+        // Store all satellites
+        currentSatellites = satellites;
+
+        // Display the first (closest) satellite in the info panel
+        const sat = satellites[0];
 
         // Validate that we have required data
         if (!sat.id) {
@@ -221,19 +237,19 @@ document.addEventListener('DOMContentLoaded', function() {
         // Check if satellite is already saved and update button state
         checkSatelliteSaveStatus(sat.id);
 
-        // Dispatch event for orbital tracking visualization
-        window.dispatchEvent(new CustomEvent('satelliteFound', {
+        // Dispatch event for orbital tracking visualization with all satellites
+        window.dispatchEvent(new CustomEvent('satellitesFound', {
             detail: {
-                id: sat.id,
-                name: sat.name,
-                latitude: sat.latitude,
-                longitude: sat.longitude,
-                altitude: sat.altitude
+                satellites: satellites,
+                location: loc
             }
         }));
 
-        // Scroll to info section
-        satelliteInfo.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        // Scroll to orbital tracking section
+        const orbitalSection = document.getElementById('orbital-tracking');
+        if (orbitalSection) {
+            orbitalSection.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
     }
 
     // Check if satellite is saved
@@ -339,4 +355,49 @@ document.addEventListener('DOMContentLoaded', function() {
     function hideSatelliteInfo() {
         satelliteInfo.style.display = 'none';
     }
+
+    // Listen for satellite clicks from the 3D visualization
+    window.addEventListener('satelliteClicked', function(e) {
+        const { id, name, data } = e.detail;
+
+        console.log('Satellite clicked event received:', name, id);
+
+        // Update the info panel with the clicked satellite
+        if (data) {
+            // Update satellite details
+            document.getElementById('sat-name').textContent = name || 'Unknown';
+            document.getElementById('sat-id').textContent = id || '-';
+            document.getElementById('sat-altitude').textContent = data.altitude ? `${data.altitude.toFixed(2)} km` : '-';
+
+            // Update position
+            document.getElementById('sat-lat').textContent = data.latitude ? `${data.latitude.toFixed(4)}°` : '-';
+            document.getElementById('sat-lng').textContent = data.longitude ? `${data.longitude.toFixed(4)}°` : '-';
+            document.getElementById('sat-elevation').textContent = data.elevation ? `${data.elevation.toFixed(2)}°` : '-';
+
+            // Update orientation
+            document.getElementById('sat-azimuth').textContent = data.azimuth ? `${data.azimuth.toFixed(2)}°` : '-';
+            document.getElementById('sat-ra').textContent = data.right_ascension ? `${data.right_ascension.toFixed(2)}°` : '-';
+            document.getElementById('sat-dec').textContent = data.declination ? `${data.declination.toFixed(2)}°` : '-';
+
+            // Update current satellite data for saving
+            currentSatelliteData = {
+                satellite_id: id,
+                name: name || 'Unknown',
+                altitude: data.altitude || 0,
+                azimuth: data.azimuth || 0,
+                elevation: data.elevation || 0,
+                latitude: data.latitude || 0,
+                longitude: data.longitude || 0
+            };
+
+            // Check if this satellite is already saved
+            checkSatelliteSaveStatus(id);
+
+            // Make sure info section is visible
+            satelliteInfo.style.display = 'block';
+
+            // Scroll to info section
+            satelliteInfo.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+    });
 });

@@ -26,7 +26,7 @@ def closest_satellite(request):
 @require_http_methods(["POST"])
 def get_closest_satellite_api(request):
     """
-    API endpoint to get the closest satellite to given coordinates
+    API endpoint to get the N closest satellites to given coordinates
     Uses N2YO.com API to fetch satellite data
     """
     try:
@@ -35,12 +35,17 @@ def get_closest_satellite_api(request):
         latitude = float(data.get('latitude'))
         longitude = float(data.get('longitude'))
         altitude = float(data.get('altitude', 0))  # Default altitude to 0 (sea level)
+        num_satellites = int(data.get('num_satellites', 5))  # Default to 5 satellites
 
         # Validate coordinates
         if not (-90 <= latitude <= 90):
             return JsonResponse({'error': 'Latitude must be between -90 and 90'}, status=400)
         if not (-180 <= longitude <= 180):
             return JsonResponse({'error': 'Longitude must be between -180 and 180'}, status=400)
+
+        # Validate num_satellites
+        if num_satellites < 1 or num_satellites > 50:
+            return JsonResponse({'error': 'Number of satellites must be between 1 and 50'}, status=400)
 
         # Get API key from settings
         api_key = settings.N2YO_API_KEY
@@ -71,11 +76,13 @@ def get_closest_satellite_api(request):
                 'longitude': longitude
             }, status=404)
 
-        # Find the closest satellite (lowest altitude from ground)
-        satellites = satellite_data['above']
-        closest = min(satellites, key=lambda s: s.get('satalt', float('inf')))
+        # Sort satellites by altitude (closest to furthest)
+        satellites = sorted(satellite_data['above'], key=lambda s: s.get('satalt', float('inf')))
 
-        # Format the response with detailed information
+        # Get the N closest satellites
+        closest_satellites = satellites[:num_satellites]
+
+        # Format the response with detailed information for all satellites
         result = {
             'success': True,
             'location': {
@@ -83,17 +90,20 @@ def get_closest_satellite_api(request):
                 'longitude': longitude,
                 'altitude': altitude
             },
-            'satellite': {
-                'name': closest.get('satname', 'Unknown'),
-                'id': closest.get('satid'),
-                'altitude': closest.get('satalt', 0),  # km above ground
-                'azimuth': closest.get('sataz', 0),    # degrees
-                'elevation': closest.get('satel', 0),  # degrees above horizon
-                'right_ascension': closest.get('satra', 0),
-                'declination': closest.get('satdec', 0),
-                'latitude': closest.get('satlat', 0),
-                'longitude': closest.get('satlng', 0),
-            },
+            'satellites': [
+                {
+                    'name': sat.get('satname', 'Unknown'),
+                    'id': sat.get('satid'),
+                    'altitude': sat.get('satalt', 0),  # km above ground
+                    'azimuth': sat.get('sataz', 0),    # degrees
+                    'elevation': sat.get('satel', 0),  # degrees above horizon
+                    'right_ascension': sat.get('satra', 0),
+                    'declination': sat.get('satdec', 0),
+                    'latitude': sat.get('satlat', 0),
+                    'longitude': sat.get('satlng', 0),
+                }
+                for sat in closest_satellites
+            ],
             'total_satellites_found': len(satellites),
             'info': satellite_data.get('info', {})
         }

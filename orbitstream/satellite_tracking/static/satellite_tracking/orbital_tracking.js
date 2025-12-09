@@ -191,11 +191,13 @@
   function setupMouseControls() {
     let isDragging = false;
     let previousMousePosition = { x: 0, y: 0 };
+    let mouseDownPosition = { x: 0, y: 0 };
     const canvas = renderer.domElement;
 
     canvas.addEventListener('mousedown', (e) => {
       isDragging = true;
       previousMousePosition = { x: e.clientX, y: e.clientY };
+      mouseDownPosition = { x: e.clientX, y: e.clientY };
     });
 
     canvas.addEventListener('mousemove', (e) => {
@@ -210,7 +212,16 @@
       previousMousePosition = { x: e.clientX, y: e.clientY };
     });
 
-    canvas.addEventListener('mouseup', () => {
+    canvas.addEventListener('mouseup', (e) => {
+      // Check if it was a click (not a drag)
+      const deltaX = Math.abs(e.clientX - mouseDownPosition.x);
+      const deltaY = Math.abs(e.clientY - mouseDownPosition.y);
+
+      if (deltaX < 5 && deltaY < 5) {
+        // It's a click, check for satellite intersection
+        handleSatelliteClick(e);
+      }
+
       isDragging = false;
     });
 
@@ -224,6 +235,57 @@
       const delta = e.deltaY * 0.1;
       camera.position.z = Math.max(200, Math.min(1500, camera.position.z + delta));
     });
+  }
+
+  // Handle satellite click with raycasting
+  function handleSatelliteClick(event) {
+    const canvas = renderer.domElement;
+    const rect = canvas.getBoundingClientRect();
+
+    // Calculate mouse position in normalized device coordinates (-1 to +1)
+    const mouse = new THREE.Vector2();
+    mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+    mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+
+    // Create raycaster
+    const raycaster = new THREE.Raycaster();
+    raycaster.setFromCamera(mouse, camera);
+
+    // Get all satellite meshes
+    const satelliteMeshes = [];
+    for (const [, sat] of satellites.entries()) {
+      if (sat.visible && sat.mesh) {
+        satelliteMeshes.push(sat.mesh);
+      }
+    }
+
+    // Check for intersections
+    const intersects = raycaster.intersectObjects(satelliteMeshes, true);
+
+    if (intersects.length > 0) {
+      // Find the parent satellite mesh (not the glow mesh)
+      let clickedMesh = intersects[0].object;
+      while (clickedMesh.parent && !clickedMesh.userData.satelliteId) {
+        clickedMesh = clickedMesh.parent;
+      }
+
+      if (clickedMesh.userData && clickedMesh.userData.satelliteId) {
+        const satData = clickedMesh.userData;
+        console.log('Clicked satellite:', satData.satelliteName, satData.satelliteId);
+
+        // Update info panel with clicked satellite data
+        updateInfoPanel(satData.satelliteId, satData.satelliteData);
+
+        // Dispatch event to update the satellite info card
+        window.dispatchEvent(new CustomEvent('satelliteClicked', {
+          detail: {
+            id: satData.satelliteId,
+            name: satData.satelliteName,
+            data: satData.satelliteData
+          }
+        }));
+      }
+    }
   }
 
   // Window resize handler
@@ -276,7 +338,7 @@
   }
 
   // Create satellite mesh and orbit
-  function createSatellite(satId, name, data, color) {
+  function createSatellite(satId, name, data, color, isClosest = false) {
     // Remove existing satellite if present
     if (satellites.has(satId)) {
       const existing = satellites.get(satId);
@@ -292,6 +354,14 @@
       opacity: 0.9
     });
     const satelliteMesh = new THREE.Mesh(geometry, material);
+
+    // Store satellite ID and data for click interaction
+    satelliteMesh.userData = {
+      satelliteId: satId,
+      satelliteName: name,
+      satelliteData: data,
+      isClosest: isClosest
+    };
 
     // Add glow effect
     const glowGeometry = new THREE.SphereGeometry(7, 16, 16);
@@ -326,7 +396,8 @@
       visible: true,
       data: data,
       name: name,
-      color: color
+      color: color,
+      isClosest: isClosest
     });
   }
 
@@ -479,7 +550,44 @@
     });
   });
 
-  // Hook into closest satellite finder to show CSS button
+  // Hook into closest satellite finder to show all satellites
+  window.addEventListener('satellitesFound', (e) => {
+    const receivedSatellites = e.detail.satellites;
+
+    console.log('Received satellites:', receivedSatellites);
+
+    // Clear existing closest satellites (but keep ISS and saved ones)
+    const toRemove = [];
+    for (const [satId, sat] of satellites.entries()) {
+      if (sat.isClosest) {
+        toRemove.push(satId);
+      }
+    }
+    toRemove.forEach(satId => {
+      const sat = satellites.get(satId);
+      if (sat) {
+        scene.remove(sat.mesh);
+        if (sat.orbit) scene.remove(sat.orbit);
+        satellites.delete(satId);
+      }
+    });
+
+    // Load all closest satellites with unique colors
+    receivedSatellites.forEach((sat, index) => {
+      const satId = sat.id.toString();
+      const color = getNextColor();
+      const name = sat.name || `SAT-${index + 1}`;
+
+      console.log(`Loading closest satellite ${index + 1}:`, name, satId, color);
+
+      // Create satellite directly with the data we have
+      createSatellite(satId, name, sat, color, true);
+    });
+
+    console.log(`Loaded ${receivedSatellites.length} closest satellites`);
+  });
+
+  // Keep backward compatibility with single satellite
   window.addEventListener('satelliteFound', (e) => {
     const closestBtn = document.getElementById('tgt-closest');
     if (closestBtn && !window.isAuthenticated) {

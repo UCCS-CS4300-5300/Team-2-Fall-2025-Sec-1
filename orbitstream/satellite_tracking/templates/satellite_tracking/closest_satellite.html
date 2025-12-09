@@ -669,8 +669,8 @@
 {% block content %}
 <div class="satellite-container">
   <div class="satellite-header">
-    <h1 class="satellite-title">Find Closest Satellite</h1>
-    <p class="satellite-subtitle">Discover which satellite is closest to your location</p>
+    <h1 class="satellite-title">Find Closest Satellites</h1>
+    <p class="satellite-subtitle">Discover the closest satellites to your location and view them orbiting Earth</p>
   </div>
 
   <div class="location-buttons">
@@ -690,6 +690,21 @@
       </svg>
       Use GPS
     </button>
+  </div>
+
+  <!-- Number of Satellites Selector -->
+  <div style="text-align: center; margin-bottom: 30px;">
+    <label for="num-satellites" style="display: inline-block; margin-right: 15px; color: var(--text); font-weight: 600; font-size: 1.1em;">
+      Number of Satellites:
+    </label>
+    <select id="num-satellites" style="padding: 10px 20px; font-size: 1em; background: var(--bg-tertiary); color: var(--text); border: 2px solid var(--input-border); border-radius: 8px; cursor: pointer; font-weight: 600;">
+      <option value="1">1</option>
+      <option value="3">3</option>
+      <option value="5" selected>5</option>
+      <option value="10">10</option>
+      <option value="15">15</option>
+      <option value="20">20</option>
+    </select>
   </div>
 
   <!-- Manual Location Dialog -->
@@ -768,7 +783,8 @@
 
   <!-- Satellite Information Display -->
   <div id="satellite-info" class="satellite-info" style="display: none;">
-    <h2 class="info-title">Closest Satellite Found</h2>
+    <h2 class="info-title">Satellite Details</h2>
+    <p style="text-align: center; color: var(--text-secondary); margin-bottom: 20px; font-size: 0.95em;">Click on any satellite dot in the visualization below to view its details</p>
 
     {% if user.is_authenticated %}
     <div style="text-align: center; margin-bottom: 20px;">
@@ -856,7 +872,7 @@
       <!-- 3D Visualization Canvas -->
       <div class="orbital-viewport">
         <canvas id="orbital-canvas"></canvas>
-        <div class="orbital-instruction">⊕ DRAG TO ROTATE</div>
+        <div class="orbital-instruction">⊕ DRAG TO ROTATE • CLICK SATELLITES FOR INFO</div>
         <div class="orbital-info-panel">
           <div class="info-line">
             <span class="info-key">TGT:</span>
