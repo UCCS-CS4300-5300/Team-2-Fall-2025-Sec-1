@@ -208,25 +208,31 @@ class FilterPresetTests(TestCase):
             sort_by="relevancy",
         )
 
+    def _get_valid_preset_data(self, name="New Preset"):
+        """Helper method to get valid preset data"""
+        return {
+            "name": name,
+            "search_query": "NASA",
+            "date_from": "",
+            "date_to": "",
+            "sort_by": "publishedAt",
+            "source": "",
+        }
+
     def test_create_preset_success(self):
         """Test successful preset creation"""
         initial_count = FilterPreset.objects.filter(user=self.user).count()
         
         resp = self.client.post(
             reverse("users:create_preset"),
-            {
-                "name": "New Preset",
-                "search_query": "NASA",
-                "sort_by": "publishedAt",
-                "source": "",  # Include all form fields
-            },
+            self._get_valid_preset_data("Unique Preset Name"),
         )
         self.assertRedirects(resp, reverse("users:settings"))
         
         # Check that a new preset was created
         new_count = FilterPreset.objects.filter(user=self.user).count()
         self.assertEqual(new_count, initial_count + 1)
-        self.assertTrue(FilterPreset.objects.filter(name="New Preset", user=self.user).exists())
+        self.assertTrue(FilterPreset.objects.filter(name="Unique Preset Name", user=self.user).exists())
         
         # Check success message
         messages = list(resp.wsgi_request._messages)
@@ -234,29 +240,32 @@ class FilterPresetTests(TestCase):
 
     def test_create_preset_duplicate_name(self):
         """Test creating preset with duplicate name for same user"""
-        resp = self.client.post(
-            reverse("users:create_preset"),
-            {
-                "name": "Test Preset",  # Same as existing preset
-                "search_query": "Mars",
-                "sort_by": "publishedAt",
-                "source": "",
-            },
-        )
+        # First verify the preset exists
+        self.assertTrue(FilterPreset.objects.filter(name="Test Preset", user=self.user).exists())
+        
+        data = self._get_valid_preset_data("Test Preset")  # Same as existing preset
+        data["search_query"] = "Mars"
+        
+        resp = self.client.post(reverse("users:create_preset"), data)
         self.assertRedirects(resp, reverse("users:settings"))
+        
         messages = list(resp.wsgi_request._messages)
-        # Check for error message about duplicate
-        self.assertTrue(any("error" in str(m).lower() or "exists" in str(m).lower() for m in messages))
+        # The view catches exceptions and shows error messages
+        message_strings = [str(m) for m in messages]
+        has_error = any(
+            "error" in msg.lower() or 
+            "exists" in msg.lower() or 
+            "already" in msg.lower() 
+            for msg in message_strings
+        )
+        self.assertTrue(has_error, f"Expected error message, got: {message_strings}")
 
     def test_create_preset_requires_login(self):
         """Test that preset creation requires authentication"""
         self.client.logout()
         resp = self.client.post(
             reverse("users:create_preset"),
-            {
-                "name": "Should Fail",
-                "search_query": "test",
-            },
+            self._get_valid_preset_data(),
         )
         self.assertEqual(resp.status_code, 302)
         self.assertIn('/login/', resp.url)
@@ -268,20 +277,17 @@ class FilterPresetTests(TestCase):
 
     def test_create_preset_with_date_fields(self):
         """Test creating preset with date filters"""
-        resp = self.client.post(
-            reverse("users:create_preset"),
-            {
-                "name": "Date Preset",
-                "search_query": "rockets",
-                "date_from": "2024-01-01",
-                "date_to": "2024-12-31",
-                "sort_by": "publishedAt",
-                "source": "",
-            },
-        )
+        data = self._get_valid_preset_data("Date Preset")
+        data.update({
+            "search_query": "rockets",
+            "date_from": "2024-01-01",
+            "date_to": "2024-12-31",
+        })
+        
+        resp = self.client.post(reverse("users:create_preset"), data)
         self.assertRedirects(resp, reverse("users:settings"))
         
-        # Check if preset was created (might fail if form validation rejects it)
+        # Check if preset was created
         if FilterPreset.objects.filter(name="Date Preset", user=self.user).exists():
             preset = FilterPreset.objects.get(name="Date Preset", user=self.user)
             self.assertEqual(preset.date_from, date(2024, 1, 1))
@@ -289,14 +295,12 @@ class FilterPresetTests(TestCase):
 
     def test_edit_preset_success(self):
         """Test successful preset editing"""
+        data = self._get_valid_preset_data("Updated Preset")
+        data["search_query"] = "satellites"
+        
         resp = self.client.post(
             reverse("users:edit_preset", args=[self.preset.id]),
-            {
-                "name": "Updated Preset",
-                "search_query": "satellites",
-                "sort_by": "publishedAt",
-                "source": "",
-            },
+            data,
         )
         self.assertRedirects(resp, reverse("users:settings"))
         
@@ -313,10 +317,7 @@ class FilterPresetTests(TestCase):
         """Test editing a preset that doesn't exist returns 404"""
         resp = self.client.post(
             reverse("users:edit_preset", args=[99999]),
-            {
-                "name": "Should Fail",
-                "search_query": "test",
-            },
+            self._get_valid_preset_data(),
         )
         self.assertEqual(resp.status_code, 404)
 
@@ -325,9 +326,7 @@ class FilterPresetTests(TestCase):
         self.client.logout()
         resp = self.client.post(
             reverse("users:edit_preset", args=[self.preset.id]),
-            {
-                "name": "Should Fail",
-            },
+            self._get_valid_preset_data(),
         )
         self.assertEqual(resp.status_code, 302)
         self.assertIn('/login/', resp.url)
