@@ -408,6 +408,415 @@
       padding: 20px;
     }
   }
+
+  /* ========================================
+     Orbital Tracker - OrbitStream Theme
+     ======================================== */
+  .orbital-tracker-container {
+    margin: 40px auto;
+    max-width: 1200px;
+    background: var(--bg-secondary);
+    border: 2px solid var(--accent-purple);
+    border-radius: 12px;
+    overflow: hidden;
+    font-family: 'Orbitron', 'Courier New', monospace;
+    box-shadow: 0 0 30px rgba(139, 92, 246, 0.3), var(--shadow);
+    transition: all 0.3s ease;
+  }
+
+  .orbital-tracker-header {
+    background: linear-gradient(135deg, var(--accent-purple) 0%, var(--accent-blue) 100%);
+    color: white;
+    padding: 12px 20px;
+    font-size: 1.1em;
+    font-weight: 700;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  }
+
+  .orbital-tracker-main {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .orbital-viewport {
+    position: relative;
+    width: 100%;
+    height: 500px;
+    background: linear-gradient(to bottom, var(--bg) 0%, var(--bg-secondary) 100%);
+    border-bottom: 2px solid var(--accent-purple);
+    overflow: hidden;
+  }
+
+  .orbital-viewport canvas {
+    width: 100% !important;
+    height: 100% !important;
+  }
+
+  /* Grid overlay */
+  .orbital-viewport::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image:
+      radial-gradient(circle, rgba(139, 92, 246, 0.05) 1px, transparent 1px);
+    background-size: 30px 30px;
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  /* Subtle scan lines */
+  .orbital-viewport::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(139, 92, 246, 0.02) 2px,
+      rgba(139, 92, 246, 0.02) 4px
+    );
+    pointer-events: none;
+    z-index: 2;
+  }
+
+  .viewport-hint {
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    color: var(--accent-blue);
+    font-size: 0.85em;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    z-index: 10;
+    text-shadow: 0 0 10px rgba(96, 165, 250, 0.5);
+    animation: pulse 2s ease-in-out infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 0.6; }
+    50% { opacity: 1; }
+  }
+
+  /* Info display overlay */
+  .orbital-info-overlay {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    z-index: 10;
+    text-align: right;
+  }
+
+  .orbital-info-box {
+    background: var(--bg-tertiary);
+    border: 2px solid var(--accent-blue);
+    border-radius: 8px;
+    padding: 8px 14px;
+    margin-bottom: 6px;
+    font-size: 0.85em;
+    color: var(--accent-blue);
+    letter-spacing: 1px;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 2px 8px rgba(96, 165, 250, 0.2);
+  }
+
+  .orbital-info-box.target {
+    border-color: var(--accent-purple);
+    color: var(--accent-purple);
+    font-size: 0.95em;
+    font-weight: bold;
+    box-shadow: 0 2px 12px rgba(139, 92, 246, 0.3);
+  }
+
+  /* Control panel */
+  .orbital-controls {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    border-bottom: 2px solid var(--input-border);
+    background: var(--bg-tertiary);
+  }
+
+  .control-section {
+    padding: 16px 20px;
+    border-right: 2px solid var(--input-border);
+  }
+
+  .control-section:last-child {
+    border-right: none;
+  }
+
+  .control-label {
+    color: var(--accent-purple);
+    font-size: 0.85em;
+    font-weight: 700;
+    margin-bottom: 12px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+
+  .control-buttons {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .control-btn {
+    background: var(--button-bg);
+    border: 2px solid var(--accent-purple);
+    color: var(--accent-purple);
+    padding: 10px 20px;
+    font-family: 'Orbitron', 'Courier New', monospace;
+    font-size: 0.85em;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    letter-spacing: 1px;
+    min-width: 80px;
+    text-align: center;
+    border-radius: 8px;
+  }
+
+  .control-btn:hover {
+    background: var(--button-bg-hover);
+    border-color: var(--accent-purple-light);
+    color: var(--accent-purple-light);
+    box-shadow: 0 0 15px rgba(139, 92, 246, 0.4);
+    transform: translateY(-1px);
+  }
+
+  .control-btn.active {
+    background: linear-gradient(135deg, var(--accent-purple) 0%, var(--accent-blue) 100%);
+    color: white;
+    border-color: var(--accent-purple);
+    box-shadow: 0 4px 12px rgba(139, 92, 246, 0.4);
+  }
+
+  .control-btn.orange {
+    border-color: var(--accent-blue);
+    color: var(--accent-blue);
+  }
+
+  .control-btn.orange:hover {
+    border-color: var(--accent-blue);
+    color: white;
+    background: var(--accent-blue);
+  }
+
+  .control-btn.orange.active {
+    background: var(--accent-blue);
+    color: white;
+    border-color: var(--accent-blue);
+  }
+
+  /* Earth mode toggle button */
+  .control-btn.earth-toggle {
+    border-color: #f472b6;
+    color: #f472b6;
+  }
+
+  .control-btn.earth-toggle:hover {
+    border-color: #f472b6;
+    color: white;
+    background: #f472b6;
+  }
+
+  .control-btn.earth-toggle.active {
+    background: linear-gradient(135deg, #f472b6 0%, #60a5fa 100%);
+    color: white;
+    border-color: #f472b6;
+  }
+
+  /* Satellite tooltip */
+  .satellite-tooltip {
+    position: absolute;
+    background: var(--bg-tertiary);
+    border: 2px solid var(--accent-purple);
+    border-radius: 8px;
+    padding: 12px 16px;
+    min-width: 200px;
+    pointer-events: none;
+    z-index: 1000;
+    opacity: 0;
+    transform: translateY(10px);
+    transition: opacity 0.2s ease, transform 0.2s ease;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 4px 20px rgba(139, 92, 246, 0.4);
+  }
+
+  .satellite-tooltip.show {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .tooltip-name {
+    color: var(--accent-purple);
+    font-weight: 700;
+    font-size: 0.95em;
+    margin-bottom: 8px;
+    letter-spacing: 1px;
+  }
+
+  .tooltip-info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .tooltip-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.85em;
+  }
+
+  .tooltip-label {
+    color: var(--text-secondary);
+  }
+
+  .tooltip-value {
+    color: var(--accent-blue);
+    font-weight: 600;
+  }
+
+  /* Data panel */
+  .orbital-data-panel {
+    display: block;
+    background: var(--bg-tertiary);
+  }
+
+  .data-section {
+    padding: 16px 20px;
+  }
+
+  .data-label {
+    color: var(--accent-purple);
+    font-size: 0.85em;
+    font-weight: 700;
+    margin-bottom: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+
+  .data-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 6px 0;
+    border-bottom: 1px solid var(--input-border);
+  }
+
+  .data-row:last-child {
+    border-bottom: none;
+  }
+
+  .data-key {
+    color: var(--text-secondary);
+    font-size: 0.9em;
+  }
+
+  .data-value {
+    color: var(--accent-blue);
+    font-weight: 600;
+  }
+
+  .data-value.green {
+    color: var(--accent-purple-light);
+  }
+
+  /* Loading state for orbital tracker */
+  .orbital-loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    color: var(--accent-purple);
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+  }
+
+  .orbital-loading-spinner {
+    width: 60px;
+    height: 60px;
+    border: 3px solid rgba(139, 92, 246, 0.2);
+    border-top-color: var(--accent-purple);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-bottom: 15px;
+    box-shadow: 0 0 20px rgba(139, 92, 246, 0.3);
+  }
+
+  .orbital-loading-text {
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    animation: pulse 1.5s ease-in-out infinite;
+    color: var(--text-secondary);
+  }
+
+  /* 3D Model loading overlay */
+  #earth-model-loading {
+    background: rgba(0, 0, 0, 0.85);
+    z-index: 100;
+  }
+
+  #earth-model-loading .orbital-loading-text {
+    color: var(--accent-blue);
+  }
+
+  /* Responsive design for orbital tracker */
+  @media (max-width: 768px) {
+    .orbital-viewport {
+      height: 400px;
+    }
+
+    .orbital-controls {
+      grid-template-columns: 1fr;
+    }
+
+    .control-section {
+      border-right: none;
+      border-bottom: 2px solid var(--input-border);
+    }
+
+    .control-section:last-child {
+      border-bottom: none;
+    }
+
+    .orbital-data-panel {
+      grid-template-columns: 1fr;
+    }
+
+    .data-section {
+      border-right: none;
+      border-bottom: 2px solid var(--input-border);
+    }
+
+    .data-section:last-child {
+      border-bottom: none;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .orbital-viewport {
+      height: 300px;
+    }
+
+    .control-btn {
+      padding: 8px 12px;
+      font-size: 0.8em;
+      min-width: 60px;
+    }
+  }
 </style>
 {% endblock %}
 
@@ -511,6 +920,102 @@
   <!-- Error Message -->
   <div id="error-message" class="error-message" style="display: none;"></div>
 
+  <!-- Orbital Tracker 3D Visualization -->
+  <div id="orbital-tracker" class="orbital-tracker-container" data-authenticated="{{ is_authenticated|yesno:'true,false' }}">
+    <div class="orbital-tracker-header">Orbital Tracking</div>
+
+    <!-- Satellite tooltip -->
+    <div id="satellite-tooltip" class="satellite-tooltip">
+      <div class="tooltip-name" id="tooltip-name"></div>
+      <div class="tooltip-info">
+        <div class="tooltip-row">
+          <span class="tooltip-label">ID:</span>
+          <span class="tooltip-value" id="tooltip-id"></span>
+        </div>
+        <div class="tooltip-row">
+          <span class="tooltip-label">Altitude:</span>
+          <span class="tooltip-value" id="tooltip-altitude"></span>
+        </div>
+        <div class="tooltip-row">
+          <span class="tooltip-label">Latitude:</span>
+          <span class="tooltip-value" id="tooltip-lat"></span>
+        </div>
+        <div class="tooltip-row">
+          <span class="tooltip-label">Longitude:</span>
+          <span class="tooltip-value" id="tooltip-lon"></span>
+        </div>
+      </div>
+    </div>
+
+    <div class="orbital-tracker-main">
+      <!-- 3D Viewport -->
+      <div class="orbital-viewport" id="orbital-viewport">
+        <div class="orbital-loading" id="orbital-loading">
+          <div class="orbital-loading-spinner"></div>
+          <div class="orbital-loading-text">Initializing tracker...</div>
+        </div>
+
+        <!-- 3D Earth Model Loading Overlay -->
+        <div class="orbital-loading" id="earth-model-loading" style="display: none; background: rgba(0,0,0,0.8); z-index: 100;">
+          <div class="orbital-loading-spinner"></div>
+          <div class="orbital-loading-text">Loading 3D Earth Model...</div>
+        </div>
+
+        <!-- Info overlay -->
+        <div class="orbital-info-overlay" id="orbital-info-overlay" style="display: none;">
+          <div class="orbital-info-box target" id="orbital-target-display">TGT: --</div>
+          <div class="orbital-info-box" id="orbital-lat-display">LAT: --</div>
+          <div class="orbital-info-box" id="orbital-lon-display">LON: --</div>
+          <div class="orbital-info-box" id="orbital-alt-display">ALT: --</div>
+        </div>
+
+        <div class="viewport-hint">✦ Drag to rotate</div>
+      </div>
+
+      <!-- Control Panel -->
+      <div class="orbital-controls">
+        <div class="control-section">
+          <div class="control-label">CAM</div>
+          <div class="control-buttons">
+            <button class="control-btn" id="cam-zoom-in">+</button>
+            <button class="control-btn" id="cam-zoom-out">-</button>
+            <button class="control-btn" id="cam-reset">RST</button>
+          </div>
+        </div>
+
+        <div class="control-section">
+          <div class="control-label">TGT</div>
+          <div class="control-buttons" id="target-buttons">
+            <button class="control-btn orange active" id="tgt-all" data-target="all">ALL</button>
+          </div>
+        </div>
+
+        <div class="control-section">
+          <div class="control-label">VIEW</div>
+          <div class="control-buttons">
+            <button class="control-btn earth-toggle active" id="view-holo-btn" title="Hologram view">HOLO</button>
+            <button class="control-btn earth-toggle" id="view-3d-btn" title="3D Earth model">3D</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Data Panel -->
+      <div class="orbital-data-panel">
+        <div class="data-section">
+          <div class="data-label">Status</div>
+          <div class="data-row">
+            <span class="data-key">SIG:</span>
+            <span class="data-value green" id="sig-status">OK</span>
+          </div>
+          <div class="data-row">
+            <span class="data-key">SAT:</span>
+            <span class="data-value" id="sat-count">0</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- Satellite Information Display -->
   <div id="satellite-info" class="satellite-info" style="display: none;">
     <h2 class="info-title">Closest Satellite Found</h2>
@@ -594,5 +1099,13 @@
   </div>
 </div>
 
+<!-- Three.js for 3D rendering -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<!-- GLTFLoader for loading .glb models (must match Three.js version) -->
+<script src="https://cdn.jsdelivr.net/gh/mrdoob/three.js@r128/examples/js/loaders/GLTFLoader.js"></script>
+<!-- satellite.js for orbital calculations -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/satellite.js/4.1.3/satellite.min.js"></script>
+
 <script src="{% static 'satellite_tracking/closest_satellite.js' %}"></script>
+<script src="{% static 'satellite_tracking/orbital_tracker.js' %}"></script>
 {% endblock %}

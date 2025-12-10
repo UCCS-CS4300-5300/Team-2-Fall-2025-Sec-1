@@ -16,14 +16,40 @@ from .models import (
 )
 
 
-def download_file_from_url(url, timeout=30):
+def download_file_from_url(url, timeout=60):
     """Download a file from a URL and return its content"""
     try:
+        print(f"[DOWNLOAD] Starting download from: {url}")
         response = requests.get(url, timeout=timeout, stream=True)
         response.raise_for_status()
-        return BytesIO(response.content)
+
+        # Get content length if available
+        content_length = response.headers.get('content-length')
+        if content_length:
+            print(f"[DOWNLOAD] Content length: {int(content_length) / 1024 / 1024:.2f} MB")
+
+        # For large files (like videos), stream the download
+        content = BytesIO()
+        chunk_size = 8192
+        downloaded = 0
+        for chunk in response.iter_content(chunk_size=chunk_size):
+            if chunk:
+                content.write(chunk)
+                downloaded += len(chunk)
+
+        print(f"[DOWNLOAD] Downloaded {downloaded / 1024 / 1024:.2f} MB")
+        content.seek(0)
+        return content
+    except requests.Timeout as e:
+        print(f"[DOWNLOAD ERROR] Timeout downloading file from {url}: {e}")
+        return None
+    except requests.RequestException as e:
+        print(f"[DOWNLOAD ERROR] Request error downloading file from {url}: {e}")
+        return None
     except Exception as e:
-        print(f"Error downloading file from {url}: {e}")
+        print(f"[DOWNLOAD ERROR] Unexpected error downloading file from {url}: {e}")
+        import traceback
+        traceback.print_exc()
         return None
 
 
@@ -105,6 +131,8 @@ def toggle_save_gallery(request):
         nasa_id = data.get('nasa_id')
         title = data.get('title', '')
 
+        print(f"[SAVE] Attempting to save gallery item: nasa_id={nasa_id}, type={data.get('media_type')}")
+
         existing = SavedGalleryItem.objects.filter(
             user=request.user,
             nasa_id=nasa_id
@@ -112,6 +140,7 @@ def toggle_save_gallery(request):
 
         if existing:
             existing.delete()
+            print(f"[SAVE] Removed existing gallery item: {nasa_id}")
             return JsonResponse({'saved': False, 'message': 'Gallery item removed from saved'})
 
         # Get URLs
@@ -119,8 +148,17 @@ def toggle_save_gallery(request):
         thumbnail_url = data.get('thumbnail_url')
         media_type = data.get('media_type', 'image')
 
-        # Create the gallery item first
-        gallery_item = SavedGalleryItem.objects.create(
+        print(f"[SAVE] Media URL: {media_url}")
+        print(f"[SAVE] Thumbnail URL: {thumbnail_url}")
+        print(f"[SAVE] Media type: {media_type}")
+
+        # Validate required fields
+        if not media_url:
+            print(f"[SAVE ERROR] No media URL provided for {nasa_id}")
+            return JsonResponse({'error': 'Media URL is required'}, status=400)
+
+        # Create the gallery item
+        gallery_item = SavedGalleryItem(
             user=request.user,
             nasa_id=nasa_id,
             title=title,
@@ -130,54 +168,78 @@ def toggle_save_gallery(request):
             media_type=media_type,
         )
 
-        # Download and save media file
+        # Download and save media data to database
         if media_url:
             try:
+                print(f"[SAVE] Downloading media from: {media_url}")
                 media_content = download_file_from_url(media_url)
                 if media_content:
                     # Generate a safe filename
                     import os
-                    extension = os.path.splitext(media_url)[1][:10]  # Limit extension length
+                    extension = os.path.splitext(media_url)[1][:10]
                     if not extension or '?' in extension:
                         extension = '.jpg' if media_type == 'image' else '.mp4'
                     filename = f"{nasa_id}{extension}"
 
-                    gallery_item.media_file.save(
-                        filename,
-                        ContentFile(media_content.read()),
-                        save=False
-                    )
+                    # Store binary data in database
+                    media_bytes = media_content.read()
+                    gallery_item.media_data = media_bytes
+                    gallery_item.media_filename = filename
+                    print(f"[SAVE] Saved media data: {len(media_bytes)} bytes")
+
+                    # Determine content type
+                    if media_type == 'image':
+                        gallery_item.media_content_type = 'image/jpeg'
+                    elif media_type == 'video':
+                        gallery_item.media_content_type = 'video/mp4'
+                    else:
+                        gallery_item.media_content_type = 'application/octet-stream'
 
                     # Create thumbnail for images
                     if media_type == 'image':
-                        media_content.seek(0)  # Reset file pointer
+                        media_content.seek(0)
                         thumbnail_content = create_thumbnail(media_content)
                         if thumbnail_content:
-                            gallery_item.thumbnail_file.save(
-                                f"{nasa_id}_thumb.jpg",
-                                thumbnail_content,
-                                save=False
-                            )
+                            thumb_bytes = thumbnail_content.read()
+                            gallery_item.thumbnail_data = thumb_bytes
+                            gallery_item.thumbnail_filename = f"{nasa_id}_thumb.jpg"
+                            gallery_item.thumbnail_content_type = 'image/jpeg'
+                            print(f"[SAVE] Created thumbnail: {len(thumb_bytes)} bytes")
+                else:
+                    print(f"[SAVE ERROR] Failed to download media from {media_url}")
+                    return JsonResponse({'error': 'Failed to download media file'}, status=400)
             except Exception as e:
-                print(f"Error saving media file: {e}")
+                print(f"[SAVE ERROR] Error saving media data: {e}")
+                import traceback
+                traceback.print_exc()
+                return JsonResponse({'error': f'Error downloading media: {str(e)}'}, status=400)
 
         # Download and save thumbnail (if not already created from image)
-        if thumbnail_url and not gallery_item.thumbnail_file:
+        if thumbnail_url and not gallery_item.thumbnail_data:
             try:
+                print(f"[SAVE] Downloading thumbnail from: {thumbnail_url}")
                 thumb_content = download_file_from_url(thumbnail_url)
                 if thumb_content:
-                    gallery_item.thumbnail_file.save(
-                        f"{nasa_id}_thumb.jpg",
-                        ContentFile(thumb_content.read()),
-                        save=False
-                    )
+                    thumb_bytes = thumb_content.read()
+                    gallery_item.thumbnail_data = thumb_bytes
+                    gallery_item.thumbnail_filename = f"{nasa_id}_thumb.jpg"
+                    gallery_item.thumbnail_content_type = 'image/jpeg'
+                    print(f"[SAVE] Saved thumbnail: {len(thumb_bytes)} bytes")
             except Exception as e:
-                print(f"Error saving thumbnail: {e}")
+                print(f"[SAVE WARNING] Error saving thumbnail: {e}")
+                # Don't fail the entire save if just thumbnail fails
 
         gallery_item.save()
+        print(f"[SAVE SUCCESS] Saved gallery item: {nasa_id}")
         return JsonResponse({'saved': True, 'message': 'Gallery item saved'})
     except (json.JSONDecodeError, KeyError) as e:
+        print(f"[SAVE ERROR] JSON/Key error: {e}")
         return JsonResponse({'error': str(e)}, status=400)
+    except Exception as e:
+        print(f"[SAVE ERROR] Unexpected error: {e}")
+        import traceback
+        traceback.print_exc()
+        return JsonResponse({'error': f'Unexpected error: {str(e)}'}, status=500)
 
 
 @login_required
@@ -464,9 +526,10 @@ def view_saved_media(request, pk):
     """Display a saved gallery media item"""
     saved_media = get_object_or_404(SavedGalleryItem, pk=pk, user=request.user)
 
-    # Use saved file if available, otherwise fall back to URL
-    media_url = saved_media.media_file.url if saved_media.media_file else saved_media.media_url
-    thumbnail_url = saved_media.thumbnail_file.url if saved_media.thumbnail_file else saved_media.thumbnail_url
+    # Use database-served media if available, otherwise fall back to URL
+    from django.urls import reverse
+    media_url = reverse('saved_page:serve_gallery_media', args=[pk]) if saved_media.media_data else saved_media.media_url
+    thumbnail_url = reverse('saved_page:serve_gallery_thumbnail', args=[pk]) if saved_media.thumbnail_data else saved_media.thumbnail_url
 
     context = {
         'media_item': saved_media,
@@ -476,3 +539,39 @@ def view_saved_media(request, pk):
     }
 
     return render(request, 'saved_page/saved_media.html', context)
+
+
+@login_required
+def serve_gallery_media(request, pk):
+    """Serve media data from database"""
+    from django.http import HttpResponse
+    saved_media = get_object_or_404(SavedGalleryItem, pk=pk, user=request.user)
+
+    if not saved_media.media_data:
+        raise Http404("Media data not found")
+
+    response = HttpResponse(
+        saved_media.media_data,
+        content_type=saved_media.media_content_type or 'application/octet-stream'
+    )
+    if saved_media.media_filename:
+        response['Content-Disposition'] = f'inline; filename="{saved_media.media_filename}"'
+    return response
+
+
+@login_required
+def serve_gallery_thumbnail(request, pk):
+    """Serve thumbnail data from database"""
+    from django.http import HttpResponse
+    saved_media = get_object_or_404(SavedGalleryItem, pk=pk, user=request.user)
+
+    if not saved_media.thumbnail_data:
+        raise Http404("Thumbnail data not found")
+
+    response = HttpResponse(
+        saved_media.thumbnail_data,
+        content_type=saved_media.thumbnail_content_type or 'image/jpeg'
+    )
+    if saved_media.thumbnail_filename:
+        response['Content-Disposition'] = f'inline; filename="{saved_media.thumbnail_filename}"'
+    return response

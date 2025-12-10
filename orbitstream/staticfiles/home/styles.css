@@ -78,11 +78,26 @@
   --input-bg: #ffffff;
   --input-border: #cbd5e0;
   --scrollbar-track: #e2e8f0;
-  --scrollbar-thumb-start: #3b82f6;
-  --scrollbar-thumb-end: #2563eb;
+  --scrollbar-thumb-start: #8b5cf6;
+  --scrollbar-thumb-end: #6d28d9;
   --shadow-color: rgba(0, 0, 0, 0.1);
   --text-shadow: rgba(59, 130, 246, 0.3);
   --shadow: 0 1px 3px rgba(0,0,0,.12), 0 1px 2px rgba(0,0,0,.24);
+}
+
+
+::-webkit-scrollbar {
+  width: 15px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--scrollbar-track); 
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(to bottom, var(--scrollbar-thumb-start), var(--scrollbar-thumb-end));
+  border-radius: var(--radius);
+  border: 3px solid var(--bg); 
 }
 
 /* Keep homepage text colors consistent regardless of theme */
@@ -105,6 +120,10 @@
 
 [data-theme="light"] .nav-link {
   color: #7c3aed;
+}
+
+[data-theme="light"] .nav-link--cta {
+  color: #ffffff;
 }
 
 [data-theme="light"] .footer-link {
@@ -165,6 +184,39 @@
   color: #1a1a1a;
 }
 
+[data-theme="light"] .info-card-btn {
+  color: #1a1a1a;
+  background-color: #5b21b6;
+}
+
+[data-theme="light"] .full-hero-mission {
+  color: #ffffff;
+}
+
+[data-theme="light"] .full-hero-countdown {
+  color: #ffffff;
+}
+
+[data-theme="light"] .hero-mission {
+  color: #ffffff;
+}
+
+[data-theme="light"] .hero-countdown {
+  color: #ffffff;
+}
+
+[data-theme="light"] .info-card-left {
+  background-color: transparent;
+}
+
+[data-theme="light"] .info-card-description {
+  color: #1a1a1a;
+}
+
+[data-theme="light"] .mission-description-section-text {
+  color: #1a1a1a;
+}
+
 [data-theme="light"] .rocket-stat-value {
   color: #1a1a1a;
 }
@@ -185,6 +237,12 @@ html, body {
   background: var(--bg);
   font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+:root[data-theme="light"],
+:root[data-theme="light"] body {
+    background-color: #ffffff !important;
+    color: #000000 !important;
 }
 
 /* Apply Orbitron font to all headings site-wide */
@@ -4531,6 +4589,12 @@ body.full-media-page .site-footer {
   width: 100%;
 }
 
+/* When the theme IS light, change background to white and text to black */
+:root[data-theme="light"] .launch-body {
+  background-color: #ffffff;
+  color: #000000; 
+}
+
 /* Hero Section */
 .launch-hero .launch-hero-bg {
   position: relative;
@@ -4930,12 +4994,13 @@ body.full-media-page .site-footer {
 .completed-launch-tabel th,
 .completed-launch-tabel td {
   border-bottom: 1px solid var(--input-border);
-  padding: 3rem 2.5rem;
+  padding: 3rem 1rem ;
 }
 
 .recent-launch-tabel tbody tr,
 .completed-launch-tabel tbody tr {
   background: 0.3s ease;
+  text-align: left;
 }
 
 .recent-launch-tabel tbody tr:hover,

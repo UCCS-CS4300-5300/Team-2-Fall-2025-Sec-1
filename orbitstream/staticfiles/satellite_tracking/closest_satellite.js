@@ -170,10 +170,35 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
+    // Current satellite data storage for save functionality
+    let currentSatelliteData = null;
+
     // Display satellite information
     function displaySatelliteInfo(data) {
         const sat = data.satellite;
         const loc = data.location;
+
+        // Validate that we have required data
+        if (!sat.id) {
+            console.error('Satellite ID is missing:', sat);
+            showError('Satellite data is incomplete - cannot save');
+        }
+
+        // Store current satellite data for saving
+        currentSatelliteData = {
+            satellite_id: sat.id,
+            name: sat.name || 'Unknown',
+            altitude: sat.altitude || 0,
+            azimuth: sat.azimuth || 0,
+            elevation: sat.elevation || 0,
+            latitude: sat.latitude || 0,
+            longitude: sat.longitude || 0
+        };
+
+        // Update the Orbital Tracker visualization
+        if (window.OrbitalTracker) {
+            window.OrbitalTracker.updateWithSatelliteData(data);
+        }
 
         // Update satellite details
         document.getElementById('sat-name').textContent = sat.name;
@@ -198,8 +223,88 @@ document.addEventListener('DOMContentLoaded', function() {
         // Show the info section
         satelliteInfo.style.display = 'block';
 
+        // Check if satellite is already saved and update button state
+        checkSatelliteSaveStatus(sat.id);
+
         // Scroll to info section
         satelliteInfo.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+
+    // Check if satellite is saved
+    function checkSatelliteSaveStatus(satelliteId) {
+        const saveBtn = document.getElementById('save-satellite-btn');
+        if (!saveBtn) return;
+
+        fetch(`/saved/api/check/satellite/?satellite_id=${satelliteId}`)
+            .then(response => response.json())
+            .then(data => {
+                updateSaveButtonState(data.saved);
+            })
+            .catch(error => {
+                console.error('Error checking save status:', error);
+            });
+    }
+
+    // Update save button appearance
+    function updateSaveButtonState(isSaved) {
+        const saveBtn = document.getElementById('save-satellite-btn');
+        const saveText = document.getElementById('save-satellite-text');
+        if (!saveBtn || !saveText) return;
+
+        if (isSaved) {
+            saveBtn.classList.remove('location-btn-primary');
+            saveBtn.classList.add('location-btn-secondary');
+            saveBtn.querySelector('svg path').setAttribute('fill', 'currentColor');
+            saveText.textContent = 'Saved';
+        } else {
+            saveBtn.classList.add('location-btn-primary');
+            saveBtn.classList.remove('location-btn-secondary');
+            saveBtn.querySelector('svg path').setAttribute('fill', 'none');
+            saveText.textContent = 'Save Satellite';
+        }
+    }
+
+    // Save/unsave satellite
+    const saveBtn = document.getElementById('save-satellite-btn');
+    if (saveBtn) {
+        saveBtn.addEventListener('click', function() {
+            if (!currentSatelliteData) {
+                showError('No satellite data to save');
+                return;
+            }
+
+            // Validate satellite_id before sending
+            if (!currentSatelliteData.satellite_id) {
+                console.error('Satellite ID is missing in currentSatelliteData:', currentSatelliteData);
+                showError('Cannot save satellite: missing satellite ID');
+                return;
+            }
+
+            console.log('Saving satellite data:', currentSatelliteData);
+
+            fetch('/saved/api/toggle/satellite/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrftoken
+                },
+                body: JSON.stringify(currentSatelliteData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    console.error('Server error:', data.error);
+                    showError(data.error);
+                } else {
+                    console.log('Save successful:', data);
+                    updateSaveButtonState(data.saved);
+                }
+            })
+            .catch(error => {
+                console.error('Error saving satellite:', error);
+                showError('Failed to save satellite. Check console for details.');
+            });
+        });
     }
 
     // UI Helper Functions

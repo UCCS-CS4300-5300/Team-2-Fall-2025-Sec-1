@@ -121,7 +121,7 @@
                 <th scope="col">MISSION</th>
                 <th scope="col">Vehicle</th>
                 <th scope="col">LAUNCH SITE</th>
-                <th scope="col">LANDING SITE</th>
+                <th scope="col">LAUNCH STATUS</th>
                 <th scope="col">DATE & TIME</th>
             </tr>
         </thead>
@@ -131,7 +131,7 @@
                 <td>{{ launch.name }}</td>
                 <td>{{ launch.rocket.configuration.full_name }}</td>
                 <td>{{ launch.pad.location.name }}</td>
-                <td>—</td>
+                <td>{{ launch.status.name }}</td>
                 <td>
                 {% if launch.net_dt %}
                     {{ launch.net_dt|date:"M d, Y H:i" }} UTC
@@ -156,7 +156,7 @@
                 <th scope="col">MISSION</th>
                 <th scope="col">Vehicle</th>
                 <th scope="col">LAUNCH SITE</th>
-                <th scope="col">LANDING SITE</th>
+                <th scope="col">LAUNCH STATUS</th>
                 <th scope="col">DATE & TIME</th>
             </tr>
         </thead>
@@ -166,7 +166,7 @@
                 <td>{{ launch.name }}</td>
                 <td>{{ launch.rocket.configuration.full_name }}</td>
                 <td>{{ launch.pad.location.name }}</td>
-                <td>—</td>
+                <td>{{ launch.status.name }}</td>
                 <td>
                 {% if launch.net_dt %}
                     {{ launch.net_dt|date:"M d, Y H:i" }} UTC

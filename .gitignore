@@ -16,3 +16,6 @@ venv/
 # Database
 db.sqlite3
 *.sqlite3
+
+# Media files (user uploaded content - stored in database)
+orbitstream/media/
