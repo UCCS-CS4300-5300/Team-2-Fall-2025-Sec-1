@@ -52,9 +52,9 @@ class NewsFilterServiceTest(TestCase):
         filter_params = {'search_query': 'NASA'}
         result = NewsFilterService.apply_filters(self.sample_articles, filter_params)
         
-        self.assertEqual(len(result), 2)
+        # Should only find 1 article - NASA in title (search_query doesn't search source)
+        self.assertEqual(len(result), 1)
         self.assertIn('NASA', result[0]['title'])
-        self.assertIn('NASA', result[1]['source']['name'])
 
     def test_apply_filters_search_query_in_description(self):
         """Test search query filtering in description"""
@@ -93,6 +93,14 @@ class NewsFilterServiceTest(TestCase):
         
         self.assertEqual(len(result), 1)
         self.assertIn('no title', result[0]['description'].lower())
+
+    def test_apply_filters_search_query_matches_multiple(self):
+        """Test search query that matches multiple articles"""
+        filter_params = {'search_query': 'space'}
+        result = NewsFilterService.apply_filters(self.sample_articles, filter_params)
+        
+        # Should match "SpaceX" and "International Space Station"
+        self.assertEqual(len(result), 2)
 
     def test_apply_filters_date_from(self):
         """Test date_from filter"""
@@ -150,7 +158,7 @@ class NewsFilterServiceTest(TestCase):
         filter_params = {'source': 'NASA'}
         result = NewsFilterService.apply_filters(self.sample_articles, filter_params)
         
-        # Should match "NASA Launches..." and "NASA News" source
+        # Should match "NASA Launches..." (title) and "NASA News" (source name)
         self.assertEqual(len(result), 2)
 
     def test_apply_filters_source_case_insensitive(self):
