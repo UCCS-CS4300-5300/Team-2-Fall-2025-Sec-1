@@ -41,7 +41,7 @@ class SavedPageViewsTestCase(TestCase):
     def test_toggle_save_satellite_create(self):
         """Test saving a new satellite"""
         data = {
-            'satellite_id': 'SAT-001',
+            'satellite_id': 12345,
             'name': 'Test Satellite',
             'altitude': 400.5,
             'azimuth': 180.0,
@@ -63,10 +63,10 @@ class SavedPageViewsTestCase(TestCase):
         """Test unsaving an existing satellite"""
         SavedSatellite.objects.create(
             user=self.user,
-            satellite_id='SAT-001',
+            satellite_id=12345,
             name='Test Satellite'
         )
-        data = {'satellite_id': 'SAT-001', 'name': 'Test Satellite'}
+        data = {'satellite_id': 12345, 'name': 'Test Satellite'}
         response = self.client.post(
             reverse('saved_page:toggle_save_satellite'),
             data=json.dumps(data),
@@ -81,12 +81,12 @@ class SavedPageViewsTestCase(TestCase):
         """Test checking if a satellite is saved"""
         SavedSatellite.objects.create(
             user=self.user,
-            satellite_id='SAT-001',
+            satellite_id=12345,
             name='Test Satellite'
         )
         response = self.client.get(
             reverse('saved_page:check_saved_satellite'),
-            {'satellite_id': 'SAT-001'}
+            {'satellite_id': '12345'}
         )
         self.assertEqual(response.status_code, 200)
         self.assertTrue(response.json()['saved'])
@@ -95,7 +95,7 @@ class SavedPageViewsTestCase(TestCase):
         """Test deleting a saved satellite"""
         satellite = SavedSatellite.objects.create(
             user=self.user,
-            satellite_id='SAT-001',
+            satellite_id=12345,
             name='Test Satellite'
         )
         response = self.client.post(
@@ -270,7 +270,7 @@ class SavedPageViewsTestCase(TestCase):
     def test_get_saved_ids(self):
         """Test retrieving all saved IDs at once"""
         # Create saved items
-        SavedSatellite.objects.create(user=self.user, satellite_id='SAT-001', name='Test')
+        SavedSatellite.objects.create(user=self.user, satellite_id=12345, name='Test')
         SavedLaunch.objects.create(user=self.user, launch_id='LAUNCH-001', name='Test')
         SavedNewsArticle.objects.create(
             user=self.user,
@@ -282,7 +282,7 @@ class SavedPageViewsTestCase(TestCase):
         self.assertEqual(response.status_code, 200)
         data = response.json()
         
-        self.assertIn('SAT-001', data['satellites'])
+        self.assertIn(12345, data['satellites'])
         self.assertIn('LAUNCH-001', data['launches'])
         self.assertIn('https://example.com/article', data['news'])
 
@@ -317,7 +317,7 @@ class SavedPageViewsTestCase(TestCase):
         )
         satellite = SavedSatellite.objects.create(
             user=other_user,
-            satellite_id='SAT-001',
+            satellite_id=12345,
             name='Test'
         )
         response = self.client.post(
