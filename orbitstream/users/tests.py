@@ -216,7 +216,7 @@ class FilterPresetTests(TestCase):
             "date_from": "",
             "date_to": "",
             "sort_by": "publishedAt",
-            "source": "",
+            # Don't include source field - let it be blank/optional
         }
 
     def test_create_preset_success(self):
