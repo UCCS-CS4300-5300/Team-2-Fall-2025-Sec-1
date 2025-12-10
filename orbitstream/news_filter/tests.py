@@ -1,6 +1,6 @@
 from django.test import TestCase
 from datetime import datetime, date, timedelta
-from news_filters.filters import NewsFilterService
+from news_filter.filters import NewsFilterService
 
 
 class NewsFilterServiceTest(TestCase):
