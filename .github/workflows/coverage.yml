@@ -44,6 +44,8 @@ jobs:
           NASA_API_KEY: ${{ secrets.NASA_API_KEY }}
           NEWS_API_KEY: ${{ secrets.NEWS_API_KEY }}
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          SPACEDEV_API_KEY: ${{ secrets.SPACEDEV_API_KEY }}
+          N2YO_API_KEY: ${{ secrets.N2YO_API_KEY }}
         run: |
           python -m coverage run manage.py test
           python -m coverage report -m --fail-under=80 # <-- prints the coverage table in the console
