@@ -28,7 +28,7 @@ lxml_html_clean==0.4.3
 newsapi-python==0.2.7
 openai==2.9.0
 packaging==25.0
-Pillow==12.0.0
+Pillow==12.1.1
 pluggy==1.6.0
 psycopg2-binary==2.9.11
 pydantic==2.12.4
