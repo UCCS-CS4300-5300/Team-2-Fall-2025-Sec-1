@@ -24,7 +24,7 @@ idna==3.11
 iniconfig==2.3.0
 jiter==0.12.0
 lxml==6.0.2
-lxml_html_clean==0.4.3
+lxml_html_clean==0.4.4
 newsapi-python==0.2.7
 openai==2.9.0
 packaging==25.0
